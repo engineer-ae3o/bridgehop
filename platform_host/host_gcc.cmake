@@ -1,0 +1,12 @@
+set(CMAKE_C_COMPILER   gcc)
+set(CMAKE_CXX_COMPILER g++)
+set(CMAKE_ASM_COMPILER gcc)
+set(CMAKE_AR           ar)
+set(CMAKE_OBJCOPY      objcopy)
+set(CMAKE_OBJDUMP      objdump)
+set(CMAKE_SIZE         size)
+set(CMAKE_GDB          gdb)
+
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
