@@ -78,8 +78,8 @@ Rules:
 
 - The hop count is 0 to 10. The starting value is configurable (default 10). A received value above 10 is dropped as corrupted.
 - A relay changes only the hop count bits.
-- A packet with an unknown version is dropped and not relayed.
-- The packet ID is the first 8 bytes of SHA-256(sender ID, target ID, payload).
+- A packet with an unknown or unsupported version is dropped and not relayed.
+- The packet ID is the first 8 bytes of SHA-256(byte-appended sender ID, target ID, payload).
 - Every node recomputes the packet ID and drops the packet if it does not match.
 - The packet length is not in the header. The transport reports it.
 
@@ -166,15 +166,15 @@ Every node keeps a duplicate cache of packet IDs.
 
 | Setting | Default |
 |---|---|
-| Cache size | 100 entries (configurable) |
+| Cache size | 2048 entries (configurable) |
 | Entry lifetime | 120 seconds since the packet was last heard |
 | When full | remove the oldest entry |
 | Delay before relaying | random, 0 to 250 ms (configurable) |
 
 When a packet arrives, every node does this, in order:
 
-1. Check the version, the hop count (not above 10) and the packet ID. Drop the packet if any is wrong.
-2. Look the packet ID up in the cache. If it is there, drop the packet. This applies to every node, including the target.
+1. Look the packet ID up in the cache. If it is there, drop the packet. This applies to every node, including the target.
+2. Check the version and the hop count (not above 10). Drop the packet if any is wrong.
 3. Add the packet ID to the cache.
 4. If this is an active node and the target ID is its own ID, process the packet. Do not relay it.
 5. If the hop count is 0, drop the packet. Otherwise lower the hop count by one, wait a random delay and send the packet again.

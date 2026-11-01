@@ -1,7 +1,8 @@
 #pragma once
 
 
-#include "utils/config.hpp"
+#include "utils/bhop_constants.hpp"
+#include "utils/types.hpp"
 
 #include <array>
 #include <cstdint>
@@ -9,14 +10,16 @@
 
 namespace bhop::packet {
 
-    using node_id_t   = std::array<uint8_t, config::NODE_ID_LEN_BYTES>;
-    using packet_id_t = std::array<uint8_t, config::PACKET_ID_LEN_BYTES>;
 
-    using auth_tag_t = std::array<uint8_t, config::AES_CCM_AUTH_TAG_LEN_BYTES>;
+    using node_id_t   = std::array<uint8_t, constants::NODE_ID_LEN_BYTES>;
+    using packet_id_t = std::array<uint8_t, constants::PACKET_ID_LEN_BYTES>;
 
-    using x25519_key_t        = std::array<uint8_t, config::X25519_KEY_LEN_BYTES>;
-    using ed25519_key_t       = std::array<uint8_t, config::Ed25519_KEY_LEN_BYTES>;
-    using ed25519_signature_t = std::array<uint8_t, config::Ed25519_SIGNATURE_ELEMENT_LEN_BYTES>;
+    using auth_tag_t = std::array<uint8_t, constants::AES_CCM_AUTH_TAG_LEN_BYTES>;
+
+    using x25519_key_t        = std::array<uint8_t, constants::X25519_KEY_LEN_BYTES>;
+    using ed25519_key_t       = std::array<uint8_t, constants::Ed25519_KEY_LEN_BYTES>;
+    using ed25519_signature_t = std::array<uint8_t, constants::Ed25519_SIGNATURE_ELEMENT_LEN_BYTES>;
+
 
     // The packet header. Never encrypted.
     // The frame field determines how to interpret the remaining bytes
@@ -52,9 +55,9 @@ namespace bhop::packet {
     };
 
     struct [[__gnu__::__packed__]] close_t {
-        auth_tag_t auth_tag{};
-        uint32_t   msg_counter{};
-        uint8_t    reason{};
+        auth_tag_t            auth_tag{};
+        uint32_t              msg_counter{};
+        types::close_reason_t reason{};
     };
 
 } // namespace bhop::packet

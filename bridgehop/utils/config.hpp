@@ -6,16 +6,11 @@
 
 namespace bhop::config {
 
-    constexpr uint32_t BRIDGEHOP_VERSION = 1;
 
-    constexpr uint32_t PACKET_ID_LEN_BYTES = 8;
-    constexpr uint32_t NODE_ID_LEN_BYTES   = 16;
+    // This file contains configurable constants used by this implementation of BridgeHop.
+    // They can modified safely.
 
-    constexpr uint32_t Ed25519_SIGNATURE_ELEMENT_LEN_BYTES = 32;
+    constexpr inline uint32_t RECEPTION_TIMEOUT_MS = 60;
 
-    constexpr uint32_t X25519_KEY_LEN_BYTES  = 32;
-    constexpr uint32_t Ed25519_KEY_LEN_BYTES = 32;
-
-    constexpr uint32_t AES_CCM_AUTH_TAG_LEN_BYTES = 16;
 
 } // namespace bhop::config
