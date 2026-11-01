@@ -34,45 +34,39 @@ SOFTWARE.
 #include "type_list.h"
 
 #if ETL_USING_CPP11
-namespace etl
-{
-  namespace private_nth_type
-  {
+namespace etl {
+    namespace private_nth_type {
+        //***********************************
+        template<size_t Index, typename T1, typename... TRest>
+        struct nth_type_helper {
+            using type = typename nth_type_helper<Index - 1U, TRest...>::type;
+        };
+
+        template<typename T1, typename... TRest>
+        struct nth_type_helper<0U, T1, TRest...> {
+            using type = T1;
+        };
+    } // namespace private_nth_type
+
     //***********************************
-    template <size_t Index, typename T1, typename... TRest>
-    struct nth_type_helper
-    {
-      using type = typename nth_type_helper<Index - 1U, TRest...>::type;
+    template<size_t Index, typename... TTypes>
+    struct nth_type {
+        ETL_STATIC_ASSERT(Index < sizeof...(TTypes), "etl::nth_type index 'Index' out of bounds");
+
+        using type      = typename private_nth_type::nth_type_helper<Index, TTypes...>::type;
+        using type_list = etl::type_list<TTypes...>;
     };
 
-    template <typename T1, typename... TRest>
-    struct nth_type_helper<0U, T1, TRest...>
-    {
-      using type = T1;
+    //***********************************
+    template<size_t Index, typename... TTypes>
+    struct nth_type<Index, etl::type_list<TTypes...>> {
+        using type      = typename nth_type<Index, TTypes...>::type;
+        using type_list = typename nth_type<Index, TTypes...>::type_list;
     };
-  } // namespace private_nth_type
 
-  //***********************************
-  template <size_t Index, typename... TTypes>
-  struct nth_type
-  {
-    ETL_STATIC_ASSERT(Index < sizeof...(TTypes), "etl::nth_type index 'Index' out of bounds");
-
-    using type      = typename private_nth_type::nth_type_helper<Index, TTypes...>::type;
-    using type_list = etl::type_list<TTypes...>;
-  };
-
-  //***********************************
-  template <size_t Index, typename... TTypes>
-  struct nth_type<Index, etl::type_list<TTypes...>>
-  {
-    using type      = typename nth_type<Index, TTypes...>::type;
-    using type_list = typename nth_type<Index, TTypes...>::type_list;
-  };
-
-  //***********************************
-  template <size_t Index, typename... TTypes>
-  using nth_type_t = typename nth_type<Index, TTypes...>::type;
+    //***********************************
+    template<size_t Index, typename... TTypes>
+    using nth_type_t = typename nth_type<Index, TTypes...>::type;
 } // namespace etl
 #endif
 #endif

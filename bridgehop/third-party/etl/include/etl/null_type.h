@@ -33,12 +33,9 @@ SOFTWARE.
 
 #include <stddef.h>
 
-namespace etl
-{
-  template <size_t Index>
-  class null_type
-  {
-  };
+namespace etl {
+    template<size_t Index>
+    class null_type {};
 } // namespace etl
 
 #endif

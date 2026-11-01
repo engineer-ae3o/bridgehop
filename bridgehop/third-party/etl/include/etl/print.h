@@ -41,73 +41,61 @@ SOFTWARE.
 // console type int here is the convention from putchar(), actually storing char
 extern "C" void etl_putchar(int c);
 
-namespace etl
-{
-  namespace private_print
-  {
-    using char_type = etl::private_format::char_type;
+namespace etl {
+    namespace private_print {
+        using char_type = etl::private_format::char_type;
 
-    // No-op iterator that forwards all assignments to etl_putchar
-    class print_iterator
-    {
-    public:
+        // No-op iterator that forwards all assignments to etl_putchar
+        class print_iterator {
+        public:
+            class print_to {
+            public:
+                print_to& operator=(char_type c) {
+                    etl_putchar(static_cast<int>(c));
+                    return *this;
+                }
+            };
 
-      class print_to
-      {
-      public:
+            print_iterator() {
+            }
 
-        print_to& operator=(char_type c)
-        {
-          etl_putchar(static_cast<int>(c));
-          return *this;
-        }
-      };
+            print_iterator(const print_iterator&) {
+            }
 
-      print_iterator() {}
+            print_iterator& operator=(const print_iterator&) {
+                return *this;
+            }
 
-      print_iterator(const print_iterator&) {}
+            print_to operator*() {
+                return print_to();
+            }
 
-      print_iterator& operator=(const print_iterator&)
-      {
-        return *this;
-      }
+            print_iterator& operator++() {
+                return *this;
+            }
 
-      print_to operator*()
-      {
-        return print_to();
-      }
+            print_iterator operator++(int) {
+                return *this;
+            }
+        };
+    } // namespace private_print
 
-      print_iterator& operator++()
-      {
-        return *this;
-      }
+    template<class... Args>
+    void print(etl::format_string<Args...> fmt, Args&&... args) {
+        private_print::print_iterator it;
+        (void)format_to(it, etl::move(fmt), etl::forward<Args>(args)...);
+    }
 
-      print_iterator operator++(int)
-      {
-        return *this;
-      }
-    };
-  } // namespace private_print
+    inline void println() {
+        etl_putchar(static_cast<int>('\n'));
+    }
 
-  template <class... Args>
-  void print(etl::format_string<Args...> fmt, Args&&... args)
-  {
-    private_print::print_iterator it;
-    (void)format_to(it, etl::move(fmt), etl::forward<Args>(args)...);
-  }
-
-  inline void println()
-  {
-    etl_putchar(static_cast<int>('\n'));
-  }
-
-  template <class... Args>
-  void println(etl::format_string<Args...> fmt, Args&&... args)
-  {
-    private_print::print_iterator it;
-    (void)format_to(it, etl::move(fmt), etl::forward<Args>(args)...);
-    println();
-  }
+    template<class... Args>
+    void println(etl::format_string<Args...> fmt, Args&&... args) {
+        private_print::print_iterator it;
+        (void)format_to(it, etl::move(fmt), etl::forward<Args>(args)...);
+        println();
+    }
 } // namespace etl
 
 #endif

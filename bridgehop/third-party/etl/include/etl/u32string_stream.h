@@ -40,9 +40,8 @@ SOFTWARE.
 #include "u32format_spec.h"
 #include "u32string.h"
 
-namespace etl
-{
-  typedef etl::basic_string_stream<etl::u32format_spec, etl::iu32string, etl::u32string_view> u32string_stream;
+namespace etl {
+    typedef etl::basic_string_stream<etl::u32format_spec, etl::iu32string, etl::u32string_view> u32string_stream;
 }
 
 #endif

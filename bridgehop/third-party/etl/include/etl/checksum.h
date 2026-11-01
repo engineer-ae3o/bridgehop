@@ -36,272 +36,231 @@ SOFTWARE.
 ///\defgroup checksum Checksum calculation
 ///\ingroup maths
 
-namespace etl
-{
-  //***************************************************************************
-  /// Standard addition checksum policy.
-  //***************************************************************************
-  template <typename T>
-  struct checksum_policy_sum
-  {
-    typedef T value_type;
+namespace etl {
+    //***************************************************************************
+    /// Standard addition checksum policy.
+    //***************************************************************************
+    template<typename T>
+    struct checksum_policy_sum {
+        typedef T value_type;
 
-    T initial() const
-    {
-      return 0;
-    }
+        T initial() const {
+            return 0;
+        }
 
-    T add(T sum, uint8_t value) const
-    {
-      return sum + value;
-    }
+        T add(T sum, uint8_t value) const {
+            return sum + value;
+        }
 
-    T final(T sum) const
-    {
-      return sum;
-    }
-  };
+        T final(T sum) const {
+            return sum;
+        }
+    };
 
-  //***************************************************************************
-  /// BSD checksum policy.
-  //***************************************************************************
-  template <typename T>
-  struct checksum_policy_bsd
-  {
-    typedef T value_type;
+    //***************************************************************************
+    /// BSD checksum policy.
+    //***************************************************************************
+    template<typename T>
+    struct checksum_policy_bsd {
+        typedef T value_type;
 
-    T initial() const
-    {
-      return 0;
-    }
+        T initial() const {
+            return 0;
+        }
 
-    T add(T sum, uint8_t value) const
-    {
-      return etl::rotate_right(sum) + value;
-    }
+        T add(T sum, uint8_t value) const {
+            return etl::rotate_right(sum) + value;
+        }
 
-    T final(T sum) const
-    {
-      return sum;
-    }
-  };
+        T final(T sum) const {
+            return sum;
+        }
+    };
 
-  //***************************************************************************
-  /// Standard XOR checksum policy.
-  //***************************************************************************
-  template <typename T>
-  struct checksum_policy_xor
-  {
-    typedef T value_type;
+    //***************************************************************************
+    /// Standard XOR checksum policy.
+    //***************************************************************************
+    template<typename T>
+    struct checksum_policy_xor {
+        typedef T value_type;
 
-    T initial() const
-    {
-      return 0;
-    }
+        T initial() const {
+            return 0;
+        }
 
-    T add(T sum, uint8_t value) const
-    {
-      return sum ^ value;
-    }
+        T add(T sum, uint8_t value) const {
+            return sum ^ value;
+        }
 
-    T final(T sum) const
-    {
-      return sum;
-    }
-  };
+        T final(T sum) const {
+            return sum;
+        }
+    };
 
-  //***************************************************************************
-  /// XOR-rotate checksum policy.
-  //***************************************************************************
-  template <typename T>
-  struct checksum_policy_xor_rotate
-  {
-    typedef T value_type;
+    //***************************************************************************
+    /// XOR-rotate checksum policy.
+    //***************************************************************************
+    template<typename T>
+    struct checksum_policy_xor_rotate {
+        typedef T value_type;
 
-    T initial() const
-    {
-      return 0;
-    }
+        T initial() const {
+            return 0;
+        }
 
-    T add(T sum, uint8_t value) const
-    {
-      return etl::rotate_left(sum) ^ value;
-    }
+        T add(T sum, uint8_t value) const {
+            return etl::rotate_left(sum) ^ value;
+        }
 
-    T final(T sum) const
-    {
-      return sum;
-    }
-  };
+        T final(T sum) const {
+            return sum;
+        }
+    };
 
-  //***************************************************************************
-  /// Parity checksum policy.
-  //***************************************************************************
-  template <typename T>
-  struct checksum_policy_parity
-  {
-    typedef T value_type;
+    //***************************************************************************
+    /// Parity checksum policy.
+    //***************************************************************************
+    template<typename T>
+    struct checksum_policy_parity {
+        typedef T value_type;
 
-    T initial() const
-    {
-      return 0;
-    }
+        T initial() const {
+            return 0;
+        }
 
-    T add(T sum, uint8_t value) const
-    {
-      return sum ^ etl::parity(value);
-    }
+        T add(T sum, uint8_t value) const {
+            return sum ^ etl::parity(value);
+        }
 
-    T final(T sum) const
-    {
-      return sum;
-    }
-  };
-
-  //*************************************************************************
-  /// Standard Checksum.
-  //*************************************************************************
-  template <typename T>
-  class checksum : public etl::frame_check_sequence<etl::checksum_policy_sum<T> >
-  {
-  public:
+        T final(T sum) const {
+            return sum;
+        }
+    };
 
     //*************************************************************************
-    /// Default constructor.
+    /// Standard Checksum.
     //*************************************************************************
-    checksum()
-    {
-      this->reset();
-    }
+    template<typename T>
+    class checksum : public etl::frame_check_sequence<etl::checksum_policy_sum<T>> {
+    public:
+        //*************************************************************************
+        /// Default constructor.
+        //*************************************************************************
+        checksum() {
+            this->reset();
+        }
+
+        //*************************************************************************
+        /// Constructor from range.
+        /// \param begin Start of the range.
+        /// \param end   End of the range.
+        //*************************************************************************
+        template<typename TIterator>
+        checksum(TIterator begin, const TIterator end) {
+            this->reset();
+            this->add(begin, end);
+        }
+    };
 
     //*************************************************************************
-    /// Constructor from range.
-    /// \param begin Start of the range.
-    /// \param end   End of the range.
+    /// BSD Checksum.
     //*************************************************************************
-    template <typename TIterator>
-    checksum(TIterator begin, const TIterator end)
-    {
-      this->reset();
-      this->add(begin, end);
-    }
-  };
+    template<typename T>
+    class bsd_checksum : public etl::frame_check_sequence<etl::checksum_policy_bsd<T>> {
+    public:
+        //*************************************************************************
+        /// Default constructor.
+        //*************************************************************************
+        bsd_checksum() {
+            this->reset();
+        }
 
-  //*************************************************************************
-  /// BSD Checksum.
-  //*************************************************************************
-  template <typename T>
-  class bsd_checksum : public etl::frame_check_sequence<etl::checksum_policy_bsd<T> >
-  {
-  public:
-
-    //*************************************************************************
-    /// Default constructor.
-    //*************************************************************************
-    bsd_checksum()
-    {
-      this->reset();
-    }
+        //*************************************************************************
+        /// Constructor from range.
+        /// \param begin Start of the range.
+        /// \param end   End of the range.
+        //*************************************************************************
+        template<typename TIterator>
+        bsd_checksum(TIterator begin, const TIterator end) {
+            this->reset();
+            this->add(begin, end);
+        }
+    };
 
     //*************************************************************************
-    /// Constructor from range.
-    /// \param begin Start of the range.
-    /// \param end   End of the range.
+    /// XOR Checksum.
     //*************************************************************************
-    template <typename TIterator>
-    bsd_checksum(TIterator begin, const TIterator end)
-    {
-      this->reset();
-      this->add(begin, end);
-    }
-  };
+    template<typename T>
+    class xor_checksum : public etl::frame_check_sequence<etl::checksum_policy_xor<T>> {
+    public:
+        //*************************************************************************
+        /// Default constructor.
+        //*************************************************************************
+        xor_checksum() {
+            this->reset();
+        }
 
-  //*************************************************************************
-  /// XOR Checksum.
-  //*************************************************************************
-  template <typename T>
-  class xor_checksum : public etl::frame_check_sequence<etl::checksum_policy_xor<T> >
-  {
-  public:
-
-    //*************************************************************************
-    /// Default constructor.
-    //*************************************************************************
-    xor_checksum()
-    {
-      this->reset();
-    }
+        //*************************************************************************
+        /// Constructor from range.
+        /// \param begin Start of the range.
+        /// \param end   End of the range.
+        //*************************************************************************
+        template<typename TIterator>
+        xor_checksum(TIterator begin, const TIterator end) {
+            this->reset();
+            this->add(begin, end);
+        }
+    };
 
     //*************************************************************************
-    /// Constructor from range.
-    /// \param begin Start of the range.
-    /// \param end   End of the range.
+    /// XOR-shift Checksum.
     //*************************************************************************
-    template <typename TIterator>
-    xor_checksum(TIterator begin, const TIterator end)
-    {
-      this->reset();
-      this->add(begin, end);
-    }
-  };
+    template<typename T>
+    class xor_rotate_checksum : public etl::frame_check_sequence<etl::checksum_policy_xor_rotate<T>> {
+    public:
+        //*************************************************************************
+        /// Default constructor.
+        //*************************************************************************
+        xor_rotate_checksum() {
+            this->reset();
+        }
 
-  //*************************************************************************
-  /// XOR-shift Checksum.
-  //*************************************************************************
-  template <typename T>
-  class xor_rotate_checksum : public etl::frame_check_sequence<etl::checksum_policy_xor_rotate<T> >
-  {
-  public:
-
-    //*************************************************************************
-    /// Default constructor.
-    //*************************************************************************
-    xor_rotate_checksum()
-    {
-      this->reset();
-    }
+        //*************************************************************************
+        /// Constructor from range.
+        /// \param begin Start of the range.
+        /// \param end   End of the range.
+        //*************************************************************************
+        template<typename TIterator>
+        xor_rotate_checksum(TIterator begin, const TIterator end) {
+            this->reset();
+            this->add(begin, end);
+        }
+    };
 
     //*************************************************************************
-    /// Constructor from range.
-    /// \param begin Start of the range.
-    /// \param end   End of the range.
+    /// Parity Checksum.
     //*************************************************************************
-    template <typename TIterator>
-    xor_rotate_checksum(TIterator begin, const TIterator end)
-    {
-      this->reset();
-      this->add(begin, end);
-    }
-  };
+    template<typename T>
+    class parity_checksum : public etl::frame_check_sequence<etl::checksum_policy_parity<T>> {
+    public:
+        //*************************************************************************
+        /// Default constructor.
+        //*************************************************************************
+        parity_checksum() {
+            this->reset();
+        }
 
-  //*************************************************************************
-  /// Parity Checksum.
-  //*************************************************************************
-  template <typename T>
-  class parity_checksum : public etl::frame_check_sequence<etl::checksum_policy_parity<T> >
-  {
-  public:
-
-    //*************************************************************************
-    /// Default constructor.
-    //*************************************************************************
-    parity_checksum()
-    {
-      this->reset();
-    }
-
-    //*************************************************************************
-    /// Constructor from range.
-    /// \param begin Start of the range.
-    /// \param end   End of the range.
-    //*************************************************************************
-    template <typename TIterator>
-    parity_checksum(TIterator begin, const TIterator end)
-    {
-      this->reset();
-      this->add(begin, end);
-    }
-  };
+        //*************************************************************************
+        /// Constructor from range.
+        /// \param begin Start of the range.
+        /// \param end   End of the range.
+        //*************************************************************************
+        template<typename TIterator>
+        parity_checksum(TIterator begin, const TIterator end) {
+            this->reset();
+            this->add(begin, end);
+        }
+    };
 } // namespace etl
 
 #endif

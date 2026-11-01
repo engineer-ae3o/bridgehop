@@ -34,109 +34,99 @@ SOFTWARE.
 #include "platform.h"
 
 #if ETL_USING_STD_EXCEPTION
-  #include <exception>
-  #define ETL_EXCEPTION_CONSTEXPR
-  #define ETL_EXCEPTION_OVERRIDE override
+#include <exception>
+#define ETL_EXCEPTION_CONSTEXPR
+#define ETL_EXCEPTION_OVERRIDE override
 #else
-  #define ETL_EXCEPTION_CONSTEXPR ETL_CONSTEXPR
-  #define ETL_EXCEPTION_OVERRIDE
+#define ETL_EXCEPTION_CONSTEXPR ETL_CONSTEXPR
+#define ETL_EXCEPTION_OVERRIDE
 #endif
 
 ///\defgroup exception exception
 /// The base class for all ETL exceptions.
 ///\ingroup utilities
 
-namespace etl
-{
-  //***************************************************************************
-  ///\ingroup exception
-  /// A low overhead exception base class.
-  //***************************************************************************
-  class exception
+namespace etl {
+    //***************************************************************************
+    ///\ingroup exception
+    /// A low overhead exception base class.
+    //***************************************************************************
+    class exception
 #if ETL_USING_STD_EXCEPTION
-    : public std::exception
+        : public std::exception
 #endif
-  {
-  public:
-
-    typedef const char* string_type;
-    typedef int         numeric_type;
-
-    //*************************************************************************
-    /// Constructor.
-    //*************************************************************************
-#if defined(ETL_VERBOSE_ERRORS)
-    ETL_EXCEPTION_CONSTEXPR
-    exception(string_type reason_, string_type file_, numeric_type line_)
-      : reason_text(reason_)
-      , file_text(file_)
-      , line(line_)
     {
-    }
+    public:
+        typedef const char* string_type;
+        typedef int         numeric_type;
+
+        //*************************************************************************
+        /// Constructor.
+        //*************************************************************************
+#if defined(ETL_VERBOSE_ERRORS)
+        ETL_EXCEPTION_CONSTEXPR
+        exception(string_type reason_, string_type file_, numeric_type line_)
+            : reason_text(reason_), file_text(file_), line(line_) {
+        }
 #elif defined(ETL_MINIMAL_ERRORS)
-    ETL_EXCEPTION_CONSTEXPR
-    exception(string_type /*reason_*/, string_type /*file_*/, numeric_type /*line_*/) {}
+        ETL_EXCEPTION_CONSTEXPR
+        exception(string_type /*reason_*/, string_type /*file_*/, numeric_type /*line_*/) {
+        }
 #else
-    ETL_EXCEPTION_CONSTEXPR
-    exception(string_type reason_, string_type /*file_*/, numeric_type /*line_*/)
-      : reason_text(reason_)
-    {
-    }
+        ETL_EXCEPTION_CONSTEXPR
+        exception(string_type reason_, string_type /*file_*/, numeric_type /*line_*/) : reason_text(reason_) {
+        }
 #endif
 
-    //***************************************************************************
-    /// Gets the reason for the exception.
-    /// \return const char* to the reason.
-    //***************************************************************************
-    ETL_EXCEPTION_CONSTEXPR
-    string_type what() const ETL_NOEXCEPT ETL_EXCEPTION_OVERRIDE
-    {
+        //***************************************************************************
+        /// Gets the reason for the exception.
+        /// \return const char* to the reason.
+        //***************************************************************************
+        ETL_EXCEPTION_CONSTEXPR
+        string_type what() const ETL_NOEXCEPT ETL_EXCEPTION_OVERRIDE {
 #if !defined(ETL_MINIMAL_ERRORS)
-      return reason_text;
+            return reason_text;
 #else
-      return "";
+            return "";
 #endif
-    }
+        }
 
-    //***************************************************************************
-    /// Gets the file for the exception.
-    /// \return const char* to the file.
-    //***************************************************************************
-    ETL_EXCEPTION_CONSTEXPR
-    string_type file_name() const
-    {
+        //***************************************************************************
+        /// Gets the file for the exception.
+        /// \return const char* to the file.
+        //***************************************************************************
+        ETL_EXCEPTION_CONSTEXPR
+        string_type file_name() const {
 #if defined(ETL_VERBOSE_ERRORS)
-      return file_text;
+            return file_text;
 #else
-      return "";
+            return "";
 #endif
-    }
+        }
 
-    //***************************************************************************
-    /// Gets the line for the exception.
-    /// \return int as line number.
-    //***************************************************************************
-    ETL_EXCEPTION_CONSTEXPR
-    numeric_type line_number() const
-    {
+        //***************************************************************************
+        /// Gets the line for the exception.
+        /// \return int as line number.
+        //***************************************************************************
+        ETL_EXCEPTION_CONSTEXPR
+        numeric_type line_number() const {
 #if defined(ETL_VERBOSE_ERRORS)
-      return line;
+            return line;
 #else
-      return -1;
+            return -1;
 #endif
-    }
+        }
 
-  private:
-
+    private:
 #if !defined(ETL_MINIMAL_ERRORS)
-    string_type reason_text; ///< The reason for the exception.
+        string_type reason_text; ///< The reason for the exception.
 #endif
 
 #if defined(ETL_VERBOSE_ERRORS)
-    string_type  file_text; ///< The file for the exception.
-    numeric_type line;      ///< The line for the exception.
+        string_type  file_text; ///< The file for the exception.
+        numeric_type line;      ///< The line for the exception.
 #endif
-  };
+    };
 } // namespace etl
 
 #endif

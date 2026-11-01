@@ -35,71 +35,54 @@ SOFTWARE.
 #include "binary.h"
 #include "frame_check_sequence.h"
 
-namespace etl
-{
-  //***************************************************************************
-  /// fnv_1 policy.
-  /// Calculates FNV1.
-  //***************************************************************************
-  struct crc1_policy
-  {
-    typedef uint8_t value_type;
+namespace etl {
+    //***************************************************************************
+    /// fnv_1 policy.
+    /// Calculates FNV1.
+    //***************************************************************************
+    struct crc1_policy {
+        typedef uint8_t value_type;
 
-    enum
-    {
-      odd_parity  = 1,
-      even_parity = 0
+        enum { odd_parity = 1, even_parity = 0 };
+
+        //*********************************
+        ETL_CONSTEXPR14 value_type initial() const {
+            return even_parity;
+        }
+
+        //*********************************
+        ETL_CONSTEXPR14 uint8_t add(int parity, uint8_t value) const {
+            return parity ^ etl::parity(value);
+        }
+
+        //*********************************
+        ETL_CONSTEXPR14 uint8_t final(uint8_t parity) const {
+            return parity;
+        }
     };
 
-    //*********************************
-    ETL_CONSTEXPR14 value_type initial() const
-    {
-      return even_parity;
-    }
+    class crc1 : public etl::frame_check_sequence<crc1_policy> {
+    public:
+        enum { odd_parity = crc1_policy::odd_parity, even_parity = crc1_policy::even_parity };
 
-    //*********************************
-    ETL_CONSTEXPR14 uint8_t add(int parity, uint8_t value) const
-    {
-      return parity ^ etl::parity(value);
-    }
+        //*************************************************************************
+        /// Default constructor.
+        //*************************************************************************
+        ETL_CONSTEXPR14 crc1() {
+            this->reset();
+        }
 
-    //*********************************
-    ETL_CONSTEXPR14 uint8_t final(uint8_t parity) const
-    {
-      return parity;
-    }
-  };
-
-  class crc1 : public etl::frame_check_sequence<crc1_policy>
-  {
-  public:
-
-    enum
-    {
-      odd_parity  = crc1_policy::odd_parity,
-      even_parity = crc1_policy::even_parity
+        //*************************************************************************
+        /// Constructor from range.
+        /// \param begin Start of the range.
+        /// \param end   End of the range.
+        //*************************************************************************
+        template<typename TIterator>
+        ETL_CONSTEXPR14 crc1(TIterator begin, const TIterator end) {
+            this->reset();
+            this->add(begin, end);
+        }
     };
-
-    //*************************************************************************
-    /// Default constructor.
-    //*************************************************************************
-    ETL_CONSTEXPR14 crc1()
-    {
-      this->reset();
-    }
-
-    //*************************************************************************
-    /// Constructor from range.
-    /// \param begin Start of the range.
-    /// \param end   End of the range.
-    //*************************************************************************
-    template <typename TIterator>
-    ETL_CONSTEXPR14 crc1(TIterator begin, const TIterator end)
-    {
-      this->reset();
-      this->add(begin, end);
-    }
-  };
 } // namespace etl
 
 #endif

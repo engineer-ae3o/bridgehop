@@ -37,37 +37,34 @@ SOFTWARE.
 /// permutations<N, K> : Calculates K permutations from N.
 ///\ingroup maths
 
-namespace etl
-{
-  //***************************************************************************
-  ///\ingroup permutations
-  /// Calculates permutations.
-  //***************************************************************************
-  template <size_t Value, size_t KV>
-  struct permutations
-  {
-    static ETL_CONSTANT size_t value = Value * permutations<Value - 1, KV - 1>::value;
-  };
+namespace etl {
+    //***************************************************************************
+    ///\ingroup permutations
+    /// Calculates permutations.
+    //***************************************************************************
+    template<size_t Value, size_t KV>
+    struct permutations {
+        static ETL_CONSTANT size_t value = Value * permutations<Value - 1, KV - 1>::value;
+    };
 
-  template <size_t Value, size_t KV>
-  ETL_CONSTANT size_t permutations<Value, KV>::value;
+    template<size_t Value, size_t KV>
+    ETL_CONSTANT size_t permutations<Value, KV>::value;
 
-  //***************************************************************************
-  /// Calculates permutations.
-  /// Specialisation for KV == 0.
-  //***************************************************************************
-  template <size_t Value>
-  struct permutations<Value, 0>
-  {
-    static ETL_CONSTANT size_t value = 1UL;
-  };
+    //***************************************************************************
+    /// Calculates permutations.
+    /// Specialisation for KV == 0.
+    //***************************************************************************
+    template<size_t Value>
+    struct permutations<Value, 0> {
+        static ETL_CONSTANT size_t value = 1UL;
+    };
 
-  template <size_t Value>
-  ETL_CONSTANT size_t permutations<Value, 0>::value;
+    template<size_t Value>
+    ETL_CONSTANT size_t permutations<Value, 0>::value;
 
 #if ETL_USING_CPP17
-  template <size_t Value, size_t KV>
-  inline constexpr size_t permutations_v = permutations<Value, KV>::value;
+    template<size_t Value, size_t KV>
+    inline constexpr size_t permutations_v = permutations<Value, KV>::value;
 #endif
 } // namespace etl
 

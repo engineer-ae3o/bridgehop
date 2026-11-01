@@ -35,47 +35,38 @@ SOFTWARE.
 #include "functional.h"
 #include "limits.h"
 
-namespace etl
-{
-  //***************************************************************************
-  /// Invert.
-  //***************************************************************************
-  template <typename TInput>
-  class invert : public etl::unary_function<TInput, TInput>
-  {
-  public:
+namespace etl {
+    //***************************************************************************
+    /// Invert.
+    //***************************************************************************
+    template<typename TInput>
+    class invert : public etl::unary_function<TInput, TInput> {
+    public:
+        //*****************************************************************
+        // Constructor.
+        //*****************************************************************
+        ETL_CONSTEXPR invert()
+            : offset(TInput(0)),
+              minuend((etl::numeric_limits<TInput>::is_signed) ? TInput(0) : etl::numeric_limits<TInput>::max()) {
+        }
 
-    //*****************************************************************
-    // Constructor.
-    //*****************************************************************
-    ETL_CONSTEXPR invert()
-      : offset(TInput(0))
-      , minuend((etl::numeric_limits<TInput>::is_signed) ? TInput(0) : etl::numeric_limits<TInput>::max())
-    {
-    }
+        //*****************************************************************
+        // Constructor.
+        //*****************************************************************
+        ETL_CONSTEXPR invert(TInput offset_, TInput minuend_) : offset(offset_), minuend(minuend_) {
+        }
 
-    //*****************************************************************
-    // Constructor.
-    //*****************************************************************
-    ETL_CONSTEXPR invert(TInput offset_, TInput minuend_)
-      : offset(offset_)
-      , minuend(minuend_)
-    {
-    }
+        //*****************************************************************
+        // operator ()
+        //*****************************************************************
+        ETL_CONSTEXPR TInput operator()(TInput value) const {
+            return minuend - (value - offset);
+        }
 
-    //*****************************************************************
-    // operator ()
-    //*****************************************************************
-    ETL_CONSTEXPR TInput operator()(TInput value) const
-    {
-      return minuend - (value - offset);
-    }
-
-  private:
-
-    const TInput offset;
-    const TInput minuend;
-  };
+    private:
+        const TInput offset;
+        const TInput minuend;
+    };
 } // namespace etl
 
 #endif

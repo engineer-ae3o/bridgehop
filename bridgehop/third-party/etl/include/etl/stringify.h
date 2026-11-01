@@ -2,10 +2,10 @@
 #define ETL_ETL_STRINGIFY_INCLUDED
 
 #ifndef STRINGIFY
-  /** Helper macro for STRINGIFY. */
-  #define STRINGIFY_1(...) #__VA_ARGS__
+/** Helper macro for STRINGIFY. */
+#define STRINGIFY_1(...) #__VA_ARGS__
 
-  /**
+/**
    * Indirect stringification.
    *
    * Doing two levels allows the parameter to be a macro itself.
@@ -15,7 +15,7 @@
    * between arguments. For example `STRINGIFY( a , b )` will be expanded to "a
    * , b".
    */
-  #define STRINGIFY(...) STRINGIFY_1(__VA_ARGS__)
+#define STRINGIFY(...) STRINGIFY_1(__VA_ARGS__)
 #endif /* STRINGIFY */
 
 #endif /* ETL_ETL_STRINGIFY_INCLUDED */

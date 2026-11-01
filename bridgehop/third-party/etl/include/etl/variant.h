@@ -34,13 +34,13 @@ SOFTWARE.
 #include "platform.h"
 
 #if ETL_USING_LEGACY_VARIANT
-  // etl::variant
-  #include "private/variant_legacy.h" // IWYU pragma: export
+// etl::variant
+#include "private/variant_legacy.h" // IWYU pragma: export
 #else
-  // etl::legacy::variant
-  #include "private/variant_legacy.h"   // IWYU pragma: export
-  // etl::variant
-  #include "private/variant_variadic.h" // IWYU pragma: export
+// etl::legacy::variant
+#include "private/variant_legacy.h"   // IWYU pragma: export
+// etl::variant
+#include "private/variant_variadic.h" // IWYU pragma: export
 #endif
 
 #endif

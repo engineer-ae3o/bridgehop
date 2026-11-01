@@ -397,87 +397,84 @@ SOFTWARE.
 //***************************************************************************
 // Specialisation for 0 message types.
 //***************************************************************************
-template <typename TDerived>
-class message_router<TDerived, void, void, void, void, void, void, void, void, void, void, void, void, void, void, void, void>
-  : public imessage_router
-{
+template<typename TDerived>
+class message_router<TDerived,
+                     void,
+                     void,
+                     void,
+                     void,
+                     void,
+                     void,
+                     void,
+                     void,
+                     void,
+                     void,
+                     void,
+                     void,
+                     void,
+                     void,
+                     void,
+                     void> : public imessage_router {
 public:
-
-  typedef etl::message_packet<> message_packet;
+    typedef etl::message_packet<> message_packet;
 
 #if ETL_USING_CPP11
-  using message_types = etl::type_list<>;
+    using message_types = etl::type_list<>;
 #endif
 
-  //**********************************************
-  message_router(etl::message_router_id_t id_)
-    : imessage_router(id_)
-  {
-    ETL_ASSERT(id_ <= etl::imessage_router::MAX_MESSAGE_ROUTER, ETL_ERROR(etl::message_router_illegal_id));
-  }
+    //**********************************************
+    message_router(etl::message_router_id_t id_) : imessage_router(id_) {
+        ETL_ASSERT(id_ <= etl::imessage_router::MAX_MESSAGE_ROUTER, ETL_ERROR(etl::message_router_illegal_id));
+    }
 
-  //**********************************************
-  message_router(etl::message_router_id_t id_, etl::imessage_router& successor_)
-    : imessage_router(id_, successor_)
-  {
-    ETL_ASSERT(id_ <= etl::imessage_router::MAX_MESSAGE_ROUTER, ETL_ERROR(etl::message_router_illegal_id));
-  }
+    //**********************************************
+    message_router(etl::message_router_id_t id_, etl::imessage_router& successor_) : imessage_router(id_, successor_) {
+        ETL_ASSERT(id_ <= etl::imessage_router::MAX_MESSAGE_ROUTER, ETL_ERROR(etl::message_router_illegal_id));
+    }
 
-  //**********************************************
-  message_router()
-    : imessage_router(etl::imessage_router::MESSAGE_ROUTER)
-  {
-  }
+    //**********************************************
+    message_router() : imessage_router(etl::imessage_router::MESSAGE_ROUTER) {
+    }
 
-  //**********************************************
-  message_router(etl::imessage_router& successor_)
-    : imessage_router(etl::imessage_router::MESSAGE_ROUTER, successor_)
-  {
-  }
+    //**********************************************
+    message_router(etl::imessage_router& successor_)
+        : imessage_router(etl::imessage_router::MESSAGE_ROUTER, successor_) {
+    }
 
-  //**********************************************
-  using etl::imessage_router::receive;
+    //**********************************************
+    using etl::imessage_router::receive;
 
-  void receive(const etl::imessage& msg) ETL_OVERRIDE
-  {
+    void receive(const etl::imessage& msg) ETL_OVERRIDE {
 #include "etl/private/diagnostic_array_bounds_push.h"
-    if (has_successor())
-    {
-      get_successor().receive(msg);
-    }
+        if (has_successor()) {
+            get_successor().receive(msg);
+        }
 #include "etl/private/diagnostic_pop.h"
-  }
-
-  //**********************************************
-  using imessage_router::accepts;
-
-  bool accepts(etl::message_id_t id) const ETL_OVERRIDE
-  {
-    if (has_successor())
-    {
-      return get_successor().accepts(id);
     }
-    else
-    {
-      return false;
+
+    //**********************************************
+    using imessage_router::accepts;
+
+    bool accepts(etl::message_id_t id) const ETL_OVERRIDE {
+        if (has_successor()) {
+            return get_successor().accepts(id);
+        } else {
+            return false;
+        }
     }
-  }
 
-  //********************************************
-  ETL_DEPRECATED bool is_null_router() const ETL_OVERRIDE
-  {
-    return false;
-  }
+    //********************************************
+    ETL_DEPRECATED bool is_null_router() const ETL_OVERRIDE {
+        return false;
+    }
 
-  //********************************************
-  bool is_producer() const ETL_OVERRIDE
-  {
-    return true;
-  }
+    //********************************************
+    bool is_producer() const ETL_OVERRIDE {
+        return true;
+    }
 
-  //********************************************
-  bool is_consumer() const ETL_OVERRIDE
-  {
-    return true;
-  }
+    //********************************************
+    bool is_consumer() const ETL_OVERRIDE {
+        return true;
+    }
 };

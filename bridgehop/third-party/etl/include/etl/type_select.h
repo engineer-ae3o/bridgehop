@@ -35,53 +35,47 @@ SOFTWARE.
 
 #include <stddef.h>
 
-namespace etl
-{
+namespace etl {
 #if ETL_USING_CPP11 && !defined(ETL_TYPE_SELECT_FORCE_CPP03_IMPLEMENTATION)
-  //***************************************************************************
-  // Variadic version.
-  //***************************************************************************
-  template <typename... TTypes>
-  struct type_select
-  {
-  private:
+    //***************************************************************************
+    // Variadic version.
+    //***************************************************************************
+    template<typename... TTypes>
+    struct type_select {
+    private:
+        //***********************************
+        template<size_t Id, size_t Index, typename T1, typename... TRest>
+        struct type_select_helper {
+            using type = typename etl::
+                conditional<Id == Index, T1, typename type_select_helper<Id, Index + 1, TRest...>::type>::type;
+        };
 
-    //***********************************
-    template <size_t Id, size_t Index, typename T1, typename... TRest>
-    struct type_select_helper
-    {
-      using type = typename etl::conditional< Id == Index, T1, typename type_select_helper<Id, Index + 1, TRest...>::type>::type;
+        //***********************************
+        template<size_t Id, size_t Index, typename T1>
+        struct type_select_helper<Id, Index, T1> {
+            using type = T1;
+        };
+
+    public:
+        template<size_t Id>
+        struct select {
+            static_assert(Id < sizeof...(TTypes), "Illegal type_select::select index");
+
+            using type = typename type_select_helper<Id, 0, TTypes...>::type;
+        };
+
+        template<size_t Id>
+        using select_t = typename select<Id>::type;
     };
 
-    //***********************************
-    template <size_t Id, size_t Index, typename T1>
-    struct type_select_helper<Id, Index, T1>
-    {
-      using type = T1;
-    };
-
-  public:
-
-    template <size_t Id>
-    struct select
-    {
-      static_assert(Id < sizeof...(TTypes), "Illegal type_select::select index");
-
-      using type = typename type_select_helper<Id, 0, TTypes...>::type;
-    };
-
-    template <size_t Id>
-    using select_t = typename select<Id>::type;
-  };
-
-  //***************************************************************************
-  // Select type alias
-  //***************************************************************************
-  template <size_t Index, typename... TTypes>
-  using type_select_t = typename etl::type_select<TTypes...>::template select_t<Index>;
+    //***************************************************************************
+    // Select type alias
+    //***************************************************************************
+    template<size_t Index, typename... TTypes>
+    using type_select_t = typename etl::type_select<TTypes...>::template select_t<Index>;
 
 #else
-  #include "private/type_select_cpp03.h"
+#include "private/type_select_cpp03.h"
 #endif
 } // namespace etl
 

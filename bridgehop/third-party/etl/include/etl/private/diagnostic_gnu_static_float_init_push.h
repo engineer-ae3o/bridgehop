@@ -34,11 +34,12 @@ SOFTWARE.
  */
 
 // Matching GCC push for later pop
-#if defined(__GNUC__) && !defined(__clang__) && !defined(__llvm__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
-  #pragma GCC diagnostic push
+#if defined(__GNUC__) && !defined(__clang__) && !defined(__llvm__) &&                                                  \
+    (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
+#pragma GCC diagnostic push
 #endif
 
 #if defined(__clang__) || defined(__llvm__)
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wgnu-static-float-init"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wgnu-static-float-init"
 #endif

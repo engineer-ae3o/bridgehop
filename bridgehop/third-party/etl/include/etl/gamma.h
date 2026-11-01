@@ -37,78 +37,63 @@ SOFTWARE.
 
 #include <math.h>
 
-namespace etl
-{
-  //***************************************************************************
-  /// Gamma encode function.
-  //***************************************************************************
-  template <typename TInput>
-  class gamma_encode : public etl::unary_function<TInput, TInput>
-  {
-  public:
+namespace etl {
+    //***************************************************************************
+    /// Gamma encode function.
+    //***************************************************************************
+    template<typename TInput>
+    class gamma_encode : public etl::unary_function<TInput, TInput> {
+    public:
+        //*********************************
+        /// Constructor.
+        //*********************************
+        gamma_encode(double gamma_, TInput maximum_) : one_over_gamma(1.0 / gamma_), maximum(maximum_) {
+        }
 
-    //*********************************
-    /// Constructor.
-    //*********************************
-    gamma_encode(double gamma_, TInput maximum_)
-      : one_over_gamma(1.0 / gamma_)
-      , maximum(maximum_)
-    {
-    }
+        //*********************************
+        /// operator ()
+        /// Get the gamma.
+        //*********************************
+        TInput operator()(TInput value) const {
+            // Calculate intermediate result because rounding + optimization
+            // lead to wrong values when returning directly (test on i386)
+            const double result = maximum * pow(double(value) / maximum, one_over_gamma);
 
-    //*********************************
-    /// operator ()
-    /// Get the gamma.
-    //*********************************
-    TInput operator()(TInput value) const
-    {
-      // Calculate intermediate result because rounding + optimization
-      // lead to wrong values when returning directly (test on i386)
-      const double result = maximum * pow(double(value) / maximum, one_over_gamma);
+            return TInput(result);
+        }
 
-      return TInput(result);
-    }
+    private:
+        const double one_over_gamma;
+        const double maximum;
+    };
 
-  private:
+    //***************************************************************************
+    /// Gamma decode function.
+    //***************************************************************************
+    template<typename TInput>
+    class gamma_decode : public etl::unary_function<TInput, TInput> {
+    public:
+        //*********************************
+        /// Constructor.
+        //*********************************
+        gamma_decode(double gamma_, TInput maximum_) : gamma(gamma_), maximum(maximum_) {
+        }
 
-    const double one_over_gamma;
-    const double maximum;
-  };
+        //*********************************
+        /// operator ()
+        /// Get the gamma.
+        //*********************************
+        TInput operator()(TInput value) const {
+            // Calculate intermediate result because rounding + optimization
+            // lead to wrong values when returning directly (test on i386)
+            const double result = maximum * pow(double(value) / maximum, gamma);
+            return TInput(result);
+        }
 
-  //***************************************************************************
-  /// Gamma decode function.
-  //***************************************************************************
-  template <typename TInput>
-  class gamma_decode : public etl::unary_function<TInput, TInput>
-  {
-  public:
-
-    //*********************************
-    /// Constructor.
-    //*********************************
-    gamma_decode(double gamma_, TInput maximum_)
-      : gamma(gamma_)
-      , maximum(maximum_)
-    {
-    }
-
-    //*********************************
-    /// operator ()
-    /// Get the gamma.
-    //*********************************
-    TInput operator()(TInput value) const
-    {
-      // Calculate intermediate result because rounding + optimization
-      // lead to wrong values when returning directly (test on i386)
-      const double result = maximum * pow(double(value) / maximum, gamma);
-      return TInput(result);
-    }
-
-  private:
-
-    const double gamma;
-    const double maximum;
-  };
+    private:
+        const double gamma;
+        const double maximum;
+    };
 } // namespace etl
 
 #endif

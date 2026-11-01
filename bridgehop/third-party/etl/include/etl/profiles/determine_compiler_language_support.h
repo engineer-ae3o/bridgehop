@@ -37,148 +37,148 @@ SOFTWARE.
 
 // Determine C++26 support
 #if !defined(ETL_CPP26_SUPPORTED)
-  #if defined(__cplusplus)
-    #if defined(ETL_COMPILER_MICROSOFT)
-      #define ETL_CPP26_SUPPORTED (__cplusplus >= 202400L)
-    #elif defined(ETL_COMPILER_ARM5)
-      #define ETL_CPP26_SUPPORTED 0
-    #elif defined(ETL_COMPILER_GCC)
-      #define ETL_CPP26_SUPPORTED (__cplusplus >= 202400L)
-    #else
-      #define ETL_CPP26_SUPPORTED (__cplusplus >= 202400L)
-    #endif
-  #else
-    #define ETL_CPP26_SUPPORTED 0
-  #endif
+#if defined(__cplusplus)
+#if defined(ETL_COMPILER_MICROSOFT)
+#define ETL_CPP26_SUPPORTED (__cplusplus >= 202400L)
+#elif defined(ETL_COMPILER_ARM5)
+#define ETL_CPP26_SUPPORTED 0
+#elif defined(ETL_COMPILER_GCC)
+#define ETL_CPP26_SUPPORTED (__cplusplus >= 202400L)
+#else
+#define ETL_CPP26_SUPPORTED (__cplusplus >= 202400L)
+#endif
+#else
+#define ETL_CPP26_SUPPORTED 0
+#endif
 #endif
 
 #if ETL_CPP26_SUPPORTED
-  #define ETL_CPP11_SUPPORTED 1
-  #define ETL_CPP14_SUPPORTED 1
-  #define ETL_CPP17_SUPPORTED 1
-  #define ETL_CPP20_SUPPORTED 1
-  #define ETL_CPP23_SUPPORTED 1
+#define ETL_CPP11_SUPPORTED 1
+#define ETL_CPP14_SUPPORTED 1
+#define ETL_CPP17_SUPPORTED 1
+#define ETL_CPP20_SUPPORTED 1
+#define ETL_CPP23_SUPPORTED 1
 #endif
 
 // Determine C++23 support
 #if !defined(ETL_CPP23_SUPPORTED)
-  #if defined(__cplusplus)
-    #if defined(ETL_COMPILER_MICROSOFT)
-      #define ETL_CPP23_SUPPORTED (__cplusplus >= 202302L)
-    #elif defined(ETL_COMPILER_ARM5)
-      #define ETL_CPP23_SUPPORTED 0
-    #elif defined(ETL_COMPILER_GCC)
-      #define ETL_CPP23_SUPPORTED (__cplusplus >= 202302L)
-    #else
-      #define ETL_CPP23_SUPPORTED (__cplusplus >= 202302L)
-    #endif
-  #else
-    #define ETL_CPP23_SUPPORTED 0
-  #endif
+#if defined(__cplusplus)
+#if defined(ETL_COMPILER_MICROSOFT)
+#define ETL_CPP23_SUPPORTED (__cplusplus >= 202302L)
+#elif defined(ETL_COMPILER_ARM5)
+#define ETL_CPP23_SUPPORTED 0
+#elif defined(ETL_COMPILER_GCC)
+#define ETL_CPP23_SUPPORTED (__cplusplus >= 202302L)
+#else
+#define ETL_CPP23_SUPPORTED (__cplusplus >= 202302L)
+#endif
+#else
+#define ETL_CPP23_SUPPORTED 0
+#endif
 #endif
 
 #if ETL_CPP23_SUPPORTED
-  #define ETL_CPP11_SUPPORTED 1
-  #define ETL_CPP14_SUPPORTED 1
-  #define ETL_CPP17_SUPPORTED 1
-  #define ETL_CPP20_SUPPORTED 1
+#define ETL_CPP11_SUPPORTED 1
+#define ETL_CPP14_SUPPORTED 1
+#define ETL_CPP17_SUPPORTED 1
+#define ETL_CPP20_SUPPORTED 1
 #endif
 
 // Determine C++20 support
 #if !defined(ETL_CPP20_SUPPORTED)
-  #if defined(__cplusplus)
-    #if defined(ETL_COMPILER_MICROSOFT)
-      #if defined(_MSVC_LANG)
-        #define ETL_CPP20_SUPPORTED (_MSVC_LANG >= 202002L)
-      #else
-        #define ETL_CPP20_SUPPORTED (_MSC_VER >= 1929)
-      #endif
-    #elif defined(ETL_COMPILER_ARM5)
-      #define ETL_CPP20_SUPPORTED 0
-    #elif defined(ETL_COMPILER_GCC)
-      #if (__GNUC__ == 10)
-        #define ETL_CPP20_SUPPORTED (__cplusplus >= 201709L)
-      #else
-        #define ETL_CPP20_SUPPORTED (__cplusplus >= 202002L)
-      #endif
-    #else
-      #define ETL_CPP20_SUPPORTED (__cplusplus >= 202002L)
-    #endif
-  #else
-    #define ETL_CPP20_SUPPORTED 0
-  #endif
+#if defined(__cplusplus)
+#if defined(ETL_COMPILER_MICROSOFT)
+#if defined(_MSVC_LANG)
+#define ETL_CPP20_SUPPORTED (_MSVC_LANG >= 202002L)
+#else
+#define ETL_CPP20_SUPPORTED (_MSC_VER >= 1929)
+#endif
+#elif defined(ETL_COMPILER_ARM5)
+#define ETL_CPP20_SUPPORTED 0
+#elif defined(ETL_COMPILER_GCC)
+#if (__GNUC__ == 10)
+#define ETL_CPP20_SUPPORTED (__cplusplus >= 201709L)
+#else
+#define ETL_CPP20_SUPPORTED (__cplusplus >= 202002L)
+#endif
+#else
+#define ETL_CPP20_SUPPORTED (__cplusplus >= 202002L)
+#endif
+#else
+#define ETL_CPP20_SUPPORTED 0
+#endif
 #endif
 
 #if ETL_CPP20_SUPPORTED
-  #define ETL_CPP11_SUPPORTED 1
-  #define ETL_CPP14_SUPPORTED 1
-  #define ETL_CPP17_SUPPORTED 1
+#define ETL_CPP11_SUPPORTED 1
+#define ETL_CPP14_SUPPORTED 1
+#define ETL_CPP17_SUPPORTED 1
 #endif
 
 // Determine C++17 support
 #if !defined(ETL_CPP17_SUPPORTED)
-  #if defined(__cplusplus)
-    #if defined(ETL_COMPILER_MICROSOFT)
-      #if defined(_MSVC_LANG)
-        #define ETL_CPP17_SUPPORTED (_MSVC_LANG >= 201703L)
-      #else
-        #define ETL_CPP17_SUPPORTED (_MSC_VER >= 1914)
-      #endif
-    #elif defined(ETL_COMPILER_ARM5)
-      #define ETL_CPP17_SUPPORTED 0
-    #else
-      #define ETL_CPP17_SUPPORTED (__cplusplus >= 201703L)
-    #endif
-  #else
-    #define ETL_CPP17_SUPPORTED 0
-  #endif
+#if defined(__cplusplus)
+#if defined(ETL_COMPILER_MICROSOFT)
+#if defined(_MSVC_LANG)
+#define ETL_CPP17_SUPPORTED (_MSVC_LANG >= 201703L)
+#else
+#define ETL_CPP17_SUPPORTED (_MSC_VER >= 1914)
+#endif
+#elif defined(ETL_COMPILER_ARM5)
+#define ETL_CPP17_SUPPORTED 0
+#else
+#define ETL_CPP17_SUPPORTED (__cplusplus >= 201703L)
+#endif
+#else
+#define ETL_CPP17_SUPPORTED 0
+#endif
 #endif
 
 #if ETL_CPP17_SUPPORTED
-  #define ETL_CPP11_SUPPORTED 1
-  #define ETL_CPP14_SUPPORTED 1
+#define ETL_CPP11_SUPPORTED 1
+#define ETL_CPP14_SUPPORTED 1
 #endif
 
 // Determine C++14 support
 #if !defined(ETL_CPP14_SUPPORTED)
-  #if defined(__cplusplus)
-    #if defined(ETL_COMPILER_MICROSOFT)
-      #if defined(_MSVC_LANG)
-        #define ETL_CPP14_SUPPORTED (_MSVC_LANG >= 201402L)
-      #else
-        #define ETL_CPP14_SUPPORTED (_MSC_VER >= 1900)
-      #endif
-    #elif defined(ETL_COMPILER_ARM5)
-      #define ETL_CPP14_SUPPORTED 0
-    #else
-      #define ETL_CPP14_SUPPORTED (__cplusplus >= 201402L)
-    #endif
-  #else
-    #define ETL_CPP14_SUPPORTED 0
-  #endif
+#if defined(__cplusplus)
+#if defined(ETL_COMPILER_MICROSOFT)
+#if defined(_MSVC_LANG)
+#define ETL_CPP14_SUPPORTED (_MSVC_LANG >= 201402L)
+#else
+#define ETL_CPP14_SUPPORTED (_MSC_VER >= 1900)
+#endif
+#elif defined(ETL_COMPILER_ARM5)
+#define ETL_CPP14_SUPPORTED 0
+#else
+#define ETL_CPP14_SUPPORTED (__cplusplus >= 201402L)
+#endif
+#else
+#define ETL_CPP14_SUPPORTED 0
+#endif
 #endif
 
 #if ETL_CPP14_SUPPORTED
-  #define ETL_CPP11_SUPPORTED 1
+#define ETL_CPP11_SUPPORTED 1
 #endif
 
 // Determine C++11 support
 #if !defined(ETL_CPP11_SUPPORTED)
-  #if defined(__cplusplus)
-    #if defined(ETL_COMPILER_MICROSOFT)
-      #if defined(_MSVC_LANG)
-        #define ETL_CPP11_SUPPORTED (_MSVC_LANG >= 201103L)
-      #else
-        #define ETL_CPP11_SUPPORTED (_MSC_VER >= 1700)
-      #endif
-    #elif defined(ETL_COMPILER_ARM5)
-      #define ETL_CPP11_SUPPORTED 0
-    #else
-      #define ETL_CPP11_SUPPORTED (__cplusplus >= 201103L)
-    #endif
-  #else
-    #define ETL_CPP11_SUPPORTED 0
-  #endif
+#if defined(__cplusplus)
+#if defined(ETL_COMPILER_MICROSOFT)
+#if defined(_MSVC_LANG)
+#define ETL_CPP11_SUPPORTED (_MSVC_LANG >= 201103L)
+#else
+#define ETL_CPP11_SUPPORTED (_MSC_VER >= 1700)
+#endif
+#elif defined(ETL_COMPILER_ARM5)
+#define ETL_CPP11_SUPPORTED 0
+#else
+#define ETL_CPP11_SUPPORTED (__cplusplus >= 201103L)
+#endif
+#else
+#define ETL_CPP11_SUPPORTED 0
+#endif
 #endif
 
 // Helper macros
@@ -205,89 +205,90 @@ SOFTWARE.
 #define ETL_NOT_USING_CPP26 (ETL_CPP26_SUPPORTED == 0)
 
 #if !defined(ETL_NO_NULLPTR_SUPPORT)
-  #define ETL_NO_NULLPTR_SUPPORT ETL_NOT_USING_CPP11
+#define ETL_NO_NULLPTR_SUPPORT ETL_NOT_USING_CPP11
 #endif
 
 #if !defined(ETL_NO_SMALL_CHAR_SUPPORT)
-  #if ETL_USING_CPP20
-    #define ETL_NO_SMALL_CHAR_SUPPORT 0
-  #else
-    #define ETL_NO_SMALL_CHAR_SUPPORT 1
-  #endif
+#if ETL_USING_CPP20
+#define ETL_NO_SMALL_CHAR_SUPPORT 0
+#else
+#define ETL_NO_SMALL_CHAR_SUPPORT 1
+#endif
 #endif
 
 #if !defined(ETL_NO_LARGE_CHAR_SUPPORT)
-  #define ETL_NO_LARGE_CHAR_SUPPORT ETL_NOT_USING_CPP11
+#define ETL_NO_LARGE_CHAR_SUPPORT ETL_NOT_USING_CPP11
 #endif
 
 #if !defined(ETL_CPP11_TYPE_TRAITS_IS_TRIVIAL_SUPPORTED)
-  #define ETL_CPP11_TYPE_TRAITS_IS_TRIVIAL_SUPPORTED ETL_USING_CPP11
+#define ETL_CPP11_TYPE_TRAITS_IS_TRIVIAL_SUPPORTED ETL_USING_CPP11
 #endif
 
 // Language standard
 #if !defined(ETL_LANGUAGE_STANDARD)
-  #if ETL_USING_CPP26
-    #define ETL_LANGUAGE_STANDARD 26
-  #elif ETL_USING_CPP23
-    #define ETL_LANGUAGE_STANDARD 23
-  #elif ETL_USING_CPP20
-    #define ETL_LANGUAGE_STANDARD 20
-  #elif ETL_USING_CPP17
-    #define ETL_LANGUAGE_STANDARD 17
-  #elif ETL_USING_CPP14
-    #define ETL_LANGUAGE_STANDARD 14
-  #elif ETL_USING_CPP11
-    #define ETL_LANGUAGE_STANDARD 11
-  #else
-    #define ETL_LANGUAGE_STANDARD 3
-  #endif
+#if ETL_USING_CPP26
+#define ETL_LANGUAGE_STANDARD 26
+#elif ETL_USING_CPP23
+#define ETL_LANGUAGE_STANDARD 23
+#elif ETL_USING_CPP20
+#define ETL_LANGUAGE_STANDARD 20
+#elif ETL_USING_CPP17
+#define ETL_LANGUAGE_STANDARD 17
+#elif ETL_USING_CPP14
+#define ETL_LANGUAGE_STANDARD 14
+#elif ETL_USING_CPP11
+#define ETL_LANGUAGE_STANDARD 11
+#else
+#define ETL_LANGUAGE_STANDARD 3
+#endif
 #endif
 
 // NAN not defined or Rowley CrossWorks
-#if !defined(ETL_NO_CPP_NAN_SUPPORT) && (!defined(NAN) || defined(__CROSSWORKS_ARM) || defined(ETL_COMPILER_ARM5) || defined(ARDUINO))
-  #define ETL_NO_CPP_NAN_SUPPORT
+#if !defined(ETL_NO_CPP_NAN_SUPPORT) &&                                                                                \
+    (!defined(NAN) || defined(__CROSSWORKS_ARM) || defined(ETL_COMPILER_ARM5) || defined(ARDUINO))
+#define ETL_NO_CPP_NAN_SUPPORT
 #endif
 
 #if defined(__has_include)
-  #if __has_include(<version>)
-    #include <version>
+#if __has_include(<version>)
+#include <version>
 
-    #if defined(__cpp_lib_byteswap)
-      #if __cpp_lib_byteswap != 0
-        #define ETL_HAS_STD_BYTESWAP 1
-      #endif
-    #endif
+#if defined(__cpp_lib_byteswap)
+#if __cpp_lib_byteswap != 0
+#define ETL_HAS_STD_BYTESWAP 1
+#endif
+#endif
 
-    #if defined(__cpp_lib_is_virtual_base_of)
-      #if __cpp_lib_is_virtual_base_of != 0
-        #define ETL_HAS_STD_IS_VIRTUAL_BASE_OF 1
-      #endif
-    #endif
+#if defined(__cpp_lib_is_virtual_base_of)
+#if __cpp_lib_is_virtual_base_of != 0
+#define ETL_HAS_STD_IS_VIRTUAL_BASE_OF 1
+#endif
+#endif
 
-    #if defined(__cpp_lib_trivially_relocatable)
-      #if __cpp_lib_trivially_relocatable != 0
-        #define ETL_HAS_STD_TRIVIALLY_RELOCATABLE 1
-      #endif
-    #endif
+#if defined(__cpp_lib_trivially_relocatable)
+#if __cpp_lib_trivially_relocatable != 0
+#define ETL_HAS_STD_TRIVIALLY_RELOCATABLE 1
+#endif
+#endif
 
-    #if defined(__cpp_lib_atomic_min_max)
-      #if __cpp_lib_atomic_min_max != 0
-        #define ETL_HAS_STD_ATOMIC_MIN_MAX 1
-      #endif
-    #endif
-  #endif
+#if defined(__cpp_lib_atomic_min_max)
+#if __cpp_lib_atomic_min_max != 0
+#define ETL_HAS_STD_ATOMIC_MIN_MAX 1
+#endif
+#endif
+#endif
 #endif
 #ifndef ETL_HAS_STD_BYTESWAP
-  #define ETL_HAS_STD_BYTESWAP 0
+#define ETL_HAS_STD_BYTESWAP 0
 #endif
 #ifndef ETL_HAS_STD_IS_VIRTUAL_BASE_OF
-  #define ETL_HAS_STD_IS_VIRTUAL_BASE_OF 0
+#define ETL_HAS_STD_IS_VIRTUAL_BASE_OF 0
 #endif
 #ifndef ETL_HAS_STD_TRIVIALLY_RELOCATABLE
-  #define ETL_HAS_STD_TRIVIALLY_RELOCATABLE 0
+#define ETL_HAS_STD_TRIVIALLY_RELOCATABLE 0
 #endif
 #ifndef ETL_HAS_STD_ATOMIC_MIN_MAX
-  #define ETL_HAS_STD_ATOMIC_MIN_MAX 0
+#define ETL_HAS_STD_ATOMIC_MIN_MAX 0
 #endif
 
 #endif

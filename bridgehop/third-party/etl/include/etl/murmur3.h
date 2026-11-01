@@ -40,203 +40,183 @@ SOFTWARE.
 #include <stdint.h>
 
 #if defined(ETL_COMPILER_KEIL)
-  #pragma diag_suppress 1300
+#pragma diag_suppress 1300
 #endif
 
 ///\defgroup murmur3 Murmur3 hash calculations
 ///\ingroup maths
 
-namespace etl
-{
-  //***************************************************************************
-  /// Calculates the murmur3 hash.
-  /// See https://en.wikipedia.org/wiki/MurmurHash for more details.
-  ///\ingroup murmur3
-  //***************************************************************************
-  template <typename THash>
-  class murmur3
-  {
-  public:
-
+namespace etl {
+    //***************************************************************************
+    /// Calculates the murmur3 hash.
+    /// See https://en.wikipedia.org/wiki/MurmurHash for more details.
+    ///\ingroup murmur3
+    //***************************************************************************
+    template<typename THash>
+    class murmur3 {
+    public:
 #if ETL_NOT_USING_64BIT_TYPES
-    ETL_STATIC_ASSERT((etl::is_same<THash, uint32_t>::value), "Only 32 bit types supported");
+        ETL_STATIC_ASSERT((etl::is_same<THash, uint32_t>::value), "Only 32 bit types supported");
 #else
-    ETL_STATIC_ASSERT((etl::is_same<THash, uint32_t>::value || etl::is_same<THash, uint64_t>::value), "Only 32 & 64 bit types supported");
+        ETL_STATIC_ASSERT((etl::is_same<THash, uint32_t>::value || etl::is_same<THash, uint64_t>::value),
+                          "Only 32 & 64 bit types supported");
 #endif
 
-    typedef THash value_type;
+        typedef THash value_type;
 
-    //*************************************************************************
-    /// Default constructor.
-    /// \param seed The seed value. Default = 0.
-    //*************************************************************************
-    murmur3(value_type seed_ = 0)
-      : seed(seed_)
-    {
-      reset();
-    }
-
-    //*************************************************************************
-    /// Constructor from range.
-    /// \param begin Start of the range.
-    /// \param end   End of the range.
-    /// \param seed  The seed value. Default = 0.
-    //*************************************************************************
-    template <typename TIterator>
-    murmur3(TIterator begin, const TIterator end, value_type seed_ = 0)
-      : seed(seed_)
-    {
-      ETL_STATIC_ASSERT(sizeof(typename etl::iterator_traits<TIterator>::value_type) == 1, "Incompatible type");
-
-      reset();
-      while (begin != end)
-      {
-        block |= static_cast<value_type>(static_cast<value_type>(*begin) << (block_fill_count * 8U));
-        ++begin;
-
-        if (++block_fill_count == FULL_BLOCK)
-        {
-          add_block();
-          block_fill_count = 0;
-          block            = 0;
+        //*************************************************************************
+        /// Default constructor.
+        /// \param seed The seed value. Default = 0.
+        //*************************************************************************
+        murmur3(value_type seed_ = 0) : seed(seed_) {
+            reset();
         }
 
-        ++char_count;
-      }
-    }
+        //*************************************************************************
+        /// Constructor from range.
+        /// \param begin Start of the range.
+        /// \param end   End of the range.
+        /// \param seed  The seed value. Default = 0.
+        //*************************************************************************
+        template<typename TIterator>
+        murmur3(TIterator begin, const TIterator end, value_type seed_ = 0) : seed(seed_) {
+            ETL_STATIC_ASSERT(sizeof(typename etl::iterator_traits<TIterator>::value_type) == 1, "Incompatible type");
 
-    //*************************************************************************
-    /// Resets the hash to the initial state.
-    //*************************************************************************
-    void reset()
-    {
-      hash             = seed;
-      char_count       = 0;
-      block            = 0;
-      block_fill_count = 0;
-      is_finalised     = false;
-    }
+            reset();
+            while (begin != end) {
+                block |= static_cast<value_type>(static_cast<value_type>(*begin) << (block_fill_count * 8U));
+                ++begin;
 
-    //*************************************************************************
-    /// Adds a range.
-    /// \param begin
-    /// \param end
-    //*************************************************************************
-    template <typename TIterator>
-    void add(TIterator begin, const TIterator end)
-    {
-      ETL_STATIC_ASSERT(sizeof(typename etl::iterator_traits<TIterator>::value_type) == 1, "Incompatible type");
-      ETL_ASSERT(!is_finalised, ETL_ERROR(hash_finalised));
+                if (++block_fill_count == FULL_BLOCK) {
+                    add_block();
+                    block_fill_count = 0;
+                    block            = 0;
+                }
 
-      while (begin != end)
-      {
-        block |= static_cast<value_type>(static_cast<value_type>(*begin) << (block_fill_count * 8U));
-        ++begin;
-
-        if (++block_fill_count == FULL_BLOCK)
-        {
-          add_block();
-          block_fill_count = 0;
-          block            = 0;
+                ++char_count;
+            }
         }
 
-        ++char_count;
-      }
-    }
+        //*************************************************************************
+        /// Resets the hash to the initial state.
+        //*************************************************************************
+        void reset() {
+            hash             = seed;
+            char_count       = 0;
+            block            = 0;
+            block_fill_count = 0;
+            is_finalised     = false;
+        }
 
-    //*************************************************************************
-    /// Adds a uint8_t value.
-    /// If the hash has already been finalised then a 'hash_finalised' error
-    /// will be emitted. \param value The char to add to the hash.
-    //*************************************************************************
-    void add(uint8_t value_)
-    {
-      // We can't add to a finalised hash!
-      ETL_ASSERT(!is_finalised, ETL_ERROR(hash_finalised));
+        //*************************************************************************
+        /// Adds a range.
+        /// \param begin
+        /// \param end
+        //*************************************************************************
+        template<typename TIterator>
+        void add(TIterator begin, const TIterator end) {
+            ETL_STATIC_ASSERT(sizeof(typename etl::iterator_traits<TIterator>::value_type) == 1, "Incompatible type");
+            ETL_ASSERT(!is_finalised, ETL_ERROR(hash_finalised));
 
-      block |= static_cast<value_type>(static_cast<value_type>(value_) << (block_fill_count * 8U));
+            while (begin != end) {
+                block |= static_cast<value_type>(static_cast<value_type>(*begin) << (block_fill_count * 8U));
+                ++begin;
 
-      if (++block_fill_count == FULL_BLOCK)
-      {
-        add_block();
-        block_fill_count = 0;
-        block            = 0;
-      }
+                if (++block_fill_count == FULL_BLOCK) {
+                    add_block();
+                    block_fill_count = 0;
+                    block            = 0;
+                }
 
-      ++char_count;
-    }
+                ++char_count;
+            }
+        }
 
-    //*************************************************************************
-    /// Gets the hash value.
-    //*************************************************************************
-    value_type value()
-    {
-      finalise();
-      return hash;
-    }
+        //*************************************************************************
+        /// Adds a uint8_t value.
+        /// If the hash has already been finalised then a 'hash_finalised' error
+        /// will be emitted. \param value The char to add to the hash.
+        //*************************************************************************
+        void add(uint8_t value_) {
+            // We can't add to a finalised hash!
+            ETL_ASSERT(!is_finalised, ETL_ERROR(hash_finalised));
 
-    //*************************************************************************
-    /// Conversion operator to value_type.
-    //*************************************************************************
-    operator value_type()
-    {
-      return value();
-    }
+            block |= static_cast<value_type>(static_cast<value_type>(value_) << (block_fill_count * 8U));
 
-  private:
+            if (++block_fill_count == FULL_BLOCK) {
+                add_block();
+                block_fill_count = 0;
+                block            = 0;
+            }
 
-    //*************************************************************************
-    /// Adds a filled block to the hash.
-    //*************************************************************************
-    void add_block()
-    {
-      block *= CONSTANT1;
-      block = rotate_left(block, SHIFT1);
-      block *= CONSTANT2;
+            ++char_count;
+        }
 
-      hash ^= block;
-      hash = rotate_left(hash, SHIFT2);
-      hash = (hash * MULTIPLY) + ADD;
-    }
+        //*************************************************************************
+        /// Gets the hash value.
+        //*************************************************************************
+        value_type value() {
+            finalise();
+            return hash;
+        }
 
-    //*************************************************************************
-    /// Finalises the hash.
-    //*************************************************************************
-    void finalise()
-    {
-      if (!is_finalised)
-      {
-        block *= CONSTANT1;
-        block = rotate_left(block, SHIFT1);
-        block *= CONSTANT2;
+        //*************************************************************************
+        /// Conversion operator to value_type.
+        //*************************************************************************
+        operator value_type() {
+            return value();
+        }
 
-        hash ^= block;
-        hash ^= char_count;
-        hash ^= (hash >> 16U);
-        hash *= 0x85EBCA6BUL;
-        hash ^= (hash >> 13U);
-        hash *= 0xC2B2AE35UL;
-        hash ^= (hash >> 16U);
+    private:
+        //*************************************************************************
+        /// Adds a filled block to the hash.
+        //*************************************************************************
+        void add_block() {
+            block *= CONSTANT1;
+            block = rotate_left(block, SHIFT1);
+            block *= CONSTANT2;
 
-        is_finalised = true;
-      }
-    }
+            hash ^= block;
+            hash = rotate_left(hash, SHIFT2);
+            hash = (hash * MULTIPLY) + ADD;
+        }
 
-    bool       is_finalised;
-    uint8_t    block_fill_count;
-    size_t     char_count;
-    value_type block;
-    value_type hash;
-    value_type seed;
+        //*************************************************************************
+        /// Finalises the hash.
+        //*************************************************************************
+        void finalise() {
+            if (!is_finalised) {
+                block *= CONSTANT1;
+                block = rotate_left(block, SHIFT1);
+                block *= CONSTANT2;
 
-    static ETL_CONSTANT uint8_t    FULL_BLOCK = 4U;
-    static ETL_CONSTANT value_type CONSTANT1  = 0xCC9E2D51UL;
-    static ETL_CONSTANT value_type CONSTANT2  = 0x1B873593UL;
-    static ETL_CONSTANT value_type SHIFT1     = 15;
-    static ETL_CONSTANT value_type SHIFT2     = 13;
-    static ETL_CONSTANT value_type MULTIPLY   = 5;
-    static ETL_CONSTANT value_type ADD        = 0xE6546B64UL;
-  };
+                hash ^= block;
+                hash ^= char_count;
+                hash ^= (hash >> 16U);
+                hash *= 0x85EBCA6BUL;
+                hash ^= (hash >> 13U);
+                hash *= 0xC2B2AE35UL;
+                hash ^= (hash >> 16U);
+
+                is_finalised = true;
+            }
+        }
+
+        bool       is_finalised;
+        uint8_t    block_fill_count;
+        size_t     char_count;
+        value_type block;
+        value_type hash;
+        value_type seed;
+
+        static ETL_CONSTANT uint8_t    FULL_BLOCK = 4U;
+        static ETL_CONSTANT value_type CONSTANT1  = 0xCC9E2D51UL;
+        static ETL_CONSTANT value_type CONSTANT2  = 0x1B873593UL;
+        static ETL_CONSTANT value_type SHIFT1     = 15;
+        static ETL_CONSTANT value_type SHIFT2     = 13;
+        static ETL_CONSTANT value_type MULTIPLY   = 5;
+        static ETL_CONSTANT value_type ADD        = 0xE6546B64UL;
+    };
 } // namespace etl
 
 #endif

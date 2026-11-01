@@ -34,49 +34,46 @@ SOFTWARE.
 
 #include <stddef.h>
 
-namespace etl
-{
+namespace etl {
 #if ETL_USING_CPP11
 
-  //***************************************************************************
-  /// Defines a no-position constant.
-  //***************************************************************************
-  ETL_INLINE_VAR ETL_CONSTANT size_t index_of_type_npos = etl::integral_limits<size_t>::max;
+    //***************************************************************************
+    /// Defines a no-position constant.
+    //***************************************************************************
+    ETL_INLINE_VAR ETL_CONSTANT size_t index_of_type_npos = etl::integral_limits<size_t>::max;
 
-  //***************************************************************************
-  /// Finds the index of a type in a variadic type parameter.
-  //***************************************************************************
-  template <typename T, typename... TTypes>
-  struct index_of_type;
+    //***************************************************************************
+    /// Finds the index of a type in a variadic type parameter.
+    //***************************************************************************
+    template<typename T, typename... TTypes>
+    struct index_of_type;
 
-  //***************************************************************************
-  /// Finds the index of a type in a variadic type parameter.
-  //***************************************************************************
-  template <typename T, typename T1, typename... TRest>
-  struct index_of_type<T, T1, TRest...>
-    : public etl::integral_constant< size_t, etl::is_same<T, T1>::value ? 0
-                                                                        : (etl::index_of_type<T, TRest...>::value == etl::index_of_type_npos
-                                                                             ? etl::index_of_type_npos
-                                                                             : etl::index_of_type<T, TRest...>::value + 1)>
-  {
-  };
+    //***************************************************************************
+    /// Finds the index of a type in a variadic type parameter.
+    //***************************************************************************
+    template<typename T, typename T1, typename... TRest>
+    struct index_of_type<T, T1, TRest...>
+        : public etl::integral_constant<size_t,
+                                        etl::is_same<T, T1>::value
+                                            ? 0
+                                            : (etl::index_of_type<T, TRest...>::value == etl::index_of_type_npos
+                                                   ? etl::index_of_type_npos
+                                                   : etl::index_of_type<T, TRest...>::value + 1)> {};
 
-  //***************************************************************************
-  /// Finds the index of a type in a variadic type parameter.
-  /// No types left.
-  //***************************************************************************
-  template <typename T>
-  struct index_of_type<T> : public etl::integral_constant<size_t, etl::index_of_type_npos>
-  {
-  };
+    //***************************************************************************
+    /// Finds the index of a type in a variadic type parameter.
+    /// No types left.
+    //***************************************************************************
+    template<typename T>
+    struct index_of_type<T> : public etl::integral_constant<size_t, etl::index_of_type_npos> {};
 
-  #if ETL_USING_CPP17
-  //***************************************************************************
-  /// Finds the index of a type in a variadic type parameter.
-  //***************************************************************************
-  template <typename T, typename... TTypes>
-  inline constexpr size_t index_of_type_v = etl::index_of_type<T, TTypes...>::value;
-  #endif
+#if ETL_USING_CPP17
+    //***************************************************************************
+    /// Finds the index of a type in a variadic type parameter.
+    //***************************************************************************
+    template<typename T, typename... TTypes>
+    inline constexpr size_t index_of_type_v = etl::index_of_type<T, TTypes...>::value;
+#endif
 #endif
 } // namespace etl
 

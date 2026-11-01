@@ -33,33 +33,30 @@ SOFTWARE.
 
 #include "platform.h"
 
-namespace etl
-{
-  //*****************************************************************************
-  /// An infinite loop that will not be optimised out
-  ///
-  /// Before C++26, an empty infinite loop without side effects is considered
-  /// undefined behavior, and may be optimised away by the compiler.
-  ///
-  /// See also
-  /// https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2809r1.html
-  //*****************************************************************************
-  ETL_NORETURN
-  inline void infinite_loop()
-  {
-    while (true)
-    {
+namespace etl {
+    //*****************************************************************************
+    /// An infinite loop that will not be optimised out
+    ///
+    /// Before C++26, an empty infinite loop without side effects is considered
+    /// undefined behavior, and may be optimised away by the compiler.
+    ///
+    /// See also
+    /// https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2023/p2809r1.html
+    //*****************************************************************************
+    ETL_NORETURN
+    inline void infinite_loop() {
+        while (true) {
 #if ETL_NOT_USING_CPP26
-  #if defined(ETL_COMPILER_GCC) || defined(ETL_COMPILER_CLANG)
-      __asm__ __volatile__("" : : : "memory");
-  #elif defined(ETL_COMPILER_MICROSOFT)
-      _ReadWriteBarrier();
-  #else
-    #error "Infinite loop not supported for this compiler and platform"
-  #endif
+#if defined(ETL_COMPILER_GCC) || defined(ETL_COMPILER_CLANG)
+            __asm__ __volatile__("" : : : "memory");
+#elif defined(ETL_COMPILER_MICROSOFT)
+            _ReadWriteBarrier();
+#else
+#error "Infinite loop not supported for this compiler and platform"
 #endif
+#endif
+        }
     }
-  }
 } // namespace etl
 
 #endif

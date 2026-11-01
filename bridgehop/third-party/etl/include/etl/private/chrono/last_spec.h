@@ -29,22 +29,20 @@ SOFTWARE.
 ******************************************************************************/
 
 #ifndef ETL_IN_CHRONO_H
-  #error DO NOT DIRECTLY INCLUDE THIS FILE. USE CHRONO.H
+#error DO NOT DIRECTLY INCLUDE THIS FILE. USE CHRONO.H
 #endif
 
-namespace etl
-{
-  namespace chrono
-  {
-    struct last_spec
-    {
-      ETL_CONSTEXPR explicit last_spec() {}
-    };
+namespace etl {
+    namespace chrono {
+        struct last_spec {
+            ETL_CONSTEXPR explicit last_spec() {
+            }
+        };
 
 #if ETL_USING_CPP17
-    inline constexpr last_spec last{};
+        inline constexpr last_spec last{};
 #else
-    static ETL_CONSTANT last_spec last{};
+        static ETL_CONSTANT last_spec last{};
 #endif
-  } // namespace chrono
+    } // namespace chrono
 } // namespace etl

@@ -87,8 +87,8 @@ Rules:
 
 | Size | Field |
 |---|---|
-| 32 | ephemeral X25519 public key |
 | 8 | handshake counter |
+| 32 | ephemeral X25519 public key |
 | 32 | signature R |
 | 32 | signature S |
 | 32 | sender's Ed25519 public key |

@@ -40,9 +40,8 @@ SOFTWARE.
 #include "to_wstring.h"
 #include "wformat_spec.h"
 
-namespace etl
-{
-  typedef etl::basic_string_stream<etl::wformat_spec, etl::iwstring, etl::wstring_view> wstring_stream;
+namespace etl {
+    typedef etl::basic_string_stream<etl::wformat_spec, etl::iwstring, etl::wstring_view> wstring_stream;
 }
 
 #endif

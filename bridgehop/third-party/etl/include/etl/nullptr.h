@@ -35,46 +35,38 @@ SOFTWARE.
 
 #include <stddef.h>
 
-namespace etl
-{
+namespace etl {
 #if ETL_CPP11_NOT_SUPPORTED
-  class nullptr_t
-  {
-  public:
+    class nullptr_t {
+    public:
+        template<class T>
+        inline operator T*() const {
+            return 0;
+        }
 
-    template <class T>
-    inline operator T*() const
-    {
-      return 0;
-    }
+        template<class C, class T>
+        inline operator T C::*() const {
+            return 0;
+        }
 
-    template <class C, class T>
-    inline operator T C::*() const
-    {
-      return 0;
-    }
+        inline bool operator==(nullptr_t) const {
+            return true;
+        }
+        inline bool operator!=(nullptr_t) const {
+            return false;
+        }
 
-    inline bool operator==(nullptr_t) const
-    {
-      return true;
-    }
-    inline bool operator!=(nullptr_t) const
-    {
-      return false;
-    }
+    private:
+        void operator&() const ETL_DELETE; // cannot take the address of ETL_NULLPTR
+    };
 
-  private:
+    static const nullptr_t _nullptr = nullptr_t();
 
-    void operator&() const ETL_DELETE; // cannot take the address of ETL_NULLPTR
-  };
-
-  static const nullptr_t _nullptr = nullptr_t();
-
-  #define ETL_NULLPTR (etl::_nullptr)
+#define ETL_NULLPTR (etl::_nullptr)
 #else
-  // Use the new style nullptr.
-  typedef decltype(nullptr) nullptr_t;
-  #define ETL_NULLPTR nullptr
+    // Use the new style nullptr.
+    typedef decltype(nullptr) nullptr_t;
+#define ETL_NULLPTR nullptr
 #endif
 } // namespace etl
 
@@ -95,9 +87,9 @@ namespace etl
 /// use a plain comparison against ETL_NULLPTR on the run time path.
 //*****************************************************************************
 #if ETL_USING_BUILTIN_CONSTANT_P
-  #define ETL_IS_FOLDED_NULL(p) (__builtin_constant_p((p) == ETL_NULLPTR) && ((p) == ETL_NULLPTR))
+#define ETL_IS_FOLDED_NULL(p) (__builtin_constant_p((p) == ETL_NULLPTR) && ((p) == ETL_NULLPTR))
 #else
-  #define ETL_IS_FOLDED_NULL(p) ((p) == ETL_NULLPTR)
+#define ETL_IS_FOLDED_NULL(p) ((p) == ETL_NULLPTR)
 #endif
 
 #endif

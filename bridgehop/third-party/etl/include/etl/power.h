@@ -41,180 +41,149 @@ SOFTWARE.
 /// power<N, Power> : Calculates N to the power Power.
 ///\ingroup maths
 
-namespace etl
-{
-  namespace private_power
-  {
+namespace etl {
+    namespace private_power {
 #if ETL_NOT_USING_64BIT_TYPES
-    typedef uint32_t type;
+        typedef uint32_t type;
 #else
-    typedef uint64_t type;
+        typedef uint64_t type;
 #endif
-  } // namespace private_power
+    } // namespace private_power
 
-  //***************************************************************************
-  ///\ingroup power
-  /// Calculates powers.
-  ///\note Only supports positive Value.
-  //***************************************************************************
-  template <size_t Value, size_t Power>
-  struct power
-  {
-    static ETL_CONSTANT private_power::type value = Value * power<Value, Power - 1>::value;
-  };
+    //***************************************************************************
+    ///\ingroup power
+    /// Calculates powers.
+    ///\note Only supports positive Value.
+    //***************************************************************************
+    template<size_t Value, size_t Power>
+    struct power {
+        static ETL_CONSTANT private_power::type value = Value * power<Value, Power - 1>::value;
+    };
 
-  template <size_t Value, size_t Power>
-  ETL_CONSTANT private_power::type power<Value, Power>::value;
+    template<size_t Value, size_t Power>
+    ETL_CONSTANT private_power::type power<Value, Power>::value;
 
-  //***************************************************************************
-  /// Calculates powers.
-  ///\note Only supports positive Value.
-  /// Specialisation for Power == 0.
-  //***************************************************************************
-  template <size_t Value>
-  struct power<Value, 0>
-  {
-    static ETL_CONSTANT private_power::type value = 1;
-  };
+    //***************************************************************************
+    /// Calculates powers.
+    ///\note Only supports positive Value.
+    /// Specialisation for Power == 0.
+    //***************************************************************************
+    template<size_t Value>
+    struct power<Value, 0> {
+        static ETL_CONSTANT private_power::type value = 1;
+    };
 
-  template <size_t Value>
-  ETL_CONSTANT private_power::type power<Value, 0>::value;
+    template<size_t Value>
+    ETL_CONSTANT private_power::type power<Value, 0>::value;
 
 #if ETL_USING_CPP17
-  template <size_t Value, size_t Power>
-  inline constexpr size_t power_v = power<Value, Power>::value;
+    template<size_t Value, size_t Power>
+    inline constexpr size_t power_v = power<Value, Power>::value;
 #endif
 
-  //***************************************************************************
-  ///\ingroup power
-  /// Calculates the rounded up power of 2.
-  //***************************************************************************
-  template <size_t Value>
-  struct power_of_2_round_up
-  {
-    enum value_type
-    {
-      value = 1 << (etl::log2<Value - 1>::value + 1)
+    //***************************************************************************
+    ///\ingroup power
+    /// Calculates the rounded up power of 2.
+    //***************************************************************************
+    template<size_t Value>
+    struct power_of_2_round_up {
+        enum value_type { value = 1 << (etl::log2<Value - 1>::value + 1) };
     };
-  };
 
-  //***************************************************************************
-  ///\ingroup power
-  /// Calculates the rounded up power of 2.
-  /// Specialisation for 0.
-  //***************************************************************************
-  template <>
-  struct power_of_2_round_up<0>
-  {
-    enum value_type
-    {
-      value = 2
+    //***************************************************************************
+    ///\ingroup power
+    /// Calculates the rounded up power of 2.
+    /// Specialisation for 0.
+    //***************************************************************************
+    template<>
+    struct power_of_2_round_up<0> {
+        enum value_type { value = 2 };
     };
-  };
 
 #if ETL_USING_CPP17
-  template <size_t Value>
-  inline constexpr size_t power_of_2_round_up_v = power_of_2_round_up<Value>::value;
+    template<size_t Value>
+    inline constexpr size_t power_of_2_round_up_v = power_of_2_round_up<Value>::value;
 #endif
 
-  //***************************************************************************
-  ///\ingroup power
-  /// Calculates the rounded down power of 2.
-  //***************************************************************************
-  template <size_t Value>
-  struct power_of_2_round_down
-  {
-    enum value_type
-    {
-      value = 1 << (etl::log2<Value - 1>::value)
+    //***************************************************************************
+    ///\ingroup power
+    /// Calculates the rounded down power of 2.
+    //***************************************************************************
+    template<size_t Value>
+    struct power_of_2_round_down {
+        enum value_type { value = 1 << (etl::log2<Value - 1>::value) };
     };
-  };
 
-  //***************************************************************************
-  ///\ingroup power
-  /// Calculates the rounded down power of 2.
-  /// Specialisation for 0.
-  //***************************************************************************
-  template <>
-  struct power_of_2_round_down<0>
-  {
-    enum value_type
-    {
-      value = 2
+    //***************************************************************************
+    ///\ingroup power
+    /// Calculates the rounded down power of 2.
+    /// Specialisation for 0.
+    //***************************************************************************
+    template<>
+    struct power_of_2_round_down<0> {
+        enum value_type { value = 2 };
     };
-  };
 
-  //***************************************************************************
-  ///\ingroup power
-  /// Calculates the rounded down power of 2.
-  /// Specialisation for 1.
-  //***************************************************************************
-  template <>
-  struct power_of_2_round_down<1>
-  {
-    enum value_type
-    {
-      value = 2
+    //***************************************************************************
+    ///\ingroup power
+    /// Calculates the rounded down power of 2.
+    /// Specialisation for 1.
+    //***************************************************************************
+    template<>
+    struct power_of_2_round_down<1> {
+        enum value_type { value = 2 };
     };
-  };
 
-  //***************************************************************************
-  ///\ingroup power
-  /// Calculates the rounded down power of 2.
-  /// Specialisation for 2.
-  //***************************************************************************
-  template <>
-  struct power_of_2_round_down<2>
-  {
-    enum value_type
-    {
-      value = 2
+    //***************************************************************************
+    ///\ingroup power
+    /// Calculates the rounded down power of 2.
+    /// Specialisation for 2.
+    //***************************************************************************
+    template<>
+    struct power_of_2_round_down<2> {
+        enum value_type { value = 2 };
     };
-  };
 
 #if ETL_USING_CPP17
-  template <size_t Value>
-  inline constexpr size_t power_of_2_round_down_v = power_of_2_round_down<Value>::value;
+    template<size_t Value>
+    inline constexpr size_t power_of_2_round_down_v = power_of_2_round_down<Value>::value;
 #endif
 
-  //***************************************************************************
-  ///\ingroup power
-  /// Checks if N is a power of 2.
-  //***************************************************************************
-  template <size_t Value>
-  struct is_power_of_2
-  {
-    static ETL_CONSTANT bool value = (Value & (Value - 1)) == 0;
-  };
+    //***************************************************************************
+    ///\ingroup power
+    /// Checks if N is a power of 2.
+    //***************************************************************************
+    template<size_t Value>
+    struct is_power_of_2 {
+        static ETL_CONSTANT bool value = (Value & (Value - 1)) == 0;
+    };
 
-  //***************************************************************************
-  ///\ingroup power
-  /// Checks if N is a power of 2.
-  /// Specialisation for 0.
-  //***************************************************************************
-  template <>
-  struct is_power_of_2<0>
-  {
-    static ETL_CONSTANT bool value = false;
-  };
+    //***************************************************************************
+    ///\ingroup power
+    /// Checks if N is a power of 2.
+    /// Specialisation for 0.
+    //***************************************************************************
+    template<>
+    struct is_power_of_2<0> {
+        static ETL_CONSTANT bool value = false;
+    };
 
-  //***************************************************************************
-  ///\ingroup power
-  /// Checks if N is a power of 2.
-  /// Specialisation for 1.
-  //***************************************************************************
-  template <>
-  struct is_power_of_2<1>
-  {
-    static ETL_CONSTANT bool value = false;
-  };
+    //***************************************************************************
+    ///\ingroup power
+    /// Checks if N is a power of 2.
+    /// Specialisation for 1.
+    //***************************************************************************
+    template<>
+    struct is_power_of_2<1> {
+        static ETL_CONSTANT bool value = false;
+    };
 
-  template <size_t Value>
-  ETL_CONSTANT bool is_power_of_2<Value>::value;
+    template<size_t Value>
+    ETL_CONSTANT bool is_power_of_2<Value>::value;
 
 #if ETL_USING_CPP17
-  template <size_t Value>
-  inline constexpr size_t is_power_of_2_v = is_power_of_2<Value>::value;
+    template<size_t Value>
+    inline constexpr size_t is_power_of_2_v = is_power_of_2<Value>::value;
 #endif
 } // namespace etl
 

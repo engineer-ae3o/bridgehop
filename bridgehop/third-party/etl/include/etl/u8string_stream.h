@@ -40,9 +40,8 @@ SOFTWARE.
 #include "u8format_spec.h"
 #include "u8string.h"
 
-namespace etl
-{
-  typedef etl::basic_string_stream<etl::u8format_spec, etl::iu8string, etl::u8string_view> u8string_stream;
+namespace etl {
+    typedef etl::basic_string_stream<etl::u8format_spec, etl::iu8string, etl::u8string_view> u8string_stream;
 }
 
 #endif

@@ -37,113 +37,102 @@ SOFTWARE.
 
 #include <stddef.h>
 
-namespace etl
-{
+namespace etl {
 #if ETL_USING_CPP11 && !defined(ETL_VARIANT_POOL_FORCE_CPP03_IMPLEMENTATION)
-  //***************************************************************************
-  template <size_t MAX_SIZE_, typename... Ts>
-  class variant_pool : public etl::generic_pool<etl::largest<Ts...>::size, etl::largest<Ts...>::alignment, MAX_SIZE_>
-  {
-  public:
+    //***************************************************************************
+    template<size_t MAX_SIZE_, typename... Ts>
+    class variant_pool
+        : public etl::generic_pool<etl::largest<Ts...>::size, etl::largest<Ts...>::alignment, MAX_SIZE_> {
+    public:
+        typedef etl::generic_pool<etl::largest<Ts...>::size, etl::largest<Ts...>::alignment, MAX_SIZE_> base_t;
 
-    typedef etl::generic_pool<etl::largest<Ts...>::size, etl::largest<Ts...>::alignment, MAX_SIZE_> base_t;
+        static const size_t MAX_SIZE = MAX_SIZE_;
 
-    static const size_t MAX_SIZE = MAX_SIZE_;
+        //*************************************************************************
+        /// Default constructor.
+        //*************************************************************************
+        variant_pool() {
+        }
 
-    //*************************************************************************
-    /// Default constructor.
-    //*************************************************************************
-    variant_pool() {}
+        //*************************************************************************
+        /// Creates the object from a type. Variadic parameter constructor.
+        //*************************************************************************
+        template<typename T, typename... Args>
+        T* create(Args&&... args) {
+            ETL_STATIC_ASSERT((etl::is_one_of<T, Ts...>::value), "Unsupported type");
 
-    //*************************************************************************
-    /// Creates the object from a type. Variadic parameter constructor.
-    //*************************************************************************
-    template <typename T, typename... Args>
-    T* create(Args&&... args)
-    {
-      ETL_STATIC_ASSERT((etl::is_one_of<T, Ts...>::value), "Unsupported type");
+            return base_t::template create<T>(etl::forward<Args>(args)...);
+        }
 
-      return base_t::template create<T>(etl::forward<Args>(args)...);
-    }
+        //*************************************************************************
+        /// Destroys the object.
+        //*************************************************************************
+        template<typename T>
+        void destroy(const T* const p) {
+            ETL_STATIC_ASSERT((etl::is_one_of<T, Ts...>::value || etl::is_base_of_any<T, Ts...>::value),
+                              "Invalid type");
 
-    //*************************************************************************
-    /// Destroys the object.
-    //*************************************************************************
-    template <typename T>
-    void destroy(const T* const p)
-    {
-      ETL_STATIC_ASSERT((etl::is_one_of<T, Ts...>::value || etl::is_base_of_any<T, Ts...>::value), "Invalid type");
+            base_t::destroy(p);
+        }
 
-      base_t::destroy(p);
-    }
+        //*************************************************************************
+        /// Returns the maximum number of items in the variant_pool.
+        //*************************************************************************
+        size_t max_size() const {
+            return MAX_SIZE;
+        }
 
-    //*************************************************************************
-    /// Returns the maximum number of items in the variant_pool.
-    //*************************************************************************
-    size_t max_size() const
-    {
-      return MAX_SIZE;
-    }
+    private:
+        variant_pool(const variant_pool&) ETL_DELETE;
+        variant_pool& operator=(const variant_pool&) ETL_DELETE;
+    };
 
-  private:
+    //***************************************************************************
+    template<typename... Ts>
+    class variant_pool_ext : public etl::generic_pool_ext<etl::largest<Ts...>::size, etl::largest<Ts...>::alignment> {
+    public:
+        typedef etl::generic_pool_ext<etl::largest<Ts...>::size, etl::largest<Ts...>::alignment> base_t;
 
-    variant_pool(const variant_pool&) ETL_DELETE;
-    variant_pool& operator=(const variant_pool&) ETL_DELETE;
-  };
+        //*************************************************************************
+        /// Default constructor.
+        //*************************************************************************
+        variant_pool_ext(typename base_t::element* buffer, size_t size) : base_t(buffer, size) {
+        }
 
-  //***************************************************************************
-  template <typename... Ts>
-  class variant_pool_ext : public etl::generic_pool_ext<etl::largest<Ts...>::size, etl::largest<Ts...>::alignment>
-  {
-  public:
+        //*************************************************************************
+        /// Creates the object from a type. Variadic parameter constructor.
+        //*************************************************************************
+        template<typename T, typename... Args>
+        T* create(Args&&... args) {
+            ETL_STATIC_ASSERT((etl::is_one_of<T, Ts...>::value), "Unsupported type");
 
-    typedef etl::generic_pool_ext<etl::largest<Ts...>::size, etl::largest<Ts...>::alignment> base_t;
+            return base_t::template create<T>(etl::forward<Args>(args)...);
+        }
 
-    //*************************************************************************
-    /// Default constructor.
-    //*************************************************************************
-    variant_pool_ext(typename base_t::element* buffer, size_t size)
-      : base_t(buffer, size)
-    {
-    }
+        //*************************************************************************
+        /// Destroys the object.
+        //*************************************************************************
+        template<typename T>
+        void destroy(const T* const p) {
+            ETL_STATIC_ASSERT((etl::is_one_of<T, Ts...>::value || etl::is_base_of_any<T, Ts...>::value),
+                              "Invalid type");
 
-    //*************************************************************************
-    /// Creates the object from a type. Variadic parameter constructor.
-    //*************************************************************************
-    template <typename T, typename... Args>
-    T* create(Args&&... args)
-    {
-      ETL_STATIC_ASSERT((etl::is_one_of<T, Ts...>::value), "Unsupported type");
+            base_t::destroy(p);
+        }
 
-      return base_t::template create<T>(etl::forward<Args>(args)...);
-    }
+        //*************************************************************************
+        /// Returns the maximum number of items in the variant_pool.
+        //*************************************************************************
+        size_t max_size() const {
+            return base_t::max_size();
+        }
 
-    //*************************************************************************
-    /// Destroys the object.
-    //*************************************************************************
-    template <typename T>
-    void destroy(const T* const p)
-    {
-      ETL_STATIC_ASSERT((etl::is_one_of<T, Ts...>::value || etl::is_base_of_any<T, Ts...>::value), "Invalid type");
-
-      base_t::destroy(p);
-    }
-
-    //*************************************************************************
-    /// Returns the maximum number of items in the variant_pool.
-    //*************************************************************************
-    size_t max_size() const
-    {
-      return base_t::max_size();
-    }
-
-  private:
-
-    variant_pool_ext(const variant_pool_ext&) ETL_DELETE;
-    variant_pool_ext& operator=(const variant_pool_ext&) ETL_DELETE;
-  };
+    private:
+        variant_pool_ext(const variant_pool_ext&) ETL_DELETE;
+        variant_pool_ext& operator=(const variant_pool_ext&) ETL_DELETE;
+    };
 #else
-  #include "private/variant_pool_cpp03.h"
+#include "private/variant_pool_cpp03.h"
 #endif
 } // namespace etl
 

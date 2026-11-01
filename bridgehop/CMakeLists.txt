@@ -8,7 +8,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
 project(${CMAKE_PROJECT_NAME})
 enable_language(C CXX)
 
-add_library(${LIB_ELF_NAME})
+add_library(${LIB_ELF_NAME} STATIC active/src/node.cpp)
 target_include_directories(${LIB_ELF_NAME} PUBLIC active/ passive/ utils/ third-party/etl/include/)
 
 target_compile_options(${LIB_ELF_NAME} PRIVATE
@@ -30,7 +30,6 @@ add_subdirectory(./utils/)
 add_subdirectory(./active/)
 add_subdirectory(./passive/)
 
-if (false)
 add_custom_command(
     TARGET ${LIB_ELF_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E echo "CREATE $<TARGET_FILE:${LIB_ELF_NAME}>.tmp.a" > combine.mri
@@ -47,7 +46,6 @@ add_custom_command(
     COMMAND ${CMAKE_SIZE} "lib${LIB_ELF_NAME}.a"
     VERBATIM
 )
-endif()
 
 # Targets for static analysis and formatting
 find_program(CPPCHECK cppcheck)

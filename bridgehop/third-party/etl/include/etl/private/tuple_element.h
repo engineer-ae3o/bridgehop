@@ -31,23 +31,21 @@ SOFTWARE.
 #ifndef ETL_TUPLE_ELEMENT_INCLUDED
 #define ETL_TUPLE_ELEMENT_INCLUDED
 
-namespace etl
-{
+namespace etl {
 #if ETL_USING_CPP11
-  //***************************************************************************
-  template <size_t Index, typename TType>
-  struct tuple_element;
+    //***************************************************************************
+    template<size_t Index, typename TType>
+    struct tuple_element;
 
-  //***************************************************************************
-  template <size_t Index, typename TType>
-  struct tuple_element<Index, const TType>
-  {
-    using type = typename etl::add_const_t< typename etl::tuple_element<Index, TType>::type>;
-  };
+    //***************************************************************************
+    template<size_t Index, typename TType>
+    struct tuple_element<Index, const TType> {
+        using type = typename etl::add_const_t<typename etl::tuple_element<Index, TType>::type>;
+    };
 
-  //***************************************************************************
-  template <size_t Index, typename TType>
-  using tuple_element_t = typename tuple_element<Index, TType>::type;
+    //***************************************************************************
+    template<size_t Index, typename TType>
+    using tuple_element_t = typename tuple_element<Index, TType>::type;
 #endif
 } // namespace etl
 

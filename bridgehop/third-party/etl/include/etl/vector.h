@@ -59,2162 +59,1967 @@ SOFTWARE.
 ///\ingroup containers
 //*****************************************************************************
 
-namespace etl
-{
-  template <typename T, typename Enable = void>
-  class ivector;
+namespace etl {
+    template<typename T, typename Enable = void>
+    class ivector;
 
-  //***************************************************************************
-  /// The base class for specifically sized vectors.
-  /// Can be used as a reference type for all vectors containing a specific
-  /// type.
-  /// A vector for when T is not an object pointer.
-  ///\ingroup vector
-  //***************************************************************************
-  template <typename T>
-  class ivector<T, typename etl::enable_if<etl::negation<etl::is_object_pointer<T> >::value>::type> : public etl::vector_base
-  {
-  public:
-
-    typedef T        value_type;
-    typedef T&       reference;
-    typedef const T& const_reference;
+    //***************************************************************************
+    /// The base class for specifically sized vectors.
+    /// Can be used as a reference type for all vectors containing a specific
+    /// type.
+    /// A vector for when T is not an object pointer.
+    ///\ingroup vector
+    //***************************************************************************
+    template<typename T>
+    class ivector<T, typename etl::enable_if<etl::negation<etl::is_object_pointer<T>>::value>::type>
+        : public etl::vector_base {
+    public:
+        typedef T        value_type;
+        typedef T&       reference;
+        typedef const T& const_reference;
 #if ETL_USING_CPP11
-    typedef T&& rvalue_reference;
+        typedef T&& rvalue_reference;
 #endif
-    typedef T*                                                       pointer;
-    typedef const T*                                                 const_pointer;
-    typedef T*                                                       iterator;
-    typedef const T*                                                 const_iterator;
-    typedef ETL_OR_STD::reverse_iterator<iterator>                   reverse_iterator;
-    typedef ETL_OR_STD::reverse_iterator<const_iterator>             const_reverse_iterator;
-    typedef size_t                                                   size_type;
-    typedef typename etl::iterator_traits<iterator>::difference_type difference_type;
+        typedef T*                                                       pointer;
+        typedef const T*                                                 const_pointer;
+        typedef T*                                                       iterator;
+        typedef const T*                                                 const_iterator;
+        typedef ETL_OR_STD::reverse_iterator<iterator>                   reverse_iterator;
+        typedef ETL_OR_STD::reverse_iterator<const_iterator>             const_reverse_iterator;
+        typedef size_t                                                   size_type;
+        typedef typename etl::iterator_traits<iterator>::difference_type difference_type;
 
-  public:
+    public:
+        //*********************************************************************
+        /// Returns an iterator to the beginning of the vector.
+        ///\return An iterator to the beginning of the vector.
+        //*********************************************************************
+        iterator begin() {
+            return p_buffer;
+        }
 
-    //*********************************************************************
-    /// Returns an iterator to the beginning of the vector.
-    ///\return An iterator to the beginning of the vector.
-    //*********************************************************************
-    iterator begin()
-    {
-      return p_buffer;
-    }
+        //*********************************************************************
+        /// Returns a const_iterator to the beginning of the vector.
+        ///\return A const iterator to the beginning of the vector.
+        //*********************************************************************
+        const_iterator begin() const {
+            return p_buffer;
+        }
 
-    //*********************************************************************
-    /// Returns a const_iterator to the beginning of the vector.
-    ///\return A const iterator to the beginning of the vector.
-    //*********************************************************************
-    const_iterator begin() const
-    {
-      return p_buffer;
-    }
+        //*********************************************************************
+        /// Returns an iterator to the end of the vector.
+        ///\return An iterator to the end of the vector.
+        //*********************************************************************
+        iterator end() {
+            return p_end;
+        }
 
-    //*********************************************************************
-    /// Returns an iterator to the end of the vector.
-    ///\return An iterator to the end of the vector.
-    //*********************************************************************
-    iterator end()
-    {
-      return p_end;
-    }
+        //*********************************************************************
+        /// Returns a const_iterator to the end of the vector.
+        ///\return A const iterator to the end of the vector.
+        //*********************************************************************
+        const_iterator end() const {
+            return p_end;
+        }
 
-    //*********************************************************************
-    /// Returns a const_iterator to the end of the vector.
-    ///\return A const iterator to the end of the vector.
-    //*********************************************************************
-    const_iterator end() const
-    {
-      return p_end;
-    }
+        //*********************************************************************
+        /// Returns a const_iterator to the beginning of the vector.
+        ///\return A const iterator to the beginning of the vector.
+        //*********************************************************************
+        const_iterator cbegin() const {
+            return p_buffer;
+        }
 
-    //*********************************************************************
-    /// Returns a const_iterator to the beginning of the vector.
-    ///\return A const iterator to the beginning of the vector.
-    //*********************************************************************
-    const_iterator cbegin() const
-    {
-      return p_buffer;
-    }
+        //*********************************************************************
+        /// Returns a const_iterator to the end of the vector.
+        ///\return A const iterator to the end of the vector.
+        //*********************************************************************
+        const_iterator cend() const {
+            return p_end;
+        }
 
-    //*********************************************************************
-    /// Returns a const_iterator to the end of the vector.
-    ///\return A const iterator to the end of the vector.
-    //*********************************************************************
-    const_iterator cend() const
-    {
-      return p_end;
-    }
+        //*********************************************************************
+        /// Returns an reverse iterator to the reverse beginning of the vector.
+        ///\return Iterator to the reverse beginning of the vector.
+        //*********************************************************************
+        reverse_iterator rbegin() {
+            return reverse_iterator(end());
+        }
 
-    //*********************************************************************
-    /// Returns an reverse iterator to the reverse beginning of the vector.
-    ///\return Iterator to the reverse beginning of the vector.
-    //*********************************************************************
-    reverse_iterator rbegin()
-    {
-      return reverse_iterator(end());
-    }
+        //*********************************************************************
+        /// Returns a const reverse iterator to the reverse beginning of the vector.
+        ///\return Const iterator to the reverse beginning of the vector.
+        //*********************************************************************
+        const_reverse_iterator rbegin() const {
+            return const_reverse_iterator(end());
+        }
 
-    //*********************************************************************
-    /// Returns a const reverse iterator to the reverse beginning of the vector.
-    ///\return Const iterator to the reverse beginning of the vector.
-    //*********************************************************************
-    const_reverse_iterator rbegin() const
-    {
-      return const_reverse_iterator(end());
-    }
+        //*********************************************************************
+        /// Returns a reverse iterator to the end + 1 of the vector.
+        ///\return Reverse iterator to the end + 1 of the vector.
+        //*********************************************************************
+        reverse_iterator rend() {
+            return reverse_iterator(begin());
+        }
 
-    //*********************************************************************
-    /// Returns a reverse iterator to the end + 1 of the vector.
-    ///\return Reverse iterator to the end + 1 of the vector.
-    //*********************************************************************
-    reverse_iterator rend()
-    {
-      return reverse_iterator(begin());
-    }
+        //*********************************************************************
+        /// Returns a const reverse iterator to the end + 1 of the vector.
+        ///\return Const reverse iterator to the end + 1 of the vector.
+        //*********************************************************************
+        const_reverse_iterator rend() const {
+            return const_reverse_iterator(begin());
+        }
 
-    //*********************************************************************
-    /// Returns a const reverse iterator to the end + 1 of the vector.
-    ///\return Const reverse iterator to the end + 1 of the vector.
-    //*********************************************************************
-    const_reverse_iterator rend() const
-    {
-      return const_reverse_iterator(begin());
-    }
+        //*********************************************************************
+        /// Returns a const reverse iterator to the reverse beginning of the vector.
+        ///\return Const reverse iterator to the reverse beginning of the vector.
+        //*********************************************************************
+        const_reverse_iterator crbegin() const {
+            return const_reverse_iterator(cend());
+        }
 
-    //*********************************************************************
-    /// Returns a const reverse iterator to the reverse beginning of the vector.
-    ///\return Const reverse iterator to the reverse beginning of the vector.
-    //*********************************************************************
-    const_reverse_iterator crbegin() const
-    {
-      return const_reverse_iterator(cend());
-    }
+        //*********************************************************************
+        /// Returns a const reverse iterator to the end + 1 of the vector.
+        ///\return Const reverse iterator to the end + 1 of the vector.
+        //*********************************************************************
+        const_reverse_iterator crend() const {
+            return const_reverse_iterator(cbegin());
+        }
 
-    //*********************************************************************
-    /// Returns a const reverse iterator to the end + 1 of the vector.
-    ///\return Const reverse iterator to the end + 1 of the vector.
-    //*********************************************************************
-    const_reverse_iterator crend() const
-    {
-      return const_reverse_iterator(cbegin());
-    }
+        //*********************************************************************
+        /// Resizes the vector.
+        /// If asserts or exceptions are enabled and the new size is larger than the
+        /// maximum then a vector_full is thrown.
+        ///\param new_size The new size.
+        //*********************************************************************
+        void resize(size_t new_size) {
+            resize(new_size, T());
+        }
 
-    //*********************************************************************
-    /// Resizes the vector.
-    /// If asserts or exceptions are enabled and the new size is larger than the
-    /// maximum then a vector_full is thrown.
-    ///\param new_size The new size.
-    //*********************************************************************
-    void resize(size_t new_size)
-    {
-      resize(new_size, T());
-    }
+        //*********************************************************************
+        /// Resizes the vector.
+        /// If asserts or exceptions are enabled and the new size is larger than the
+        /// maximum then a vector_full is thrown.
+        ///\param new_size The new size.
+        ///\param value   The value to fill new elements with. Default = default
+        /// constructed value.
+        //*********************************************************************
+        void resize(size_t new_size, const_reference value) {
+            ETL_ASSERT_OR_RETURN(new_size <= CAPACITY, ETL_ERROR(vector_full));
 
-    //*********************************************************************
-    /// Resizes the vector.
-    /// If asserts or exceptions are enabled and the new size is larger than the
-    /// maximum then a vector_full is thrown.
-    ///\param new_size The new size.
-    ///\param value   The value to fill new elements with. Default = default
-    /// constructed value.
-    //*********************************************************************
-    void resize(size_t new_size, const_reference value)
-    {
-      ETL_ASSERT_OR_RETURN(new_size <= CAPACITY, ETL_ERROR(vector_full));
+            const size_t current_size = size();
+            size_t       delta        = (current_size < new_size) ? new_size - current_size : current_size - new_size;
 
-      const size_t current_size = size();
-      size_t       delta        = (current_size < new_size) ? new_size - current_size : current_size - new_size;
+            if (current_size < new_size) {
+                etl::uninitialized_fill_n(p_end, delta, value);
+                ETL_ADD_DEBUG_COUNT(delta);
+            } else {
+                etl::destroy_n(p_end - delta, delta);
+                ETL_SUBTRACT_DEBUG_COUNT(delta);
+            }
 
-      if (current_size < new_size)
-      {
-        etl::uninitialized_fill_n(p_end, delta, value);
-        ETL_ADD_DEBUG_COUNT(delta);
-      }
-      else
-      {
-        etl::destroy_n(p_end - delta, delta);
-        ETL_SUBTRACT_DEBUG_COUNT(delta);
-      }
+            p_end = p_buffer + new_size;
+        }
 
-      p_end = p_buffer + new_size;
-    }
-
-    //*********************************************************************
-    /// Resizes the vector, but does not initialise new entries.
-    ///\param new_size The new size.
-    //*********************************************************************
-    void uninitialized_resize(size_t new_size)
-    {
-      ETL_ASSERT_OR_RETURN(new_size <= CAPACITY, ETL_ERROR(vector_full));
+        //*********************************************************************
+        /// Resizes the vector, but does not initialise new entries.
+        ///\param new_size The new size.
+        //*********************************************************************
+        void uninitialized_resize(size_t new_size) {
+            ETL_ASSERT_OR_RETURN(new_size <= CAPACITY, ETL_ERROR(vector_full));
 
 #if defined(ETL_DEBUG_COUNT)
-      if (size() < new_size)
-      {
-        ETL_ADD_DEBUG_COUNT(new_size - size());
-      }
-      else
-      {
-        ETL_SUBTRACT_DEBUG_COUNT(size() - new_size);
-      }
+            if (size() < new_size) {
+                ETL_ADD_DEBUG_COUNT(new_size - size());
+            } else {
+                ETL_SUBTRACT_DEBUG_COUNT(size() - new_size);
+            }
 #endif
 
-      p_end = p_buffer + new_size;
-    }
+            p_end = p_buffer + new_size;
+        }
 
-    //*********************************************************************
-    /// For compatibility with the STL vector API.
-    /// Does not increase the capacity, as this is fixed.
-    /// Asserts an etl::vector_out_of_bounds error if the request is for more
-    /// than the capacity.
-    //*********************************************************************
-    void reserve(size_t n)
-    {
-      (void)n; // Stop 'unused parameter' warning in release mode.
-      ETL_ASSERT(n <= CAPACITY, ETL_ERROR(vector_out_of_bounds));
-    }
+        //*********************************************************************
+        /// For compatibility with the STL vector API.
+        /// Does not increase the capacity, as this is fixed.
+        /// Asserts an etl::vector_out_of_bounds error if the request is for more
+        /// than the capacity.
+        //*********************************************************************
+        void reserve(size_t n) {
+            (void)n; // Stop 'unused parameter' warning in release mode.
+            ETL_ASSERT(n <= CAPACITY, ETL_ERROR(vector_out_of_bounds));
+        }
 
-    //*********************************************************************
-    /// Returns a reference to the value at index 'i'
-    ///\param i The index.
-    ///\return A reference to the value at index 'i'
-    //*********************************************************************
-    reference operator[](size_t i)
-    {
-      ETL_ASSERT_CHECK_INDEX_OPERATOR(i < size(), ETL_ERROR(vector_out_of_bounds));
-      return p_buffer[i];
-    }
+        //*********************************************************************
+        /// Returns a reference to the value at index 'i'
+        ///\param i The index.
+        ///\return A reference to the value at index 'i'
+        //*********************************************************************
+        reference operator[](size_t i) {
+            ETL_ASSERT_CHECK_INDEX_OPERATOR(i < size(), ETL_ERROR(vector_out_of_bounds));
+            return p_buffer[i];
+        }
 
-    //*********************************************************************
-    /// Returns a const reference to the value at index 'i'
-    ///\param i The index.
-    ///\return A const reference to the value at index 'i'
-    //*********************************************************************
-    const_reference operator[](size_t i) const
-    {
-      ETL_ASSERT_CHECK_INDEX_OPERATOR(i < size(), ETL_ERROR(vector_out_of_bounds));
-      return p_buffer[i];
-    }
+        //*********************************************************************
+        /// Returns a const reference to the value at index 'i'
+        ///\param i The index.
+        ///\return A const reference to the value at index 'i'
+        //*********************************************************************
+        const_reference operator[](size_t i) const {
+            ETL_ASSERT_CHECK_INDEX_OPERATOR(i < size(), ETL_ERROR(vector_out_of_bounds));
+            return p_buffer[i];
+        }
 
-    //*********************************************************************
-    /// Returns a reference to the value at index 'i'
-    /// If asserts or exceptions are enabled, emits an etl::vector_out_of_bounds
-    /// if the index is out of range.
-    ///\param i The index.
-    ///\return A reference to the value at index 'i'
-    //*********************************************************************
-    reference at(size_t i)
-    {
-      ETL_ASSERT(i < size(), ETL_ERROR(vector_out_of_bounds));
-      return p_buffer[i];
-    }
+        //*********************************************************************
+        /// Returns a reference to the value at index 'i'
+        /// If asserts or exceptions are enabled, emits an etl::vector_out_of_bounds
+        /// if the index is out of range.
+        ///\param i The index.
+        ///\return A reference to the value at index 'i'
+        //*********************************************************************
+        reference at(size_t i) {
+            ETL_ASSERT(i < size(), ETL_ERROR(vector_out_of_bounds));
+            return p_buffer[i];
+        }
 
-    //*********************************************************************
-    /// Returns a const reference to the value at index 'i'
-    /// If asserts or exceptions are enabled, emits an etl::vector_out_of_bounds
-    /// if the index is out of range.
-    ///\param i The index.
-    ///\return A const reference to the value at index 'i'
-    //*********************************************************************
-    const_reference at(size_t i) const
-    {
-      ETL_ASSERT(i < size(), ETL_ERROR(vector_out_of_bounds));
-      return p_buffer[i];
-    }
+        //*********************************************************************
+        /// Returns a const reference to the value at index 'i'
+        /// If asserts or exceptions are enabled, emits an etl::vector_out_of_bounds
+        /// if the index is out of range.
+        ///\param i The index.
+        ///\return A const reference to the value at index 'i'
+        //*********************************************************************
+        const_reference at(size_t i) const {
+            ETL_ASSERT(i < size(), ETL_ERROR(vector_out_of_bounds));
+            return p_buffer[i];
+        }
 
-    //*********************************************************************
-    /// Returns a reference to the first element.
-    ///\return A reference to the first element.
-    //*********************************************************************
-    reference front()
-    {
-      ETL_ASSERT_CHECK_EXTRA(size() > 0, ETL_ERROR(vector_out_of_bounds));
-      return *p_buffer;
-    }
+        //*********************************************************************
+        /// Returns a reference to the first element.
+        ///\return A reference to the first element.
+        //*********************************************************************
+        reference front() {
+            ETL_ASSERT_CHECK_EXTRA(size() > 0, ETL_ERROR(vector_out_of_bounds));
+            return *p_buffer;
+        }
 
-    //*********************************************************************
-    /// Returns a const reference to the first element.
-    ///\return A const reference to the first element.
-    //*********************************************************************
-    const_reference front() const
-    {
-      ETL_ASSERT_CHECK_EXTRA(size() > 0, ETL_ERROR(vector_out_of_bounds));
-      return *p_buffer;
-    }
+        //*********************************************************************
+        /// Returns a const reference to the first element.
+        ///\return A const reference to the first element.
+        //*********************************************************************
+        const_reference front() const {
+            ETL_ASSERT_CHECK_EXTRA(size() > 0, ETL_ERROR(vector_out_of_bounds));
+            return *p_buffer;
+        }
 
-    //*********************************************************************
-    /// Returns a reference to the last element.
-    ///\return A reference to the last element.
-    //*********************************************************************
-    reference back()
-    {
-      ETL_ASSERT_CHECK_EXTRA(size() > 0, ETL_ERROR(vector_out_of_bounds));
-      return *(p_end - 1);
-    }
+        //*********************************************************************
+        /// Returns a reference to the last element.
+        ///\return A reference to the last element.
+        //*********************************************************************
+        reference back() {
+            ETL_ASSERT_CHECK_EXTRA(size() > 0, ETL_ERROR(vector_out_of_bounds));
+            return *(p_end - 1);
+        }
 
-    //*********************************************************************
-    /// Returns a const reference to the last element.
-    ///\return A const reference to the last element.
-    //*********************************************************************
-    const_reference back() const
-    {
-      ETL_ASSERT_CHECK_EXTRA(size() > 0, ETL_ERROR(vector_out_of_bounds));
-      return *(p_end - 1);
-    }
+        //*********************************************************************
+        /// Returns a const reference to the last element.
+        ///\return A const reference to the last element.
+        //*********************************************************************
+        const_reference back() const {
+            ETL_ASSERT_CHECK_EXTRA(size() > 0, ETL_ERROR(vector_out_of_bounds));
+            return *(p_end - 1);
+        }
 
-    //*********************************************************************
-    /// Returns a pointer to the beginning of the vector data.
-    ///\return A pointer to the beginning of the vector data.
-    //*********************************************************************
-    pointer data()
-    {
-      return p_buffer;
-    }
+        //*********************************************************************
+        /// Returns a pointer to the beginning of the vector data.
+        ///\return A pointer to the beginning of the vector data.
+        //*********************************************************************
+        pointer data() {
+            return p_buffer;
+        }
 
-    //*********************************************************************
-    /// Returns a const pointer to the beginning of the vector data.
-    ///\return A const pointer to the beginning of the vector data.
-    //*********************************************************************
-    ETL_CONSTEXPR const_pointer data() const
-    {
-      return p_buffer;
-    }
+        //*********************************************************************
+        /// Returns a const pointer to the beginning of the vector data.
+        ///\return A const pointer to the beginning of the vector data.
+        //*********************************************************************
+        ETL_CONSTEXPR const_pointer data() const {
+            return p_buffer;
+        }
 
-    //*********************************************************************
-    /// Assigns values to the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector
-    /// does not have enough free space. If asserts or exceptions are enabled,
-    /// emits vector_iterator if the iterators are reversed.
-    ///\param first The iterator to the first element.
-    ///\param last  The iterator to the last element + 1.
-    //*********************************************************************
-    template <typename TIterator>
-    typename etl::enable_if<!etl::is_integral<TIterator>::value
-                              && etl::is_convertible<typename etl::iterator_traits<TIterator>::value_type, T>::value,
-                            typename etl::enable_if<!etl::is_integral<TIterator>::value, void>::type>::type
-      assign(TIterator first, TIterator last) ETL_NOEXCEPT_IF((etl::is_nothrow_copy_constructible<T>::value && ETL_NOT_USING_EXCEPTIONS))
-    {
+        //*********************************************************************
+        /// Assigns values to the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector
+        /// does not have enough free space. If asserts or exceptions are enabled,
+        /// emits vector_iterator if the iterators are reversed.
+        ///\param first The iterator to the first element.
+        ///\param last  The iterator to the last element + 1.
+        //*********************************************************************
+        template<typename TIterator>
+        typename etl::enable_if<!etl::is_integral<TIterator>::value &&
+                                    etl::is_convertible<typename etl::iterator_traits<TIterator>::value_type, T>::value,
+                                typename etl::enable_if<!etl::is_integral<TIterator>::value, void>::type>::type
+        assign(TIterator first, TIterator last)
+            ETL_NOEXCEPT_IF((etl::is_nothrow_copy_constructible<T>::value && ETL_NOT_USING_EXCEPTIONS)) {
 #if ETL_USING_CPP11
-      ETL_STATIC_ASSERT((etl::is_same<typename etl::remove_cv<T>::type,
-                                      typename etl::remove_cv<typename etl::remove_reference<decltype(*first)>::type>::type>::value),
-                        "Iterator type does not match container type");
+            ETL_STATIC_ASSERT(
+                (etl::is_same<
+                    typename etl::remove_cv<T>::type,
+                    typename etl::remove_cv<typename etl::remove_reference<decltype(*first)>::type>::type>::value),
+                "Iterator type does not match container type");
 #endif
 
 #if ETL_IS_DEBUG_BUILD
-      difference_type d = etl::distance(first, last);
-      ETL_ASSERT_OR_RETURN(static_cast<size_t>(d) <= CAPACITY, ETL_ERROR(vector_full));
+            difference_type d = etl::distance(first, last);
+            ETL_ASSERT_OR_RETURN(static_cast<size_t>(d) <= CAPACITY, ETL_ERROR(vector_full));
 #endif
 
-      initialise();
+            initialise();
 
-      p_end = etl::uninitialized_copy(first, last, p_buffer);
-      ETL_ADD_DEBUG_COUNT(uint32_t(etl::distance(first, last)));
-    }
+            p_end = etl::uninitialized_copy(first, last, p_buffer);
+            ETL_ADD_DEBUG_COUNT(uint32_t(etl::distance(first, last)));
+        }
 
-    //*********************************************************************
-    /// Assigns values to the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector
-    /// does not have enough free space.
-    ///\param n     The number of elements to add.
-    ///\param value The value to insert for each element.
-    //*********************************************************************
-    void assign(size_t n, const_reference value)
-    {
-      ETL_ASSERT_OR_RETURN(n <= CAPACITY, ETL_ERROR(vector_full));
+        //*********************************************************************
+        /// Assigns values to the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector
+        /// does not have enough free space.
+        ///\param n     The number of elements to add.
+        ///\param value The value to insert for each element.
+        //*********************************************************************
+        void assign(size_t n, const_reference value) {
+            ETL_ASSERT_OR_RETURN(n <= CAPACITY, ETL_ERROR(vector_full));
 
-      initialise();
+            initialise();
 
-      p_end = etl::uninitialized_fill_n(p_buffer, n, value);
-      ETL_ADD_DEBUG_COUNT(uint32_t(n));
-    }
+            p_end = etl::uninitialized_fill_n(p_buffer, n, value);
+            ETL_ADD_DEBUG_COUNT(uint32_t(n));
+        }
 
-    //*************************************************************************
-    /// Clears the vector.
-    //*************************************************************************
-    void clear()
-    {
-      initialise();
-    }
+        //*************************************************************************
+        /// Clears the vector.
+        //*************************************************************************
+        void clear() {
+            initialise();
+        }
 
-    //*************************************************************************
-    /// Fills the vector.
-    //*************************************************************************
-    void fill(const T& value)
-    {
-      etl::fill(begin(), end(), value);
-    }
+        //*************************************************************************
+        /// Fills the vector.
+        //*************************************************************************
+        void fill(const T& value) {
+            etl::fill(begin(), end(), value);
+        }
 
-    //*********************************************************************
-    /// Inserts a value at the end of the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector is
-    /// already full.
-    ///\param value The value to add.
-    //*********************************************************************
-    void push_back(const_reference value)
-    {
-      ETL_ASSERT_CHECK_PUSH_POP_OR_RETURN(size() != CAPACITY, ETL_ERROR(vector_full));
+        //*********************************************************************
+        /// Inserts a value at the end of the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector is
+        /// already full.
+        ///\param value The value to add.
+        //*********************************************************************
+        void push_back(const_reference value) {
+            ETL_ASSERT_CHECK_PUSH_POP_OR_RETURN(size() != CAPACITY, ETL_ERROR(vector_full));
 
-      create_back(value);
-    }
+            create_back(value);
+        }
 
 #if ETL_USING_CPP11
-    //*********************************************************************
-    /// Inserts a value at the end of the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector is
-    /// already full.
-    ///\param value The value to add.
-    //*********************************************************************
-    void push_back(rvalue_reference value)
-    {
-      ETL_ASSERT_CHECK_PUSH_POP_OR_RETURN(size() != CAPACITY, ETL_ERROR(vector_full));
+        //*********************************************************************
+        /// Inserts a value at the end of the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector is
+        /// already full.
+        ///\param value The value to add.
+        //*********************************************************************
+        void push_back(rvalue_reference value) {
+            ETL_ASSERT_CHECK_PUSH_POP_OR_RETURN(size() != CAPACITY, ETL_ERROR(vector_full));
 
-      create_back(etl::move(value));
-    }
+            create_back(etl::move(value));
+        }
 #endif
 
 #if ETL_USING_CPP11 && ETL_NOT_USING_STLPORT && !defined(ETL_VECTOR_FORCE_CPP03_IMPLEMENTATION)
-    //*********************************************************************
-    /// Constructs a value at the end of the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector is
-    /// already full.
-    ///\param value The value to add.
-    //*********************************************************************
-    template <typename... Args>
-    reference emplace_back(Args&&... args)
-    {
-      ETL_ASSERT_CHECK_PUSH_POP(size() != CAPACITY, ETL_ERROR(vector_full));
+        //*********************************************************************
+        /// Constructs a value at the end of the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector is
+        /// already full.
+        ///\param value The value to add.
+        //*********************************************************************
+        template<typename... Args>
+        reference emplace_back(Args&&... args) {
+            ETL_ASSERT_CHECK_PUSH_POP(size() != CAPACITY, ETL_ERROR(vector_full));
 
-  #include "private/diagnostic_sign_conversion_push.h"
-      ::new (p_end) T(etl::forward<Args>(args)...);
-  #include "private/diagnostic_pop.h"
-      ++p_end;
-      ETL_INCREMENT_DEBUG_COUNT;
-      return back();
-    }
+#include "private/diagnostic_sign_conversion_push.h"
+            ::new (p_end) T(etl::forward<Args>(args)...);
+#include "private/diagnostic_pop.h"
+            ++p_end;
+            ETL_INCREMENT_DEBUG_COUNT;
+            return back();
+        }
 #else
-    //*********************************************************************
-    /// Constructs a value at the end of the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector is
-    /// already full.
-    ///\param value The value to add.
-    //*********************************************************************
-    reference emplace_back()
-    {
-      ETL_ASSERT_CHECK_PUSH_POP(size() != CAPACITY, ETL_ERROR(vector_full));
+        //*********************************************************************
+        /// Constructs a value at the end of the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector is
+        /// already full.
+        ///\param value The value to add.
+        //*********************************************************************
+        reference emplace_back() {
+            ETL_ASSERT_CHECK_PUSH_POP(size() != CAPACITY, ETL_ERROR(vector_full));
 
-      ::new (p_end) T();
-      ++p_end;
-      ETL_INCREMENT_DEBUG_COUNT;
-      return back();
-    }
-
-    //*********************************************************************
-    /// Constructs a value at the end of the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector is
-    /// already full.
-    ///\param value The value to add.
-    //*********************************************************************
-    template <typename T1>
-    reference emplace_back(const T1& value1)
-    {
-      ETL_ASSERT_CHECK_PUSH_POP(size() != CAPACITY, ETL_ERROR(vector_full));
-
-      ::new (p_end) T(value1);
-      ++p_end;
-      ETL_INCREMENT_DEBUG_COUNT;
-      return back();
-    }
-
-    //*********************************************************************
-    /// Constructs a value at the end of the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector is
-    /// already full.
-    ///\param value The value to add.
-    //*********************************************************************
-    template <typename T1, typename T2>
-    reference emplace_back(const T1& value1, const T2& value2)
-    {
-      ETL_ASSERT_CHECK_PUSH_POP(size() != CAPACITY, ETL_ERROR(vector_full));
-
-      ::new (p_end) T(value1, value2);
-      ++p_end;
-      ETL_INCREMENT_DEBUG_COUNT;
-      return back();
-    }
-
-    //*********************************************************************
-    /// Constructs a value at the end of the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector is
-    /// already full.
-    ///\param value The value to add.
-    //*********************************************************************
-    template <typename T1, typename T2, typename T3>
-    reference emplace_back(const T1& value1, const T2& value2, const T3& value3)
-    {
-      ETL_ASSERT_CHECK_PUSH_POP(size() != CAPACITY, ETL_ERROR(vector_full));
-
-      ::new (p_end) T(value1, value2, value3);
-      ++p_end;
-      ETL_INCREMENT_DEBUG_COUNT;
-      return back();
-    }
-
-    //*********************************************************************
-    /// Constructs a value at the end of the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector is
-    /// already full.
-    ///\param value The value to add.
-    //*********************************************************************
-    template <typename T1, typename T2, typename T3, typename T4>
-    reference emplace_back(const T1& value1, const T2& value2, const T3& value3, const T4& value4)
-    {
-      ETL_ASSERT_CHECK_PUSH_POP(size() != CAPACITY, ETL_ERROR(vector_full));
-
-      ::new (p_end) T(value1, value2, value3, value4);
-      ++p_end;
-      ETL_INCREMENT_DEBUG_COUNT;
-      return back();
-    }
-#endif
-
-    //*************************************************************************
-    /// Removes an element from the end of the vector.
-    /// Does nothing if the vector is empty.
-    /// If asserts or exceptions are enabled, emits vector_empty if the vector
-    /// is empty.
-    //*************************************************************************
-    void pop_back()
-    {
-      ETL_ASSERT_CHECK_PUSH_POP_OR_RETURN(size() > 0, ETL_ERROR(vector_empty));
-
-      destroy_back();
-    }
-
-    //*********************************************************************
-    /// Inserts a value to the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector is
-    /// already full.
-    ///\param position The position to insert before.
-    ///\param value    The value to insert.
-    //*********************************************************************
-    iterator insert(const_iterator position, const_reference value)
-    {
-      ETL_ASSERT(size() != CAPACITY, ETL_ERROR(vector_full));
-      ETL_ASSERT_CHECK_EXTRA(cbegin() <= position && position <= cend(), ETL_ERROR(vector_out_of_bounds));
-
-      iterator position_ = to_iterator(position);
-
-      if (position_ == end())
-      {
-        create_back(value);
-      }
-      else
-      {
-        // value may refer to an element that is about to be shifted.
-        const_pointer p_value = etl::addressof(value);
-
-        create_back(back());
-        etl::move_backward(position_, p_end - 2, p_end - 1);
-
-        if ((p_value >= position_) && (p_value < p_end))
-        {
-          ++p_value;
+            ::new (p_end) T();
+            ++p_end;
+            ETL_INCREMENT_DEBUG_COUNT;
+            return back();
         }
 
-        *position_ = *p_value;
-      }
+        //*********************************************************************
+        /// Constructs a value at the end of the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector is
+        /// already full.
+        ///\param value The value to add.
+        //*********************************************************************
+        template<typename T1>
+        reference emplace_back(const T1& value1) {
+            ETL_ASSERT_CHECK_PUSH_POP(size() != CAPACITY, ETL_ERROR(vector_full));
 
-      return position_;
-    }
+            ::new (p_end) T(value1);
+            ++p_end;
+            ETL_INCREMENT_DEBUG_COUNT;
+            return back();
+        }
+
+        //*********************************************************************
+        /// Constructs a value at the end of the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector is
+        /// already full.
+        ///\param value The value to add.
+        //*********************************************************************
+        template<typename T1, typename T2>
+        reference emplace_back(const T1& value1, const T2& value2) {
+            ETL_ASSERT_CHECK_PUSH_POP(size() != CAPACITY, ETL_ERROR(vector_full));
+
+            ::new (p_end) T(value1, value2);
+            ++p_end;
+            ETL_INCREMENT_DEBUG_COUNT;
+            return back();
+        }
+
+        //*********************************************************************
+        /// Constructs a value at the end of the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector is
+        /// already full.
+        ///\param value The value to add.
+        //*********************************************************************
+        template<typename T1, typename T2, typename T3>
+        reference emplace_back(const T1& value1, const T2& value2, const T3& value3) {
+            ETL_ASSERT_CHECK_PUSH_POP(size() != CAPACITY, ETL_ERROR(vector_full));
+
+            ::new (p_end) T(value1, value2, value3);
+            ++p_end;
+            ETL_INCREMENT_DEBUG_COUNT;
+            return back();
+        }
+
+        //*********************************************************************
+        /// Constructs a value at the end of the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector is
+        /// already full.
+        ///\param value The value to add.
+        //*********************************************************************
+        template<typename T1, typename T2, typename T3, typename T4>
+        reference emplace_back(const T1& value1, const T2& value2, const T3& value3, const T4& value4) {
+            ETL_ASSERT_CHECK_PUSH_POP(size() != CAPACITY, ETL_ERROR(vector_full));
+
+            ::new (p_end) T(value1, value2, value3, value4);
+            ++p_end;
+            ETL_INCREMENT_DEBUG_COUNT;
+            return back();
+        }
+#endif
+
+        //*************************************************************************
+        /// Removes an element from the end of the vector.
+        /// Does nothing if the vector is empty.
+        /// If asserts or exceptions are enabled, emits vector_empty if the vector
+        /// is empty.
+        //*************************************************************************
+        void pop_back() {
+            ETL_ASSERT_CHECK_PUSH_POP_OR_RETURN(size() > 0, ETL_ERROR(vector_empty));
+
+            destroy_back();
+        }
+
+        //*********************************************************************
+        /// Inserts a value to the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector is
+        /// already full.
+        ///\param position The position to insert before.
+        ///\param value    The value to insert.
+        //*********************************************************************
+        iterator insert(const_iterator position, const_reference value) {
+            ETL_ASSERT(size() != CAPACITY, ETL_ERROR(vector_full));
+            ETL_ASSERT_CHECK_EXTRA(cbegin() <= position && position <= cend(), ETL_ERROR(vector_out_of_bounds));
+
+            iterator position_ = to_iterator(position);
+
+            if (position_ == end()) {
+                create_back(value);
+            } else {
+                // value may refer to an element that is about to be shifted.
+                const_pointer p_value = etl::addressof(value);
+
+                create_back(back());
+                etl::move_backward(position_, p_end - 2, p_end - 1);
+
+                if ((p_value >= position_) && (p_value < p_end)) {
+                    ++p_value;
+                }
+
+                *position_ = *p_value;
+            }
+
+            return position_;
+        }
 
 #if ETL_USING_CPP11
-    //*********************************************************************
-    /// Inserts a value to the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector is
-    /// already full.
-    ///\param position The position to insert before.
-    ///\param value    The value to insert.
-    //*********************************************************************
-    iterator insert(const_iterator position, rvalue_reference value)
-    {
-      ETL_ASSERT(size() != CAPACITY, ETL_ERROR(vector_full));
-      ETL_ASSERT_CHECK_EXTRA(cbegin() <= position && position <= cend(), ETL_ERROR(vector_out_of_bounds));
+        //*********************************************************************
+        /// Inserts a value to the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector is
+        /// already full.
+        ///\param position The position to insert before.
+        ///\param value    The value to insert.
+        //*********************************************************************
+        iterator insert(const_iterator position, rvalue_reference value) {
+            ETL_ASSERT(size() != CAPACITY, ETL_ERROR(vector_full));
+            ETL_ASSERT_CHECK_EXTRA(cbegin() <= position && position <= cend(), ETL_ERROR(vector_out_of_bounds));
 
-      iterator position_ = to_iterator(position);
+            iterator position_ = to_iterator(position);
 
-      if (position_ == end())
-      {
-        create_back(etl::move(value));
-      }
-      else
-      {
-        // value may refer to an element that is about to be shifted.
-        pointer p_value = etl::addressof(value);
+            if (position_ == end()) {
+                create_back(etl::move(value));
+            } else {
+                // value may refer to an element that is about to be shifted.
+                pointer p_value = etl::addressof(value);
 
-        create_back(etl::move(back()));
-        etl::move_backward(position_, p_end - 2, p_end - 1);
+                create_back(etl::move(back()));
+                etl::move_backward(position_, p_end - 2, p_end - 1);
 
-        if ((p_value >= position_) && (p_value < p_end))
-        {
-          ++p_value;
+                if ((p_value >= position_) && (p_value < p_end)) {
+                    ++p_value;
+                }
+
+                *position_ = etl::move(*p_value);
+            }
+
+            return position_;
         }
-
-        *position_ = etl::move(*p_value);
-      }
-
-      return position_;
-    }
 #endif
 
-    //*************************************************************************
-    /// Emplaces a value to the vector at the specified position.
-    //*************************************************************************
+        //*************************************************************************
+        /// Emplaces a value to the vector at the specified position.
+        //*************************************************************************
 #if ETL_USING_CPP11 && ETL_NOT_USING_STLPORT
-    template <typename... Args>
-    iterator emplace(const_iterator position, Args&&... args)
-    {
-      ETL_ASSERT(!full(), ETL_ERROR(vector_full));
-      ETL_ASSERT_CHECK_EXTRA(cbegin() <= position && position <= cend(), ETL_ERROR(vector_out_of_bounds));
+        template<typename... Args>
+        iterator emplace(const_iterator position, Args&&... args) {
+            ETL_ASSERT(!full(), ETL_ERROR(vector_full));
+            ETL_ASSERT_CHECK_EXTRA(cbegin() <= position && position <= cend(), ETL_ERROR(vector_out_of_bounds));
 
-      iterator position_ = to_iterator(position);
+            iterator position_ = to_iterator(position);
 
-      if (position_ == end())
-      {
-  #include "private/diagnostic_sign_conversion_push.h"
-        ::new (p_end) T(etl::forward<Args>(args)...);
-  #include "private/diagnostic_pop.h"
-        ++p_end;
-        ETL_INCREMENT_DEBUG_COUNT;
-      }
-      else
-      {
-  #include "private/diagnostic_sign_conversion_push.h"
-        // args may refer to elements that are about to be shifted, so construct the value first.
-        T value(etl::forward<Args>(args)...);
-  #include "private/diagnostic_pop.h"
+            if (position_ == end()) {
+#include "private/diagnostic_sign_conversion_push.h"
+                ::new (p_end) T(etl::forward<Args>(args)...);
+#include "private/diagnostic_pop.h"
+                ++p_end;
+                ETL_INCREMENT_DEBUG_COUNT;
+            } else {
+#include "private/diagnostic_sign_conversion_push.h"
+                // args may refer to elements that are about to be shifted, so construct the value first.
+                T value(etl::forward<Args>(args)...);
+#include "private/diagnostic_pop.h"
 
-        create_back(etl::move(back()));
-        etl::move_backward(position_, p_end - 2, p_end - 1);
-        *position_ = etl::move(value);
-      }
+                create_back(etl::move(back()));
+                etl::move_backward(position_, p_end - 2, p_end - 1);
+                *position_ = etl::move(value);
+            }
 
-      return position_;
-    }
+            return position_;
+        }
 #else
-    template <typename T1>
-    iterator emplace(const_iterator position, const T1& value1)
-    {
-      ETL_ASSERT(!full(), ETL_ERROR(vector_full));
-      ETL_ASSERT_CHECK_EXTRA(cbegin() <= position && position <= cend(), ETL_ERROR(vector_out_of_bounds));
-
-      iterator position_ = to_iterator(position);
-
-      if (position_ == end())
-      {
-        ::new (p_end) T(value1);
-        ++p_end;
-        ETL_INCREMENT_DEBUG_COUNT;
-      }
-      else
-      {
-        // The values may refer to elements that are about to be shifted, so construct the value first.
-        T value(value1);
-
-        create_back(back());
-        etl::move_backward(position_, p_end - 2, p_end - 1);
-        *position_ = value;
-      }
-
-      return position_;
-    }
-
-    template <typename T1, typename T2>
-    iterator emplace(const_iterator position, const T1& value1, const T2& value2)
-    {
-      ETL_ASSERT(!full(), ETL_ERROR(vector_full));
-      ETL_ASSERT_CHECK_EXTRA(cbegin() <= position && position <= cend(), ETL_ERROR(vector_out_of_bounds));
-
-      iterator position_ = to_iterator(position);
-
-      if (position_ == end())
-      {
-        ::new (p_end) T(value1, value2);
-        ++p_end;
-        ETL_INCREMENT_DEBUG_COUNT;
-      }
-      else
-      {
-        // The values may refer to elements that are about to be shifted, so construct the value first.
-        T value(value1, value2);
-
-        create_back(back());
-        etl::move_backward(position_, p_end - 2, p_end - 1);
-        *position_ = value;
-      }
-
-      return position_;
-    }
-
-    template <typename T1, typename T2, typename T3>
-    iterator emplace(const_iterator position, const T1& value1, const T2& value2, const T3& value3)
-    {
-      ETL_ASSERT(!full(), ETL_ERROR(vector_full));
-      ETL_ASSERT_CHECK_EXTRA(cbegin() <= position && position <= cend(), ETL_ERROR(vector_out_of_bounds));
-
-      iterator position_ = to_iterator(position);
-
-      if (position_ == end())
-      {
-        ::new (p_end) T(value1, value2, value3);
-        ++p_end;
-        ETL_INCREMENT_DEBUG_COUNT;
-      }
-      else
-      {
-        // The values may refer to elements that are about to be shifted, so construct the value first.
-        T value(value1, value2, value3);
-
-        create_back(back());
-        etl::move_backward(position_, p_end - 2, p_end - 1);
-        *position_ = value;
-      }
-
-      return position_;
-    }
-
-    template <typename T1, typename T2, typename T3, typename T4>
-    iterator emplace(const_iterator position, const T1& value1, const T2& value2, const T3& value3, const T4& value4)
-    {
-      ETL_ASSERT(!full(), ETL_ERROR(vector_full));
-      ETL_ASSERT_CHECK_EXTRA(cbegin() <= position && position <= cend(), ETL_ERROR(vector_out_of_bounds));
-
-      iterator position_ = to_iterator(position);
-
-      if (position_ == end())
-      {
-        ::new (p_end) T(value1, value2, value3, value4);
-        ++p_end;
-        ETL_INCREMENT_DEBUG_COUNT;
-      }
-      else
-      {
-        // The values may refer to elements that are about to be shifted, so construct the value first.
-        T value(value1, value2, value3, value4);
-
-        create_back(back());
-        etl::move_backward(position_, p_end - 2, p_end - 1);
-        *position_ = value;
-      }
-
-      return position_;
-    }
-#endif
-
-    //*********************************************************************
-    /// Inserts 'n' values to the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector
-    /// does not have enough free space.
-    ///\param position The position to insert before.
-    ///\param n        The number of elements to add.
-    ///\param value    The value to insert.
-    //*********************************************************************
-    void insert(const_iterator position, size_t n, const_reference value)
-    {
-      ETL_ASSERT_OR_RETURN((size() + n) <= CAPACITY, ETL_ERROR(vector_full));
-      ETL_ASSERT_CHECK_EXTRA(cbegin() <= position && position <= cend(), ETL_ERROR(vector_out_of_bounds));
-
-      iterator position_ = to_iterator(position);
-
-      size_t insert_n     = n;
-      size_t insert_begin = static_cast<size_t>(etl::distance(begin(), position_));
-      size_t insert_end   = insert_begin + insert_n;
-
-      // Copy old data.
-      size_t   copy_old_n;
-      size_t   construct_old_n;
-      iterator p_construct_old;
-
-      if (insert_end > size())
-      {
-        copy_old_n      = 0;
-        construct_old_n = size() - insert_begin;
-        p_construct_old = p_buffer + insert_end;
-      }
-      else
-      {
-        copy_old_n      = size() - insert_begin - insert_n;
-        construct_old_n = insert_n;
-        p_construct_old = p_end;
-      }
-
-      size_t copy_new_n      = construct_old_n;
-      size_t construct_new_n = insert_n - copy_new_n;
-
-      // value may refer to an element that is about to be shifted.
-      const_pointer p_value = etl::addressof(value);
-
-      if ((p_value >= position_) && (p_value < p_end))
-      {
-        p_value += n;
-      }
-
-      // Construct old.
-      etl::uninitialized_move(p_end - construct_old_n, p_end, p_construct_old);
-      ETL_ADD_DEBUG_COUNT(construct_old_n);
-
-      // Copy old.
-      etl::move_backward(p_buffer + insert_begin, p_buffer + insert_begin + copy_old_n, p_buffer + insert_end + copy_old_n);
-
-      // Construct new.
-      etl::uninitialized_fill_n(p_end, construct_new_n, *p_value);
-      ETL_ADD_DEBUG_COUNT(construct_new_n);
-
-      // Copy new.
-      etl::fill_n(p_buffer + insert_begin, copy_new_n, *p_value);
-
-      p_end += n;
-    }
-
-    //*********************************************************************
-    /// Inserts a range of values to the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector
-    /// does not have enough free space. For fundamental and pointer types.
-    ///\param position The position to insert before.
-    ///\param first    The first element to add.
-    ///\param last     The last + 1 element to add.
-    //*********************************************************************
-    template <class TIterator>
-    typename etl::enable_if<
-      !etl::is_integral<TIterator>::value && etl::is_convertible<typename etl::iterator_traits<TIterator>::value_type, T>::value, void>::type
-      insert(const_iterator position, TIterator first, TIterator last, typename etl::enable_if<!etl::is_integral<TIterator>::value, int>::type = 0)
-    {
-      size_t count = static_cast<size_t>(etl::distance(first, last));
-
-      ETL_ASSERT_OR_RETURN((size() + count) <= CAPACITY, ETL_ERROR(vector_full));
-      ETL_ASSERT_CHECK_EXTRA(cbegin() <= position && position <= cend(), ETL_ERROR(vector_out_of_bounds));
-
-      size_t insert_n     = count;
-      size_t insert_begin = static_cast<size_t>(etl::distance(cbegin(), position));
-      size_t insert_end   = insert_begin + insert_n;
-
-      // Move old data.
-      size_t   copy_old_n;
-      size_t   construct_old_n;
-      iterator p_construct_old;
-
-      if (insert_end > size())
-      {
-        copy_old_n      = 0;
-        construct_old_n = size() - insert_begin;
-        p_construct_old = p_buffer + insert_end;
-      }
-      else
-      {
-        copy_old_n      = size() - insert_begin - insert_n;
-        construct_old_n = insert_n;
-        p_construct_old = p_end;
-      }
-
-      size_t copy_new_n      = construct_old_n;
-      size_t construct_new_n = insert_n - copy_new_n;
-
-      // Move construct old.
-      etl::uninitialized_move(p_end - construct_old_n, p_end, p_construct_old);
-      ETL_ADD_DEBUG_COUNT(construct_old_n);
-
-      // Move old.
-      etl::move_backward(p_buffer + insert_begin, p_buffer + insert_begin + copy_old_n, p_buffer + insert_end + copy_old_n);
-
-      // Copy construct new.
-      etl::uninitialized_copy(first + static_cast<ptrdiff_t>(copy_new_n), first + static_cast<ptrdiff_t>(copy_new_n + construct_new_n), p_end);
-      ETL_ADD_DEBUG_COUNT(construct_new_n);
-
-      // Copy new.
-      etl::copy(first, first + static_cast<ptrdiff_t>(copy_new_n), p_buffer + insert_begin);
-
-      p_end += count;
-    }
-
-    //*********************************************************************
-    /// Erases an element.
-    ///\param i_element Iterator to the element.
-    ///\return An iterator pointing to the element that followed the erased
-    /// element.
-    //*********************************************************************
-    iterator erase(iterator i_element)
-    {
-      ETL_ASSERT_CHECK_EXTRA(cbegin() <= i_element && i_element < cend(), ETL_ERROR(vector_out_of_bounds));
-
-      etl::move(i_element + 1, end(), i_element);
-      destroy_back();
-
-      return i_element;
-    }
-
-    //*********************************************************************
-    /// Erases an element.
-    ///\param i_element Iterator to the element.
-    ///\return An iterator pointing to the element that followed the erased
-    /// element.
-    //*********************************************************************
-    iterator erase(const_iterator i_element)
-    {
-      ETL_ASSERT_CHECK_EXTRA(cbegin() <= i_element && i_element < cend(), ETL_ERROR(vector_out_of_bounds));
-
-      iterator i_element_ = to_iterator(i_element);
-
-      etl::move(i_element_ + 1, end(), i_element_);
-      destroy_back();
-
-      return i_element_;
-    }
-
-    //*********************************************************************
-    /// Erases a range of elements.
-    /// The range includes all the elements between first and last, including
-    /// the element pointed by first, but not the one pointed by last.
-    ///\param first Iterator to the first element.
-    ///\param last  Iterator to the last element.
-    ///\return An iterator pointing to the element that followed the erased
-    /// element.
-    //*********************************************************************
-    iterator erase(const_iterator first, const_iterator last)
-    {
-      ETL_ASSERT_CHECK_EXTRA(cbegin() <= first && first <= last && last <= cend(), ETL_ERROR(vector_out_of_bounds));
-
-      iterator first_ = to_iterator(first);
-      iterator last_  = to_iterator(last);
-
-      if (first == begin() && last == end())
-      {
-        clear();
-      }
-      else
-      {
-        etl::move(last_, end(), first_);
-        size_t n_delete = static_cast<size_t>(etl::distance(first_, last_));
-
-        // Destroy the elements left over at the end.
-        etl::destroy(p_end - n_delete, p_end);
-        ETL_SUBTRACT_DEBUG_COUNT(n_delete);
-        p_end -= n_delete;
-      }
-
-      return first_;
-    }
-
-    //*********************************************************************
-    /// Swap contents with another vector.  Performs operation on each
-    /// individual element.
-    ///\param other The other vector to swap with.
-    //*********************************************************************
-    void swap(ivector<T>& other)
-    {
-      if (this == &other)
-      {
-        return;
-      }
-
-      ETL_ASSERT_OR_RETURN(this->max_size() >= other.size() && other.max_size() >= this->size(), ETL_ERROR(vector_full));
-
-      ivector<T>& smaller = other.size() > this->size() ? *this : other;
-      ivector<T>& larger  = other.size() > this->size() ? other : *this;
-
-      etl::swap_ranges(smaller.begin(), smaller.end(), larger.begin());
-
-      typename ivector<T>::iterator larger_itr =
-        etl::next(larger.begin(), static_cast<typename etl::iterator_traits< typename ivector<T>::iterator>::difference_type>(smaller.size()));
-
-      etl::move(larger_itr, larger.end(), etl::back_inserter(smaller));
-
-      larger.erase(larger_itr, larger.end());
-    }
-
-    //*************************************************************************
-    /// Assignment operator.
-    //*************************************************************************
-    ivector& operator=(const ivector& rhs)
-    {
-      if (&rhs != this)
-      {
-        assign(rhs.cbegin(), rhs.cend());
-      }
-
-      return *this;
-    }
-
-#if ETL_USING_CPP11
-    //*************************************************************************
-    /// Move assignment operator.
-    //*************************************************************************
-    ivector& operator=(ivector&& rhs) ETL_NOEXCEPT_IF((etl::is_nothrow_move_constructible<T>::value))
-    {
-      if (&rhs != this)
-      {
-        clear();
-        iterator itr = rhs.begin();
-        while (itr != rhs.end())
-        {
-          push_back(etl::move(*itr));
-          ++itr;
+        template<typename T1>
+        iterator emplace(const_iterator position, const T1& value1) {
+            ETL_ASSERT(!full(), ETL_ERROR(vector_full));
+            ETL_ASSERT_CHECK_EXTRA(cbegin() <= position && position <= cend(), ETL_ERROR(vector_out_of_bounds));
+
+            iterator position_ = to_iterator(position);
+
+            if (position_ == end()) {
+                ::new (p_end) T(value1);
+                ++p_end;
+                ETL_INCREMENT_DEBUG_COUNT;
+            } else {
+                // The values may refer to elements that are about to be shifted, so construct the value first.
+                T value(value1);
+
+                create_back(back());
+                etl::move_backward(position_, p_end - 2, p_end - 1);
+                *position_ = value;
+            }
+
+            return position_;
         }
 
-        rhs.initialise();
-      }
+        template<typename T1, typename T2>
+        iterator emplace(const_iterator position, const T1& value1, const T2& value2) {
+            ETL_ASSERT(!full(), ETL_ERROR(vector_full));
+            ETL_ASSERT_CHECK_EXTRA(cbegin() <= position && position <= cend(), ETL_ERROR(vector_out_of_bounds));
 
-      return *this;
-    }
+            iterator position_ = to_iterator(position);
+
+            if (position_ == end()) {
+                ::new (p_end) T(value1, value2);
+                ++p_end;
+                ETL_INCREMENT_DEBUG_COUNT;
+            } else {
+                // The values may refer to elements that are about to be shifted, so construct the value first.
+                T value(value1, value2);
+
+                create_back(back());
+                etl::move_backward(position_, p_end - 2, p_end - 1);
+                *position_ = value;
+            }
+
+            return position_;
+        }
+
+        template<typename T1, typename T2, typename T3>
+        iterator emplace(const_iterator position, const T1& value1, const T2& value2, const T3& value3) {
+            ETL_ASSERT(!full(), ETL_ERROR(vector_full));
+            ETL_ASSERT_CHECK_EXTRA(cbegin() <= position && position <= cend(), ETL_ERROR(vector_out_of_bounds));
+
+            iterator position_ = to_iterator(position);
+
+            if (position_ == end()) {
+                ::new (p_end) T(value1, value2, value3);
+                ++p_end;
+                ETL_INCREMENT_DEBUG_COUNT;
+            } else {
+                // The values may refer to elements that are about to be shifted, so construct the value first.
+                T value(value1, value2, value3);
+
+                create_back(back());
+                etl::move_backward(position_, p_end - 2, p_end - 1);
+                *position_ = value;
+            }
+
+            return position_;
+        }
+
+        template<typename T1, typename T2, typename T3, typename T4>
+        iterator
+        emplace(const_iterator position, const T1& value1, const T2& value2, const T3& value3, const T4& value4) {
+            ETL_ASSERT(!full(), ETL_ERROR(vector_full));
+            ETL_ASSERT_CHECK_EXTRA(cbegin() <= position && position <= cend(), ETL_ERROR(vector_out_of_bounds));
+
+            iterator position_ = to_iterator(position);
+
+            if (position_ == end()) {
+                ::new (p_end) T(value1, value2, value3, value4);
+                ++p_end;
+                ETL_INCREMENT_DEBUG_COUNT;
+            } else {
+                // The values may refer to elements that are about to be shifted, so construct the value first.
+                T value(value1, value2, value3, value4);
+
+                create_back(back());
+                etl::move_backward(position_, p_end - 2, p_end - 1);
+                *position_ = value;
+            }
+
+            return position_;
+        }
 #endif
 
-    //*************************************************************************
-    /// Gets the current size of the vector.
-    ///\return The current size of the vector.
-    //*************************************************************************
-    size_type size() const
-    {
-      return size_t(p_end - p_buffer);
-    }
+        //*********************************************************************
+        /// Inserts 'n' values to the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector
+        /// does not have enough free space.
+        ///\param position The position to insert before.
+        ///\param n        The number of elements to add.
+        ///\param value    The value to insert.
+        //*********************************************************************
+        void insert(const_iterator position, size_t n, const_reference value) {
+            ETL_ASSERT_OR_RETURN((size() + n) <= CAPACITY, ETL_ERROR(vector_full));
+            ETL_ASSERT_CHECK_EXTRA(cbegin() <= position && position <= cend(), ETL_ERROR(vector_out_of_bounds));
 
-    //*************************************************************************
-    /// Checks the 'empty' state of the vector.
-    ///\return <b>true</b> if empty.
-    //*************************************************************************
-    bool empty() const
-    {
-      return (p_end == p_buffer);
-    }
+            iterator position_ = to_iterator(position);
 
-    //*************************************************************************
-    /// Checks the 'full' state of the vector.
-    ///\return <b>true</b> if full.
-    //*************************************************************************
-    bool full() const
-    {
-      return size() == CAPACITY;
-    }
+            size_t insert_n     = n;
+            size_t insert_begin = static_cast<size_t>(etl::distance(begin(), position_));
+            size_t insert_end   = insert_begin + insert_n;
 
-    //*************************************************************************
-    /// Returns the remaining capacity.
-    ///\return The remaining capacity.
-    //*************************************************************************
-    size_t available() const
-    {
-      return max_size() - size();
-    }
+            // Copy old data.
+            size_t   copy_old_n;
+            size_t   construct_old_n;
+            iterator p_construct_old;
+
+            if (insert_end > size()) {
+                copy_old_n      = 0;
+                construct_old_n = size() - insert_begin;
+                p_construct_old = p_buffer + insert_end;
+            } else {
+                copy_old_n      = size() - insert_begin - insert_n;
+                construct_old_n = insert_n;
+                p_construct_old = p_end;
+            }
+
+            size_t copy_new_n      = construct_old_n;
+            size_t construct_new_n = insert_n - copy_new_n;
+
+            // value may refer to an element that is about to be shifted.
+            const_pointer p_value = etl::addressof(value);
+
+            if ((p_value >= position_) && (p_value < p_end)) {
+                p_value += n;
+            }
+
+            // Construct old.
+            etl::uninitialized_move(p_end - construct_old_n, p_end, p_construct_old);
+            ETL_ADD_DEBUG_COUNT(construct_old_n);
+
+            // Copy old.
+            etl::move_backward(
+                p_buffer + insert_begin, p_buffer + insert_begin + copy_old_n, p_buffer + insert_end + copy_old_n);
+
+            // Construct new.
+            etl::uninitialized_fill_n(p_end, construct_new_n, *p_value);
+            ETL_ADD_DEBUG_COUNT(construct_new_n);
+
+            // Copy new.
+            etl::fill_n(p_buffer + insert_begin, copy_new_n, *p_value);
+
+            p_end += n;
+        }
+
+        //*********************************************************************
+        /// Inserts a range of values to the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector
+        /// does not have enough free space. For fundamental and pointer types.
+        ///\param position The position to insert before.
+        ///\param first    The first element to add.
+        ///\param last     The last + 1 element to add.
+        //*********************************************************************
+        template<class TIterator>
+        typename etl::enable_if<!etl::is_integral<TIterator>::value &&
+                                    etl::is_convertible<typename etl::iterator_traits<TIterator>::value_type, T>::value,
+                                void>::type
+        insert(const_iterator position,
+               TIterator      first,
+               TIterator      last,
+               typename etl::enable_if<!etl::is_integral<TIterator>::value, int>::type = 0) {
+            size_t count = static_cast<size_t>(etl::distance(first, last));
+
+            ETL_ASSERT_OR_RETURN((size() + count) <= CAPACITY, ETL_ERROR(vector_full));
+            ETL_ASSERT_CHECK_EXTRA(cbegin() <= position && position <= cend(), ETL_ERROR(vector_out_of_bounds));
+
+            size_t insert_n     = count;
+            size_t insert_begin = static_cast<size_t>(etl::distance(cbegin(), position));
+            size_t insert_end   = insert_begin + insert_n;
+
+            // Move old data.
+            size_t   copy_old_n;
+            size_t   construct_old_n;
+            iterator p_construct_old;
+
+            if (insert_end > size()) {
+                copy_old_n      = 0;
+                construct_old_n = size() - insert_begin;
+                p_construct_old = p_buffer + insert_end;
+            } else {
+                copy_old_n      = size() - insert_begin - insert_n;
+                construct_old_n = insert_n;
+                p_construct_old = p_end;
+            }
+
+            size_t copy_new_n      = construct_old_n;
+            size_t construct_new_n = insert_n - copy_new_n;
+
+            // Move construct old.
+            etl::uninitialized_move(p_end - construct_old_n, p_end, p_construct_old);
+            ETL_ADD_DEBUG_COUNT(construct_old_n);
+
+            // Move old.
+            etl::move_backward(
+                p_buffer + insert_begin, p_buffer + insert_begin + copy_old_n, p_buffer + insert_end + copy_old_n);
+
+            // Copy construct new.
+            etl::uninitialized_copy(first + static_cast<ptrdiff_t>(copy_new_n),
+                                    first + static_cast<ptrdiff_t>(copy_new_n + construct_new_n),
+                                    p_end);
+            ETL_ADD_DEBUG_COUNT(construct_new_n);
+
+            // Copy new.
+            etl::copy(first, first + static_cast<ptrdiff_t>(copy_new_n), p_buffer + insert_begin);
+
+            p_end += count;
+        }
+
+        //*********************************************************************
+        /// Erases an element.
+        ///\param i_element Iterator to the element.
+        ///\return An iterator pointing to the element that followed the erased
+        /// element.
+        //*********************************************************************
+        iterator erase(iterator i_element) {
+            ETL_ASSERT_CHECK_EXTRA(cbegin() <= i_element && i_element < cend(), ETL_ERROR(vector_out_of_bounds));
+
+            etl::move(i_element + 1, end(), i_element);
+            destroy_back();
+
+            return i_element;
+        }
+
+        //*********************************************************************
+        /// Erases an element.
+        ///\param i_element Iterator to the element.
+        ///\return An iterator pointing to the element that followed the erased
+        /// element.
+        //*********************************************************************
+        iterator erase(const_iterator i_element) {
+            ETL_ASSERT_CHECK_EXTRA(cbegin() <= i_element && i_element < cend(), ETL_ERROR(vector_out_of_bounds));
+
+            iterator i_element_ = to_iterator(i_element);
+
+            etl::move(i_element_ + 1, end(), i_element_);
+            destroy_back();
+
+            return i_element_;
+        }
+
+        //*********************************************************************
+        /// Erases a range of elements.
+        /// The range includes all the elements between first and last, including
+        /// the element pointed by first, but not the one pointed by last.
+        ///\param first Iterator to the first element.
+        ///\param last  Iterator to the last element.
+        ///\return An iterator pointing to the element that followed the erased
+        /// element.
+        //*********************************************************************
+        iterator erase(const_iterator first, const_iterator last) {
+            ETL_ASSERT_CHECK_EXTRA(cbegin() <= first && first <= last && last <= cend(),
+                                   ETL_ERROR(vector_out_of_bounds));
+
+            iterator first_ = to_iterator(first);
+            iterator last_  = to_iterator(last);
+
+            if (first == begin() && last == end()) {
+                clear();
+            } else {
+                etl::move(last_, end(), first_);
+                size_t n_delete = static_cast<size_t>(etl::distance(first_, last_));
+
+                // Destroy the elements left over at the end.
+                etl::destroy(p_end - n_delete, p_end);
+                ETL_SUBTRACT_DEBUG_COUNT(n_delete);
+                p_end -= n_delete;
+            }
+
+            return first_;
+        }
+
+        //*********************************************************************
+        /// Swap contents with another vector.  Performs operation on each
+        /// individual element.
+        ///\param other The other vector to swap with.
+        //*********************************************************************
+        void swap(ivector<T>& other) {
+            if (this == &other) {
+                return;
+            }
+
+            ETL_ASSERT_OR_RETURN(this->max_size() >= other.size() && other.max_size() >= this->size(),
+                                 ETL_ERROR(vector_full));
+
+            ivector<T>& smaller = other.size() > this->size() ? *this : other;
+            ivector<T>& larger  = other.size() > this->size() ? other : *this;
+
+            etl::swap_ranges(smaller.begin(), smaller.end(), larger.begin());
+
+            typename ivector<T>::iterator larger_itr =
+                etl::next(larger.begin(),
+                          static_cast<typename etl::iterator_traits<typename ivector<T>::iterator>::difference_type>(
+                              smaller.size()));
+
+            etl::move(larger_itr, larger.end(), etl::back_inserter(smaller));
+
+            larger.erase(larger_itr, larger.end());
+        }
+
+        //*************************************************************************
+        /// Assignment operator.
+        //*************************************************************************
+        ivector& operator=(const ivector& rhs) {
+            if (&rhs != this) {
+                assign(rhs.cbegin(), rhs.cend());
+            }
+
+            return *this;
+        }
+
+#if ETL_USING_CPP11
+        //*************************************************************************
+        /// Move assignment operator.
+        //*************************************************************************
+        ivector& operator=(ivector&& rhs) ETL_NOEXCEPT_IF((etl::is_nothrow_move_constructible<T>::value)) {
+            if (&rhs != this) {
+                clear();
+                iterator itr = rhs.begin();
+                while (itr != rhs.end()) {
+                    push_back(etl::move(*itr));
+                    ++itr;
+                }
+
+                rhs.initialise();
+            }
+
+            return *this;
+        }
+#endif
+
+        //*************************************************************************
+        /// Gets the current size of the vector.
+        ///\return The current size of the vector.
+        //*************************************************************************
+        size_type size() const {
+            return size_t(p_end - p_buffer);
+        }
+
+        //*************************************************************************
+        /// Checks the 'empty' state of the vector.
+        ///\return <b>true</b> if empty.
+        //*************************************************************************
+        bool empty() const {
+            return (p_end == p_buffer);
+        }
+
+        //*************************************************************************
+        /// Checks the 'full' state of the vector.
+        ///\return <b>true</b> if full.
+        //*************************************************************************
+        bool full() const {
+            return size() == CAPACITY;
+        }
+
+        //*************************************************************************
+        /// Returns the remaining capacity.
+        ///\return The remaining capacity.
+        //*************************************************************************
+        size_t available() const {
+            return max_size() - size();
+        }
 
 #ifdef ETL_IVECTOR_REPAIR_ENABLE
-    //*************************************************************************
-    /// Fix the internal pointers after a low level memory copy.
-    //*************************************************************************
-    virtual void repair() = 0;
+        //*************************************************************************
+        /// Fix the internal pointers after a low level memory copy.
+        //*************************************************************************
+        virtual void repair() = 0;
 #endif
 
-  protected:
+    protected:
+        //*********************************************************************
+        /// Constructor.
+        //*********************************************************************
+        ivector(T* p_buffer_, size_t MAX_SIZE) ETL_NOEXCEPT : vector_base(MAX_SIZE),
+                                                              p_buffer(p_buffer_),
+                                                              p_end(p_buffer_) {
+        }
 
-    //*********************************************************************
-    /// Constructor.
-    //*********************************************************************
-    ivector(T* p_buffer_, size_t MAX_SIZE) ETL_NOEXCEPT
-      : vector_base(MAX_SIZE)
-      , p_buffer(p_buffer_)
-      , p_end(p_buffer_)
-    {
-    }
+        //*********************************************************************
+        /// Initialise the vector.
+        //*********************************************************************
+        void initialise() {
+            if ETL_IF_CONSTEXPR (etl::is_trivially_destructible<T>::value) {
+                ETL_RESET_DEBUG_COUNT;
+            } else {
+                etl::destroy(p_buffer, p_end);
+                ETL_SUBTRACT_DEBUG_COUNT(int32_t(etl::distance(p_buffer, p_end)));
+            }
 
-    //*********************************************************************
-    /// Initialise the vector.
-    //*********************************************************************
-    void initialise()
-    {
-      if ETL_IF_CONSTEXPR (etl::is_trivially_destructible<T>::value)
-      {
-        ETL_RESET_DEBUG_COUNT;
-      }
-      else
-      {
-        etl::destroy(p_buffer, p_end);
-        ETL_SUBTRACT_DEBUG_COUNT(int32_t(etl::distance(p_buffer, p_end)));
-      }
+            p_end = p_buffer;
+        }
 
-      p_end = p_buffer;
-    }
+        //*************************************************************************
+        /// Fix the internal pointers after a low level memory copy.
+        //*************************************************************************
+        void repair_buffer(T* p_buffer_) {
+            uintptr_t length = static_cast<uintptr_t>(p_end - p_buffer);
+            p_buffer         = p_buffer_;
+            p_end            = p_buffer_ + length;
+        }
 
-    //*************************************************************************
-    /// Fix the internal pointers after a low level memory copy.
-    //*************************************************************************
-    void repair_buffer(T* p_buffer_)
-    {
-      uintptr_t length = static_cast<uintptr_t>(p_end - p_buffer);
-      p_buffer         = p_buffer_;
-      p_end            = p_buffer_ + length;
-    }
+        pointer p_buffer; ///< Pointer to the start of the buffer.
+        pointer p_end;    ///< Pointer to one past the last element in the buffer.
 
-    pointer p_buffer; ///< Pointer to the start of the buffer.
-    pointer p_end;    ///< Pointer to one past the last element in the buffer.
+    private:
+        //*********************************************************************
+        /// Create a new element with a value at the back
+        //*********************************************************************
+        void create_back(const_reference value) {
+            etl::create_copy_at(p_end, value);
+            ETL_INCREMENT_DEBUG_COUNT;
 
-  private:
-
-    //*********************************************************************
-    /// Create a new element with a value at the back
-    //*********************************************************************
-    void create_back(const_reference value)
-    {
-      etl::create_copy_at(p_end, value);
-      ETL_INCREMENT_DEBUG_COUNT;
-
-      ++p_end;
-    }
+            ++p_end;
+        }
 
 #if ETL_USING_CPP11
-    //*********************************************************************
-    /// Create a new element with a value at the back
-    //*********************************************************************
-    void create_back(rvalue_reference value)
-    {
-      etl::create_copy_at(p_end, etl::move(value));
-      ETL_INCREMENT_DEBUG_COUNT;
+        //*********************************************************************
+        /// Create a new element with a value at the back
+        //*********************************************************************
+        void create_back(rvalue_reference value) {
+            etl::create_copy_at(p_end, etl::move(value));
+            ETL_INCREMENT_DEBUG_COUNT;
 
-      ++p_end;
-    }
+            ++p_end;
+        }
 #endif
 
-    //*********************************************************************
-    /// Destroy an element at the back.
-    //*********************************************************************
-    void destroy_back()
-    {
-      --p_end;
+        //*********************************************************************
+        /// Destroy an element at the back.
+        //*********************************************************************
+        void destroy_back() {
+            --p_end;
 
-      etl::destroy_at(p_end);
-      ETL_DECREMENT_DEBUG_COUNT;
-    }
+            etl::destroy_at(p_end);
+            ETL_DECREMENT_DEBUG_COUNT;
+        }
 
-    // Disable copy construction.
-    ivector(const ivector&) ETL_DELETE;
+        // Disable copy construction.
+        ivector(const ivector&) ETL_DELETE;
 
-  private:
-
-    //*************************************************************************
-    /// Convert from const_iterator to iterator
-    //*************************************************************************
-    ETL_CONSTEXPR iterator to_iterator(const_iterator itr) const
-    {
-      return const_cast<iterator>(itr);
-    }
-  };
-
-  //***************************************************************************
-  /// The base class for specifically sized vectors.
-  /// Can be used as a reference type for all vectors containing a specific
-  /// type.
-  /// A vector for when T is an object pointer.
-  ///\ingroup vector
-  //***************************************************************************
-  template <typename T>
-  class ivector<T, typename etl::enable_if<etl::is_object_pointer<T>::value>::type> : public etl::pvoidvector
-  {
-  public:
-
-    typedef T        value_type;
-    typedef T&       reference;
-    typedef const T& const_reference;
-#if ETL_USING_CPP11
-    typedef T&& rvalue_reference;
-#endif
-    typedef T*                                                       pointer;
-    typedef const T*                                                 const_pointer;
-    typedef T*                                                       iterator;
-    typedef const T*                                                 const_iterator;
-    typedef ETL_OR_STD::reverse_iterator<iterator>                   reverse_iterator;
-    typedef ETL_OR_STD::reverse_iterator<const_iterator>             const_reverse_iterator;
-    typedef size_t                                                   size_type;
-    typedef typename etl::iterator_traits<iterator>::difference_type difference_type;
-
-  private:
-
-    typedef pvoidvector base_t;
-
-    template <typename TIterator>
-    struct is_compatible_iterator
-      : etl::bool_constant<etl::is_pointer<typename etl::iterator_traits<TIterator>::value_type>::value
-                           && etl::is_convertible<typename etl::iterator_traits<TIterator>::value_type, value_type>::value>
-    {
+    private:
+        //*************************************************************************
+        /// Convert from const_iterator to iterator
+        //*************************************************************************
+        ETL_CONSTEXPR iterator to_iterator(const_iterator itr) const {
+            return const_cast<iterator>(itr);
+        }
     };
 
-  public:
+    //***************************************************************************
+    /// The base class for specifically sized vectors.
+    /// Can be used as a reference type for all vectors containing a specific
+    /// type.
+    /// A vector for when T is an object pointer.
+    ///\ingroup vector
+    //***************************************************************************
+    template<typename T>
+    class ivector<T, typename etl::enable_if<etl::is_object_pointer<T>::value>::type> : public etl::pvoidvector {
+    public:
+        typedef T        value_type;
+        typedef T&       reference;
+        typedef const T& const_reference;
+#if ETL_USING_CPP11
+        typedef T&& rvalue_reference;
+#endif
+        typedef T*                                                       pointer;
+        typedef const T*                                                 const_pointer;
+        typedef T*                                                       iterator;
+        typedef const T*                                                 const_iterator;
+        typedef ETL_OR_STD::reverse_iterator<iterator>                   reverse_iterator;
+        typedef ETL_OR_STD::reverse_iterator<const_iterator>             const_reverse_iterator;
+        typedef size_t                                                   size_type;
+        typedef typename etl::iterator_traits<iterator>::difference_type difference_type;
 
-    //*********************************************************************
-    /// Returns an iterator to the beginning of the vector.
-    ///\return An iterator to the beginning of the vector.
-    //*********************************************************************
-    iterator begin()
-    {
-      return iterator(base_t::begin());
-    }
+    private:
+        typedef pvoidvector base_t;
 
-    //*********************************************************************
-    /// Returns a const_iterator to the beginning of the vector.
-    ///\return A const iterator to the beginning of the vector.
-    //*********************************************************************
-    const_iterator begin() const
-    {
-      return const_iterator(base_t::begin());
-    }
+        template<typename TIterator>
+        struct is_compatible_iterator
+            : etl::bool_constant<
+                  etl::is_pointer<typename etl::iterator_traits<TIterator>::value_type>::value &&
+                  etl::is_convertible<typename etl::iterator_traits<TIterator>::value_type, value_type>::value> {};
 
-    //*********************************************************************
-    /// Returns an iterator to the end of the vector.
-    ///\return An iterator to the end of the vector.
-    //*********************************************************************
-    iterator end()
-    {
-      return iterator(base_t::end());
-    }
+    public:
+        //*********************************************************************
+        /// Returns an iterator to the beginning of the vector.
+        ///\return An iterator to the beginning of the vector.
+        //*********************************************************************
+        iterator begin() {
+            return iterator(base_t::begin());
+        }
 
-    //*********************************************************************
-    /// Returns a const_iterator to the end of the vector.
-    ///\return A const iterator to the end of the vector.
-    //*********************************************************************
-    const_iterator end() const
-    {
-      return const_iterator(base_t::end());
-    }
+        //*********************************************************************
+        /// Returns a const_iterator to the beginning of the vector.
+        ///\return A const iterator to the beginning of the vector.
+        //*********************************************************************
+        const_iterator begin() const {
+            return const_iterator(base_t::begin());
+        }
 
-    //*********************************************************************
-    /// Returns a const_iterator to the beginning of the vector.
-    ///\return A const iterator to the beginning of the vector.
-    //*********************************************************************
-    const_iterator cbegin() const
-    {
-      return const_iterator(base_t::cbegin());
-    }
+        //*********************************************************************
+        /// Returns an iterator to the end of the vector.
+        ///\return An iterator to the end of the vector.
+        //*********************************************************************
+        iterator end() {
+            return iterator(base_t::end());
+        }
 
-    //*********************************************************************
-    /// Returns a const_iterator to the end of the vector.
-    ///\return A const iterator to the end of the vector.
-    //*********************************************************************
-    const_iterator cend() const
-    {
-      return const_iterator(base_t::cend());
-    }
+        //*********************************************************************
+        /// Returns a const_iterator to the end of the vector.
+        ///\return A const iterator to the end of the vector.
+        //*********************************************************************
+        const_iterator end() const {
+            return const_iterator(base_t::end());
+        }
 
-    //*********************************************************************
-    /// Returns an reverse iterator to the reverse beginning of the vector.
-    ///\return Iterator to the reverse beginning of the vector.
-    //*********************************************************************
-    reverse_iterator rbegin()
-    {
-      return reverse_iterator(iterator(base_t::end()));
-    }
+        //*********************************************************************
+        /// Returns a const_iterator to the beginning of the vector.
+        ///\return A const iterator to the beginning of the vector.
+        //*********************************************************************
+        const_iterator cbegin() const {
+            return const_iterator(base_t::cbegin());
+        }
 
-    //*********************************************************************
-    /// Returns a const reverse iterator to the reverse beginning of the vector.
-    ///\return Const iterator to the reverse beginning of the vector.
-    //*********************************************************************
-    const_reverse_iterator rbegin() const
-    {
-      return const_reverse_iterator(const_iterator(base_t::end()));
-    }
+        //*********************************************************************
+        /// Returns a const_iterator to the end of the vector.
+        ///\return A const iterator to the end of the vector.
+        //*********************************************************************
+        const_iterator cend() const {
+            return const_iterator(base_t::cend());
+        }
 
-    //*********************************************************************
-    /// Returns a reverse iterator to the end + 1 of the vector.
-    ///\return Reverse iterator to the end + 1 of the vector.
-    //*********************************************************************
-    reverse_iterator rend()
-    {
-      return reverse_iterator(iterator(base_t::begin()));
-    }
+        //*********************************************************************
+        /// Returns an reverse iterator to the reverse beginning of the vector.
+        ///\return Iterator to the reverse beginning of the vector.
+        //*********************************************************************
+        reverse_iterator rbegin() {
+            return reverse_iterator(iterator(base_t::end()));
+        }
 
-    //*********************************************************************
-    /// Returns a const reverse iterator to the end + 1 of the vector.
-    ///\return Const reverse iterator to the end + 1 of the vector.
-    //*********************************************************************
-    const_reverse_iterator rend() const
-    {
-      return const_reverse_iterator(const_iterator(base_t::begin()));
-    }
+        //*********************************************************************
+        /// Returns a const reverse iterator to the reverse beginning of the vector.
+        ///\return Const iterator to the reverse beginning of the vector.
+        //*********************************************************************
+        const_reverse_iterator rbegin() const {
+            return const_reverse_iterator(const_iterator(base_t::end()));
+        }
 
-    //*********************************************************************
-    /// Returns a const reverse iterator to the reverse beginning of the vector.
-    ///\return Const reverse iterator to the reverse beginning of the vector.
-    //*********************************************************************
-    const_reverse_iterator crbegin() const
-    {
-      return const_reverse_iterator(const_iterator(base_t::cend()));
-    }
+        //*********************************************************************
+        /// Returns a reverse iterator to the end + 1 of the vector.
+        ///\return Reverse iterator to the end + 1 of the vector.
+        //*********************************************************************
+        reverse_iterator rend() {
+            return reverse_iterator(iterator(base_t::begin()));
+        }
 
-    //*********************************************************************
-    /// Returns a const reverse iterator to the end + 1 of the vector.
-    ///\return Const reverse iterator to the end + 1 of the vector.
-    //*********************************************************************
-    const_reverse_iterator crend() const
-    {
-      return const_reverse_iterator(const_iterator(base_t::cbegin()));
-    }
+        //*********************************************************************
+        /// Returns a const reverse iterator to the end + 1 of the vector.
+        ///\return Const reverse iterator to the end + 1 of the vector.
+        //*********************************************************************
+        const_reverse_iterator rend() const {
+            return const_reverse_iterator(const_iterator(base_t::begin()));
+        }
 
-    //*********************************************************************
-    /// Resizes the vector.
-    /// If asserts or exceptions are enabled and the new size is larger than the
-    /// maximum then a vector_full is thrown.
-    ///\param new_size The new size.
-    //*********************************************************************
-    void resize(size_t new_size)
-    {
-      base_t::resize(new_size);
-    }
+        //*********************************************************************
+        /// Returns a const reverse iterator to the reverse beginning of the vector.
+        ///\return Const reverse iterator to the reverse beginning of the vector.
+        //*********************************************************************
+        const_reverse_iterator crbegin() const {
+            return const_reverse_iterator(const_iterator(base_t::cend()));
+        }
 
-    //*********************************************************************
-    /// Resizes the vector.
-    /// If asserts or exceptions are enabled and the new size is larger than the
-    /// maximum then a vector_full is thrown.
-    ///\param new_size The new size.
-    ///\param value   The value to fill new elements with. Default = default
-    /// constructed value.
-    //*********************************************************************
-    void resize(size_t new_size, value_type value)
-    {
-      base_t::resize(new_size, to_void_ptr(value));
-    }
+        //*********************************************************************
+        /// Returns a const reverse iterator to the end + 1 of the vector.
+        ///\return Const reverse iterator to the end + 1 of the vector.
+        //*********************************************************************
+        const_reverse_iterator crend() const {
+            return const_reverse_iterator(const_iterator(base_t::cbegin()));
+        }
 
-    //*********************************************************************
-    /// Resizes the vector, but does not initialise new entries.
-    ///\param new_size The new size.
-    //*********************************************************************
-    void uninitialized_resize(size_t new_size)
-    {
-      base_t::uninitialized_resize(new_size);
-    }
+        //*********************************************************************
+        /// Resizes the vector.
+        /// If asserts or exceptions are enabled and the new size is larger than the
+        /// maximum then a vector_full is thrown.
+        ///\param new_size The new size.
+        //*********************************************************************
+        void resize(size_t new_size) {
+            base_t::resize(new_size);
+        }
 
-    //*********************************************************************
-    /// Returns a reference to the value at index 'i'
-    ///\param i The index.
-    ///\return A reference to the value at index 'i'
-    //*********************************************************************
-    reference operator[](size_t i)
-    {
-      return reference(base_t::operator[](i));
-    }
+        //*********************************************************************
+        /// Resizes the vector.
+        /// If asserts or exceptions are enabled and the new size is larger than the
+        /// maximum then a vector_full is thrown.
+        ///\param new_size The new size.
+        ///\param value   The value to fill new elements with. Default = default
+        /// constructed value.
+        //*********************************************************************
+        void resize(size_t new_size, value_type value) {
+            base_t::resize(new_size, to_void_ptr(value));
+        }
 
-    //*********************************************************************
-    /// Returns a const reference to the value at index 'i'
-    ///\param i The index.
-    ///\return A const reference to the value at index 'i'
-    //*********************************************************************
-    const_reference operator[](size_t i) const
-    {
-      return const_reference(base_t::operator[](i));
-    }
+        //*********************************************************************
+        /// Resizes the vector, but does not initialise new entries.
+        ///\param new_size The new size.
+        //*********************************************************************
+        void uninitialized_resize(size_t new_size) {
+            base_t::uninitialized_resize(new_size);
+        }
 
-    //*********************************************************************
-    /// Returns a reference to the value at index 'i'
-    /// If asserts or exceptions are enabled, emits an etl::vector_out_of_bounds
-    /// if the index is out of range.
-    ///\param i The index.
-    ///\return A reference to the value at index 'i'
-    //*********************************************************************
-    reference at(size_t i)
-    {
-      return reference(base_t::at(i));
-    }
+        //*********************************************************************
+        /// Returns a reference to the value at index 'i'
+        ///\param i The index.
+        ///\return A reference to the value at index 'i'
+        //*********************************************************************
+        reference operator[](size_t i) {
+            return reference(base_t::operator[](i));
+        }
 
-    //*********************************************************************
-    /// Returns a const reference to the value at index 'i'
-    /// If asserts or exceptions are enabled, emits an etl::vector_out_of_bounds
-    /// if the index is out of range.
-    ///\param i The index.
-    ///\return A const reference to the value at index 'i'
-    //*********************************************************************
-    const_reference at(size_t i) const
-    {
-      return const_reference(base_t::at(i));
-    }
+        //*********************************************************************
+        /// Returns a const reference to the value at index 'i'
+        ///\param i The index.
+        ///\return A const reference to the value at index 'i'
+        //*********************************************************************
+        const_reference operator[](size_t i) const {
+            return const_reference(base_t::operator[](i));
+        }
 
-    //*********************************************************************
-    /// Returns a reference to the first element.
-    ///\return A reference to the first element.
-    //*********************************************************************
-    reference front()
-    {
-      return reference(base_t::front());
-    }
+        //*********************************************************************
+        /// Returns a reference to the value at index 'i'
+        /// If asserts or exceptions are enabled, emits an etl::vector_out_of_bounds
+        /// if the index is out of range.
+        ///\param i The index.
+        ///\return A reference to the value at index 'i'
+        //*********************************************************************
+        reference at(size_t i) {
+            return reference(base_t::at(i));
+        }
 
-    //*********************************************************************
-    /// Returns a const reference to the first element.
-    ///\return A const reference to the first element.
-    //*********************************************************************
-    const_reference front() const
-    {
-      return const_reference(base_t::front());
-    }
+        //*********************************************************************
+        /// Returns a const reference to the value at index 'i'
+        /// If asserts or exceptions are enabled, emits an etl::vector_out_of_bounds
+        /// if the index is out of range.
+        ///\param i The index.
+        ///\return A const reference to the value at index 'i'
+        //*********************************************************************
+        const_reference at(size_t i) const {
+            return const_reference(base_t::at(i));
+        }
 
-    //*********************************************************************
-    /// Returns a reference to the last element.
-    ///\return A reference to the last element.
-    //*********************************************************************
-    reference back()
-    {
-      return reference(base_t::back());
-    }
+        //*********************************************************************
+        /// Returns a reference to the first element.
+        ///\return A reference to the first element.
+        //*********************************************************************
+        reference front() {
+            return reference(base_t::front());
+        }
 
-    //*********************************************************************
-    /// Returns a const reference to the last element.
-    ///\return A const reference to the last element.
-    //*********************************************************************
-    const_reference back() const
-    {
-      return const_reference(base_t::back());
-    }
+        //*********************************************************************
+        /// Returns a const reference to the first element.
+        ///\return A const reference to the first element.
+        //*********************************************************************
+        const_reference front() const {
+            return const_reference(base_t::front());
+        }
 
-    //*********************************************************************
-    /// Returns a pointer to the beginning of the vector data.
-    ///\return A pointer to the beginning of the vector data.
-    //*********************************************************************
-    pointer data()
-    {
-      return pointer(base_t::data());
-    }
+        //*********************************************************************
+        /// Returns a reference to the last element.
+        ///\return A reference to the last element.
+        //*********************************************************************
+        reference back() {
+            return reference(base_t::back());
+        }
 
-    //*********************************************************************
-    /// Returns a const pointer to the beginning of the vector data.
-    ///\return A const pointer to the beginning of the vector data.
-    //*********************************************************************
-    const_pointer data() const
-    {
-      return const_pointer(base_t::data());
-    }
+        //*********************************************************************
+        /// Returns a const reference to the last element.
+        ///\return A const reference to the last element.
+        //*********************************************************************
+        const_reference back() const {
+            return const_reference(base_t::back());
+        }
 
-    //*********************************************************************
-    /// Assigns values to the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector
-    /// does not have enough free space. If asserts or exceptions are enabled,
-    /// emits vector_iterator if the iterators are reversed.
-    ///\param first The iterator to the first element.
-    ///\param last  The iterator to the last element + 1.
-    //*********************************************************************
-    template <typename TIterator>
-    typename etl::enable_if<is_compatible_iterator<TIterator>::value, void>::type assign(TIterator first, TIterator last)
-    {
-      base_t::assign(first, last);
-    }
+        //*********************************************************************
+        /// Returns a pointer to the beginning of the vector data.
+        ///\return A pointer to the beginning of the vector data.
+        //*********************************************************************
+        pointer data() {
+            return pointer(base_t::data());
+        }
 
-    //*********************************************************************
-    /// Assigns values to the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector
-    /// does not have enough free space.
-    ///\param n     The number of elements to add.
-    ///\param value The value to insert for each element.
-    //*********************************************************************
-    void assign(size_t n, const_reference value)
-    {
-      base_t::assign(n, to_void_ptr(value));
-    }
+        //*********************************************************************
+        /// Returns a const pointer to the beginning of the vector data.
+        ///\return A const pointer to the beginning of the vector data.
+        //*********************************************************************
+        const_pointer data() const {
+            return const_pointer(base_t::data());
+        }
 
-    //*************************************************************************
-    /// Clears the vector.
-    //*************************************************************************
-    void clear()
-    {
-      base_t::clear();
-    }
+        //*********************************************************************
+        /// Assigns values to the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector
+        /// does not have enough free space. If asserts or exceptions are enabled,
+        /// emits vector_iterator if the iterators are reversed.
+        ///\param first The iterator to the first element.
+        ///\param last  The iterator to the last element + 1.
+        //*********************************************************************
+        template<typename TIterator>
+        typename etl::enable_if<is_compatible_iterator<TIterator>::value, void>::type assign(TIterator first,
+                                                                                             TIterator last) {
+            base_t::assign(first, last);
+        }
 
-    //*********************************************************************
-    /// Inserts a value at the end of the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector is
-    /// already full.
-    ///\param value The value to add.
-    //*********************************************************************
-    void push_back(const_reference value)
-    {
-      base_t::push_back(to_void_ptr(value));
-    }
+        //*********************************************************************
+        /// Assigns values to the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector
+        /// does not have enough free space.
+        ///\param n     The number of elements to add.
+        ///\param value The value to insert for each element.
+        //*********************************************************************
+        void assign(size_t n, const_reference value) {
+            base_t::assign(n, to_void_ptr(value));
+        }
 
-    //*********************************************************************
-    /// Constructs a value at the end of the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector is
-    /// already full.
-    ///\param value The value to add.
-    //*********************************************************************
-    reference emplace_back()
-    {
-      base_t::emplace_back(ETL_NULLPTR);
+        //*************************************************************************
+        /// Clears the vector.
+        //*************************************************************************
+        void clear() {
+            base_t::clear();
+        }
 
-      return back();
-    }
+        //*********************************************************************
+        /// Inserts a value at the end of the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector is
+        /// already full.
+        ///\param value The value to add.
+        //*********************************************************************
+        void push_back(const_reference value) {
+            base_t::push_back(to_void_ptr(value));
+        }
 
-    //*********************************************************************
-    /// Constructs a value at the end of the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector is
-    /// already full.
-    ///\param value The value to add.
-    //*********************************************************************
-    reference emplace_back(const_reference value)
-    {
-      base_t::emplace_back(to_void_ptr(value));
+        //*********************************************************************
+        /// Constructs a value at the end of the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector is
+        /// already full.
+        ///\param value The value to add.
+        //*********************************************************************
+        reference emplace_back() {
+            base_t::emplace_back(ETL_NULLPTR);
 
-      return back();
-    }
+            return back();
+        }
 
-    //*************************************************************************
-    /// Removes an element from the end of the vector.
-    /// Does nothing if the vector is empty.
-    //*************************************************************************
-    void pop_back()
-    {
-      base_t::pop_back();
-    }
+        //*********************************************************************
+        /// Constructs a value at the end of the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector is
+        /// already full.
+        ///\param value The value to add.
+        //*********************************************************************
+        reference emplace_back(const_reference value) {
+            base_t::emplace_back(to_void_ptr(value));
 
-    //*********************************************************************
-    /// Inserts a value to the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector is
-    /// already full.
-    ///\param position The position to insert before.
-    ///\param value    The value to insert.
-    //*********************************************************************
-    iterator insert(const_iterator position, const_reference value)
-    {
-      return iterator(base_t::insert(base_t::iterator(position), to_void_ptr(value)));
-    }
+            return back();
+        }
 
-    //*************************************************************************
-    /// Emplaces a value to the vector at the specified position.
-    //*************************************************************************
-    iterator emplace(const_iterator position)
-    {
-      return iterator(base_t::emplace(base_t::iterator(position), ETL_NULLPTR));
-    }
+        //*************************************************************************
+        /// Removes an element from the end of the vector.
+        /// Does nothing if the vector is empty.
+        //*************************************************************************
+        void pop_back() {
+            base_t::pop_back();
+        }
 
-    //*************************************************************************
-    /// Emplaces a value to the vector at the specified position.
-    //*************************************************************************
-    iterator emplace(const_iterator position, const_reference value)
-    {
-      return iterator(base_t::emplace(base_t::iterator(position), to_void_ptr(value)));
-    }
+        //*********************************************************************
+        /// Inserts a value to the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector is
+        /// already full.
+        ///\param position The position to insert before.
+        ///\param value    The value to insert.
+        //*********************************************************************
+        iterator insert(const_iterator position, const_reference value) {
+            return iterator(base_t::insert(base_t::iterator(position), to_void_ptr(value)));
+        }
 
-    //*********************************************************************
-    /// Inserts 'n' values to the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector
-    /// does not have enough free space.
-    ///\param position The position to insert before.
-    ///\param n        The number of elements to add.
-    ///\param value    The value to insert.
-    //*********************************************************************
-    void insert(const_iterator position, size_t n, const_reference value)
-    {
-      base_t::insert(base_t::const_iterator(position), n, to_void_ptr(value));
-    }
+        //*************************************************************************
+        /// Emplaces a value to the vector at the specified position.
+        //*************************************************************************
+        iterator emplace(const_iterator position) {
+            return iterator(base_t::emplace(base_t::iterator(position), ETL_NULLPTR));
+        }
 
-    //*********************************************************************
-    /// Inserts a range of values to the vector.
-    /// If asserts or exceptions are enabled, emits vector_full if the vector
-    /// does not have enough free space.
-    ///\param position The position to insert before.
-    ///\param first    The first element to add.
-    ///\param last     The last + 1 element to add.
-    //*********************************************************************
-    template <typename TIterator>
-    typename etl::enable_if< is_compatible_iterator<TIterator>::value, void>::type insert(const_iterator position, TIterator first, TIterator last)
-    {
-      base_t::insert(base_t::const_iterator(position), first, last);
-    }
+        //*************************************************************************
+        /// Emplaces a value to the vector at the specified position.
+        //*************************************************************************
+        iterator emplace(const_iterator position, const_reference value) {
+            return iterator(base_t::emplace(base_t::iterator(position), to_void_ptr(value)));
+        }
 
-    //*********************************************************************
-    /// Erases an element.
-    ///\param i_element Iterator to the element.
-    ///\return An iterator pointing to the element that followed the erased
-    /// element.
-    //*********************************************************************
-    iterator erase(iterator i_element)
-    {
-      return iterator(base_t::erase(base_t::iterator(i_element)));
-    }
+        //*********************************************************************
+        /// Inserts 'n' values to the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector
+        /// does not have enough free space.
+        ///\param position The position to insert before.
+        ///\param n        The number of elements to add.
+        ///\param value    The value to insert.
+        //*********************************************************************
+        void insert(const_iterator position, size_t n, const_reference value) {
+            base_t::insert(base_t::const_iterator(position), n, to_void_ptr(value));
+        }
 
-    //*********************************************************************
-    /// Erases an element.
-    ///\param i_element Iterator to the element.
-    ///\return An iterator pointing to the element that followed the erased
-    /// element.
-    //*********************************************************************
-    iterator erase(const_iterator i_element)
-    {
-      return iterator(base_t::erase(base_t::const_iterator(i_element)));
-    }
+        //*********************************************************************
+        /// Inserts a range of values to the vector.
+        /// If asserts or exceptions are enabled, emits vector_full if the vector
+        /// does not have enough free space.
+        ///\param position The position to insert before.
+        ///\param first    The first element to add.
+        ///\param last     The last + 1 element to add.
+        //*********************************************************************
+        template<typename TIterator>
+        typename etl::enable_if<is_compatible_iterator<TIterator>::value, void>::type
+        insert(const_iterator position, TIterator first, TIterator last) {
+            base_t::insert(base_t::const_iterator(position), first, last);
+        }
 
-    //*********************************************************************
-    /// Erases a range of elements.
-    /// The range includes all the elements between first and last, including
-    /// the element pointed by first, but not the one pointed by last.
-    ///\param first Iterator to the first element.
-    ///\param last  Iterator to the last element.
-    ///\return An iterator pointing to the element that followed the erased
-    /// element.
-    //*********************************************************************
-    iterator erase(const_iterator first, const_iterator last)
-    {
-      return iterator(base_t::erase(base_t::const_iterator(first), base_t::const_iterator(last)));
-    }
+        //*********************************************************************
+        /// Erases an element.
+        ///\param i_element Iterator to the element.
+        ///\return An iterator pointing to the element that followed the erased
+        /// element.
+        //*********************************************************************
+        iterator erase(iterator i_element) {
+            return iterator(base_t::erase(base_t::iterator(i_element)));
+        }
 
-    //*********************************************************************
-    /// Swap contents with another vector.  Performs operation on each
-    /// individual element.
-    ///\param other The other vector to swap with.
-    //*********************************************************************
-    void swap(ivector<T>& other)
-    {
-      if (this == &other)
-      {
-        return;
-      }
+        //*********************************************************************
+        /// Erases an element.
+        ///\param i_element Iterator to the element.
+        ///\return An iterator pointing to the element that followed the erased
+        /// element.
+        //*********************************************************************
+        iterator erase(const_iterator i_element) {
+            return iterator(base_t::erase(base_t::const_iterator(i_element)));
+        }
 
-      ETL_ASSERT_OR_RETURN(this->max_size() >= other.size() && other.max_size() >= this->size(), ETL_ERROR(vector_full));
+        //*********************************************************************
+        /// Erases a range of elements.
+        /// The range includes all the elements between first and last, including
+        /// the element pointed by first, but not the one pointed by last.
+        ///\param first Iterator to the first element.
+        ///\param last  Iterator to the last element.
+        ///\return An iterator pointing to the element that followed the erased
+        /// element.
+        //*********************************************************************
+        iterator erase(const_iterator first, const_iterator last) {
+            return iterator(base_t::erase(base_t::const_iterator(first), base_t::const_iterator(last)));
+        }
 
-      ivector<T>& smaller = other.size() > this->size() ? *this : other;
-      ivector<T>& larger  = other.size() > this->size() ? other : *this;
+        //*********************************************************************
+        /// Swap contents with another vector.  Performs operation on each
+        /// individual element.
+        ///\param other The other vector to swap with.
+        //*********************************************************************
+        void swap(ivector<T>& other) {
+            if (this == &other) {
+                return;
+            }
 
-      etl::swap_ranges(smaller.begin(), smaller.end(), larger.begin());
+            ETL_ASSERT_OR_RETURN(this->max_size() >= other.size() && other.max_size() >= this->size(),
+                                 ETL_ERROR(vector_full));
 
-      typename ivector<T>::iterator larger_itr = etl::next(larger.begin(), static_cast<ptrdiff_t>(smaller.size()));
+            ivector<T>& smaller = other.size() > this->size() ? *this : other;
+            ivector<T>& larger  = other.size() > this->size() ? other : *this;
 
-      etl::move(larger_itr, larger.end(), etl::back_inserter(smaller));
+            etl::swap_ranges(smaller.begin(), smaller.end(), larger.begin());
 
-      larger.erase(larger_itr, larger.end());
-    }
+            typename ivector<T>::iterator larger_itr =
+                etl::next(larger.begin(), static_cast<ptrdiff_t>(smaller.size()));
 
-    //*************************************************************************
-    /// Assignment operator.
-    //*************************************************************************
-    ivector& operator=(const ivector& rhs)
-    {
-      base_t::operator=(rhs);
+            etl::move(larger_itr, larger.end(), etl::back_inserter(smaller));
 
-      return *this;
-    }
+            larger.erase(larger_itr, larger.end());
+        }
+
+        //*************************************************************************
+        /// Assignment operator.
+        //*************************************************************************
+        ivector& operator=(const ivector& rhs) {
+            base_t::operator=(rhs);
+
+            return *this;
+        }
 
 #if ETL_USING_CPP11
-    //*************************************************************************
-    /// Move assignment operator.
-    //*************************************************************************
-    ivector& operator=(ivector&& rhs)
-    {
-      (void)base_t::operator=(etl::move(rhs));
+        //*************************************************************************
+        /// Move assignment operator.
+        //*************************************************************************
+        ivector& operator=(ivector&& rhs) {
+            (void)base_t::operator=(etl::move(rhs));
 
-      return *this;
-    }
+            return *this;
+        }
 #endif
 
 #ifdef ETL_IVECTOR_REPAIR_ENABLE
-    //*************************************************************************
-    /// Fix the internal pointers after a low level memory copy.
-    //*************************************************************************
-    virtual void repair() = 0;
+        //*************************************************************************
+        /// Fix the internal pointers after a low level memory copy.
+        //*************************************************************************
+        virtual void repair() = 0;
 #endif
 
-  protected:
+    protected:
+        //*********************************************************************
+        /// Constructor.
+        //*********************************************************************
+        ivector(pointer p_buffer_, size_t MAX_SIZE) ETL_NOEXCEPT : pvoidvector(to_void_pptr(p_buffer_), MAX_SIZE) {
+        }
 
-    //*********************************************************************
-    /// Constructor.
-    //*********************************************************************
-    ivector(pointer p_buffer_, size_t MAX_SIZE) ETL_NOEXCEPT
-      : pvoidvector(to_void_pptr(p_buffer_), MAX_SIZE)
-    {
+        //*********************************************************************
+        /// Initialise the vector.
+        //*********************************************************************
+        void initialise() {
+            base_t::initialise();
+        }
+
+        //*************************************************************************
+        /// Fix the internal pointers after a low level memory copy.
+        //*************************************************************************
+        void repair_buffer(pointer p_buffer_) {
+            base_t::repair_buffer(to_void_pptr(p_buffer_));
+        }
+
+    private:
+        // Disable copy construction.
+        ivector(const ivector&) ETL_DELETE;
+
+        // Convert from const_reference to void*
+        static ETL_CONSTEXPR14 void* to_void_ptr(const_reference value) ETL_NOEXCEPT {
+            return const_cast<void*>(static_cast<const void*>(value));
+        }
+
+        // Convert from pointer to void**
+        static ETL_CONSTEXPR14 void** to_void_pptr(pointer p_buffer) ETL_NOEXCEPT {
+            ETL_STATIC_ASSERT(!etl::is_const<typename etl::remove_pointer<pointer>::type>::value,
+                              "to_void_pptr must not remove const from the pointed-to "
+                              "element type");
+
+            return static_cast<void**>(const_cast<void*>(static_cast<const void*>(p_buffer)));
+        }
+    };
+
+    //***************************************************************************
+    /// Equal operator.
+    ///\param lhs Reference to the first vector.
+    ///\param rhs Reference to the second vector.
+    ///\return <b>true</b> if the arrays are equal, otherwise <b>false</b>
+    ///\ingroup vector
+    //***************************************************************************
+    template<typename T>
+    bool operator==(const etl::ivector<T>& lhs, const etl::ivector<T>& rhs) {
+        return (lhs.size() == rhs.size()) && etl::equal(lhs.begin(), lhs.end(), rhs.begin());
     }
 
-    //*********************************************************************
-    /// Initialise the vector.
-    //*********************************************************************
-    void initialise()
-    {
-      base_t::initialise();
+    //***************************************************************************
+    /// Not equal operator.
+    ///\param lhs Reference to the first vector.
+    ///\param rhs Reference to the second vector.
+    ///\return <b>true</b> if the arrays are not equal, otherwise <b>false</b>
+    ///\ingroup vector
+    //***************************************************************************
+    template<typename T>
+    bool operator!=(const etl::ivector<T>& lhs, const etl::ivector<T>& rhs) {
+        return !(lhs == rhs);
     }
 
-    //*************************************************************************
-    /// Fix the internal pointers after a low level memory copy.
-    //*************************************************************************
-    void repair_buffer(pointer p_buffer_)
-    {
-      base_t::repair_buffer(to_void_pptr(p_buffer_));
+    //***************************************************************************
+    /// Less than operator.
+    ///\param lhs Reference to the first vector.
+    ///\param rhs Reference to the second vector.
+    ///\return <b>true</b> if the first vector is lexicographically less than the
+    /// second, otherwise <b>false</b> \ingroup vector
+    //***************************************************************************
+    template<typename T>
+    bool operator<(const etl::ivector<T>& lhs, const etl::ivector<T>& rhs) {
+        return etl::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
     }
 
-  private:
-
-    // Disable copy construction.
-    ivector(const ivector&) ETL_DELETE;
-
-    // Convert from const_reference to void*
-    static ETL_CONSTEXPR14 void* to_void_ptr(const_reference value) ETL_NOEXCEPT
-    {
-      return const_cast<void*>(static_cast<const void*>(value));
+    //***************************************************************************
+    /// Greater than operator.
+    ///\param lhs Reference to the first vector.
+    ///\param rhs Reference to the second vector.
+    ///\return <b>true</b> if the first vector is lexicographically greater than
+    /// the second, otherwise <b>false</b> \ingroup vector
+    //***************************************************************************
+    template<typename T>
+    bool operator>(const etl::ivector<T>& lhs, const etl::ivector<T>& rhs) {
+        return (rhs < lhs);
     }
 
-    // Convert from pointer to void**
-    static ETL_CONSTEXPR14 void** to_void_pptr(pointer p_buffer) ETL_NOEXCEPT
-    {
-      ETL_STATIC_ASSERT(!etl::is_const<typename etl::remove_pointer<pointer>::type>::value,
-                        "to_void_pptr must not remove const from the pointed-to element type");
-
-      return static_cast<void**>(const_cast<void*>(static_cast<const void*>(p_buffer)));
+    //***************************************************************************
+    /// Less than or equal operator.
+    ///\param lhs Reference to the first vector.
+    ///\param rhs Reference to the second vector.
+    ///\return <b>true</b> if the first vector is lexicographically less than or
+    /// equal to the second, otherwise
+    ///< b>false</b> \ingroup vector
+    //***************************************************************************
+    template<typename T>
+    bool operator<=(const etl::ivector<T>& lhs, const etl::ivector<T>& rhs) {
+        return !(lhs > rhs);
     }
-  };
 
-  //***************************************************************************
-  /// Equal operator.
-  ///\param lhs Reference to the first vector.
-  ///\param rhs Reference to the second vector.
-  ///\return <b>true</b> if the arrays are equal, otherwise <b>false</b>
-  ///\ingroup vector
-  //***************************************************************************
-  template <typename T>
-  bool operator==(const etl::ivector<T>& lhs, const etl::ivector<T>& rhs)
-  {
-    return (lhs.size() == rhs.size()) && etl::equal(lhs.begin(), lhs.end(), rhs.begin());
-  }
-
-  //***************************************************************************
-  /// Not equal operator.
-  ///\param lhs Reference to the first vector.
-  ///\param rhs Reference to the second vector.
-  ///\return <b>true</b> if the arrays are not equal, otherwise <b>false</b>
-  ///\ingroup vector
-  //***************************************************************************
-  template <typename T>
-  bool operator!=(const etl::ivector<T>& lhs, const etl::ivector<T>& rhs)
-  {
-    return !(lhs == rhs);
-  }
-
-  //***************************************************************************
-  /// Less than operator.
-  ///\param lhs Reference to the first vector.
-  ///\param rhs Reference to the second vector.
-  ///\return <b>true</b> if the first vector is lexicographically less than the
-  /// second, otherwise <b>false</b> \ingroup vector
-  //***************************************************************************
-  template <typename T>
-  bool operator<(const etl::ivector<T>& lhs, const etl::ivector<T>& rhs)
-  {
-    return etl::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
-  }
-
-  //***************************************************************************
-  /// Greater than operator.
-  ///\param lhs Reference to the first vector.
-  ///\param rhs Reference to the second vector.
-  ///\return <b>true</b> if the first vector is lexicographically greater than
-  /// the second, otherwise <b>false</b> \ingroup vector
-  //***************************************************************************
-  template <typename T>
-  bool operator>(const etl::ivector<T>& lhs, const etl::ivector<T>& rhs)
-  {
-    return (rhs < lhs);
-  }
-
-  //***************************************************************************
-  /// Less than or equal operator.
-  ///\param lhs Reference to the first vector.
-  ///\param rhs Reference to the second vector.
-  ///\return <b>true</b> if the first vector is lexicographically less than or
-  /// equal to the second, otherwise
-  ///< b>false</b> \ingroup vector
-  //***************************************************************************
-  template <typename T>
-  bool operator<=(const etl::ivector<T>& lhs, const etl::ivector<T>& rhs)
-  {
-    return !(lhs > rhs);
-  }
-
-  //***************************************************************************
-  /// Greater than or equal operator.
-  ///\param lhs Reference to the first vector.
-  ///\param rhs Reference to the second vector.
-  ///\return <b>true</b> if the first vector is lexicographically greater than
-  /// or equal to the second, otherwise
-  ///< b>false</b> \ingroup vector
-  //***************************************************************************
-  template <typename T>
-  bool operator>=(const etl::ivector<T>& lhs, const etl::ivector<T>& rhs)
-  {
-    return !(lhs < rhs);
-  }
+    //***************************************************************************
+    /// Greater than or equal operator.
+    ///\param lhs Reference to the first vector.
+    ///\param rhs Reference to the second vector.
+    ///\return <b>true</b> if the first vector is lexicographically greater than
+    /// or equal to the second, otherwise
+    ///< b>false</b> \ingroup vector
+    //***************************************************************************
+    template<typename T>
+    bool operator>=(const etl::ivector<T>& lhs, const etl::ivector<T>& rhs) {
+        return !(lhs < rhs);
+    }
 } // namespace etl
 
-namespace etl
-{
-  //***************************************************************************
-  template <typename T, const size_t MAX_SIZE_>
-  class vector;
+namespace etl {
+    //***************************************************************************
+    template<typename T, const size_t MAX_SIZE_>
+    class vector;
 
-  //***************************************************************************
-  /// A vector implementation that uses a fixed size buffer.
-  ///\tparam T The element type.
-  ///\tparam MAX_SIZE_ The maximum number of elements that can be stored.
-  ///\ingroup vector
-  //***************************************************************************
-  template <typename T, const size_t MAX_SIZE_>
-  class vector : public etl::ivector<T>
-  {
-  public:
+    //***************************************************************************
+    /// A vector implementation that uses a fixed size buffer.
+    ///\tparam T The element type.
+    ///\tparam MAX_SIZE_ The maximum number of elements that can be stored.
+    ///\ingroup vector
+    //***************************************************************************
+    template<typename T, const size_t MAX_SIZE_>
+    class vector : public etl::ivector<T> {
+    public:
+        ETL_STATIC_ASSERT((MAX_SIZE_ > 0U), "Zero capacity etl::vector is not valid");
 
-    ETL_STATIC_ASSERT((MAX_SIZE_ > 0U), "Zero capacity etl::vector is not valid");
+        static const size_t MAX_SIZE = MAX_SIZE_;
 
-    static const size_t MAX_SIZE = MAX_SIZE_;
-
-    //*************************************************************************
-    /// Constructor.
-    //*************************************************************************
-    vector() ETL_NOEXCEPT
-      : etl::ivector<T>(reinterpret_cast<T*>(&buffer), MAX_SIZE)
-    {
-      this->initialise();
-    }
-
-    //*************************************************************************
-    /// Constructor, with size.
-    ///\param initial_size The initial size of the vector.
-    //*************************************************************************
-    explicit vector(size_t initial_size)
-      : etl::ivector<T>(reinterpret_cast<T*>(&buffer), MAX_SIZE)
-    {
-      this->initialise();
-      this->resize(initial_size);
-    }
-
-    //*************************************************************************
-    /// Constructor, from initial size and value.
-    ///\param initial_size  The initial size of the vector.
-    ///\param value        The value to fill the vector with.
-    //*************************************************************************
-    vector(size_t initial_size, typename etl::ivector<T>::const_reference value)
-      : etl::ivector<T>(reinterpret_cast<T*>(&buffer), MAX_SIZE)
-    {
-      this->initialise();
-      this->resize(initial_size, value);
-    }
-
-    //*************************************************************************
-    /// Constructor, from an iterator range.
-    ///\tparam TIterator The iterator type.
-    ///\param first The iterator to the first element.
-    ///\param last  The iterator to the last element + 1.
-    //*************************************************************************
-    template <typename TIterator>
-    vector(TIterator first, TIterator last, typename etl::enable_if<!etl::is_integral<TIterator>::value, int>::type = 0)
-      : etl::ivector<T>(reinterpret_cast<T*>(&buffer), MAX_SIZE)
-    {
-      this->assign(first, last);
-    }
-
-#if ETL_HAS_INITIALIZER_LIST
-    //*************************************************************************
-    /// Constructor, from an initializer_list.
-    //*************************************************************************
-    vector(std::initializer_list<T> init)
-      : etl::ivector<T>(reinterpret_cast<T*>(&buffer), MAX_SIZE)
-    {
-      this->assign(init.begin(), init.end());
-    }
-#endif
-
-    //*************************************************************************
-    /// Copy constructor.
-    //*************************************************************************
-    vector(const vector& other)
-      : etl::ivector<T>(reinterpret_cast<T*>(&buffer), MAX_SIZE)
-    {
-      this->assign(other.begin(), other.end());
-    }
-
-    //*************************************************************************
-    /// Assignment operator.
-    //*************************************************************************
-    vector& operator=(const vector& rhs)
-    {
-      if (&rhs != this)
-      {
-        this->assign(rhs.cbegin(), rhs.cend());
-      }
-
-      return *this;
-    }
-
-#if ETL_USING_CPP11
-    //*************************************************************************
-    /// Move constructor.
-    //*************************************************************************
-    vector(vector&& other) ETL_NOEXCEPT_IF((etl::is_nothrow_move_constructible<T>::value))
-      : etl::ivector<T>(reinterpret_cast<T*>(&buffer), MAX_SIZE)
-    {
-      if (this != &other)
-      {
-        this->initialise();
-
-        typename etl::ivector<T>::iterator itr = other.begin();
-        while (itr != other.end())
-        {
-          this->push_back(etl::move(*itr));
-          ++itr;
+        //*************************************************************************
+        /// Constructor.
+        //*************************************************************************
+        vector() ETL_NOEXCEPT : etl::ivector<T>(reinterpret_cast<T*>(&buffer), MAX_SIZE) {
+            this->initialise();
         }
 
-        other.initialise();
-      }
-    }
-
-    //*************************************************************************
-    /// Move assignment operator.
-    //*************************************************************************
-    vector& operator=(vector&& rhs) ETL_NOEXCEPT_IF((etl::is_nothrow_move_constructible<T>::value))
-    {
-      if (&rhs != this)
-      {
-        this->clear();
-        typename etl::ivector<T>::iterator itr = rhs.begin();
-        while (itr != rhs.end())
-        {
-          this->push_back(etl::move(*itr));
-          ++itr;
+        //*************************************************************************
+        /// Constructor, with size.
+        ///\param initial_size The initial size of the vector.
+        //*************************************************************************
+        explicit vector(size_t initial_size) : etl::ivector<T>(reinterpret_cast<T*>(&buffer), MAX_SIZE) {
+            this->initialise();
+            this->resize(initial_size);
         }
 
-        rhs.initialise();
-      }
+        //*************************************************************************
+        /// Constructor, from initial size and value.
+        ///\param initial_size  The initial size of the vector.
+        ///\param value        The value to fill the vector with.
+        //*************************************************************************
+        vector(size_t initial_size, typename etl::ivector<T>::const_reference value)
+            : etl::ivector<T>(reinterpret_cast<T*>(&buffer), MAX_SIZE) {
+            this->initialise();
+            this->resize(initial_size, value);
+        }
 
-      return *this;
-    }
-#endif
-
-    //*************************************************************************
-    /// Destructor.
-    //*************************************************************************
-#ifdef ETL_IVECTOR_REPAIR_ENABLE
-    virtual
-#endif
-      ~vector() ETL_NOEXCEPT
-    {
-      this->clear();
-    }
-
-    //*************************************************************************
-    /// Fix the internal pointers after a low level memory copy.
-    //*************************************************************************
-#ifdef ETL_IVECTOR_REPAIR_ENABLE
-    virtual void repair() ETL_OVERRIDE
-#else
-    void repair()
-#endif
-    {
-      ETL_ASSERT_OR_RETURN(etl::is_trivially_copyable<T>::value, ETL_ERROR(etl::vector_incompatible_type));
-
-      etl::ivector<T>::repair_buffer(buffer);
-    }
-
-  private:
-
-    typename etl::aligned_storage<sizeof(T) * MAX_SIZE, etl::alignment_of<T>::value>::type buffer;
-  };
-
-  //*************************************************************************
-  /// Template deduction guides.
-  //*************************************************************************
-#if ETL_USING_CPP17 && ETL_HAS_INITIALIZER_LIST
-  template <typename... T>
-  vector(T...) -> vector<typename etl::common_type_t<T...>, sizeof...(T)>;
-#endif
-
-  //*************************************************************************
-  /// Make
-  //*************************************************************************
-#if ETL_USING_CPP11 && ETL_HAS_INITIALIZER_LIST
-  template <typename T = void, typename... TValues>
-  constexpr auto make_vector(TValues&&... values) -> etl::vector<etl::private_make::element_type_t<T, TValues...>, sizeof...(TValues)>
-  {
-    // Library Fundamentals TS make_array design: the element type is T when
-    // supplied explicitly, otherwise the decayed common type of the arguments.
-    // convert forwards same-type arguments and static_casts the rest.
-    using TElement = etl::private_make::element_type_t<T, TValues...>;
-    return {etl::private_make::convert<TElement>(etl::forward<TValues>(values))...};
-  }
-#endif
-
-  //***************************************************************************
-  /// A vector implementation that uses a fixed size external buffer.
-  /// The buffer is supplied on construction.
-  ///\tparam T The element type.
-  ///\ingroup vector
-  //***************************************************************************
-  template <typename T>
-  class vector_ext : public etl::ivector<T>
-  {
-  public:
-
-    //*************************************************************************
-    /// Constructor.
-    //*************************************************************************
-    vector_ext(void* buffer, size_t max_size) ETL_NOEXCEPT
-      : etl::ivector<T>(reinterpret_cast<T*>(buffer), max_size)
-    {
-      this->initialise();
-    }
-
-    //*************************************************************************
-    /// Constructor, with size.
-    ///\param initial_size The initial size of the vector_ext.
-    //*************************************************************************
-    explicit vector_ext(size_t initial_size, void* buffer, size_t max_size)
-      : etl::ivector<T>(reinterpret_cast<T*>(buffer), max_size)
-    {
-      this->initialise();
-      this->resize(initial_size);
-    }
-
-    //*************************************************************************
-    /// Constructor, from initial size and value.
-    ///\param initial_size  The initial size of the vector_ext.
-    ///\param value        The value to fill the vector_ext with.
-    //*************************************************************************
-    vector_ext(size_t initial_size, typename etl::ivector<T>::const_reference value, void* buffer, size_t max_size)
-      : etl::ivector<T>(reinterpret_cast<T*>(buffer), max_size)
-    {
-      this->initialise();
-      this->resize(initial_size, value);
-    }
-
-    //*************************************************************************
-    /// Constructor, from an iterator range.
-    ///\tparam TIterator The iterator type.
-    ///\param first The iterator to the first element.
-    ///\param last  The iterator to the last element + 1.
-    //*************************************************************************
-    template <typename TIterator>
-    vector_ext(TIterator first, TIterator last, void* buffer, size_t max_size,
+        //*************************************************************************
+        /// Constructor, from an iterator range.
+        ///\tparam TIterator The iterator type.
+        ///\param first The iterator to the first element.
+        ///\param last  The iterator to the last element + 1.
+        //*************************************************************************
+        template<typename TIterator>
+        vector(TIterator first,
+               TIterator last,
                typename etl::enable_if<!etl::is_integral<TIterator>::value, int>::type = 0)
-      : etl::ivector<T>(reinterpret_cast<T*>(buffer), max_size)
-    {
-      this->assign(first, last);
-    }
+            : etl::ivector<T>(reinterpret_cast<T*>(&buffer), MAX_SIZE) {
+            this->assign(first, last);
+        }
 
 #if ETL_HAS_INITIALIZER_LIST
-    //*************************************************************************
-    /// Constructor, from an initializer_list.
-    //*************************************************************************
-    vector_ext(std::initializer_list<T> init, void* buffer, size_t max_size)
-      : etl::ivector<T>(reinterpret_cast<T*>(buffer), max_size)
-    {
-      this->assign(init.begin(), init.end());
-    }
+        //*************************************************************************
+        /// Constructor, from an initializer_list.
+        //*************************************************************************
+        vector(std::initializer_list<T> init) : etl::ivector<T>(reinterpret_cast<T*>(&buffer), MAX_SIZE) {
+            this->assign(init.begin(), init.end());
+        }
 #endif
 
-    //*************************************************************************
-    /// Copy constructor.
-    //*************************************************************************
-    vector_ext(const vector_ext& other, void* buffer, size_t max_size)
-      ETL_NOEXCEPT_IF((etl::is_nothrow_copy_constructible<T>::value && ETL_NOT_USING_EXCEPTIONS))
-      : etl::ivector<T>(reinterpret_cast<T*>(buffer), max_size)
-    {
-      if (&other != this)
-      {
-        this->assign(other.begin(), other.end());
-      }
-    }
+        //*************************************************************************
+        /// Copy constructor.
+        //*************************************************************************
+        vector(const vector& other) : etl::ivector<T>(reinterpret_cast<T*>(&buffer), MAX_SIZE) {
+            this->assign(other.begin(), other.end());
+        }
 
-    //*************************************************************************
-    /// Assignment operator.
-    //*************************************************************************
-    vector_ext& operator=(const vector_ext& rhs) ETL_NOEXCEPT_IF((etl::is_nothrow_copy_constructible<T>::value && ETL_NOT_USING_EXCEPTIONS))
-    {
-      if (&rhs != this)
-      {
-        this->assign(rhs.cbegin(), rhs.cend());
-      }
+        //*************************************************************************
+        /// Assignment operator.
+        //*************************************************************************
+        vector& operator=(const vector& rhs) {
+            if (&rhs != this) {
+                this->assign(rhs.cbegin(), rhs.cend());
+            }
 
-      return *this;
-    }
+            return *this;
+        }
 
 #if ETL_USING_CPP11
-    //*************************************************************************
-    /// Move constructor.
-    //*************************************************************************
-    vector_ext(vector_ext&& other, void* buffer, size_t max_size)
-      ETL_NOEXCEPT_IF((etl::is_nothrow_move_constructible<T>::value && ETL_NOT_USING_EXCEPTIONS))
-      : etl::ivector<T>(reinterpret_cast<T*>(buffer), max_size)
-    {
-      if (&other != this)
-      {
-        this->assign(etl::make_move_iterator(other.begin()), etl::make_move_iterator(other.end()));
+        //*************************************************************************
+        /// Move constructor.
+        //*************************************************************************
+        vector(vector&& other) ETL_NOEXCEPT_IF((etl::is_nothrow_move_constructible<T>::value))
+            : etl::ivector<T>(reinterpret_cast<T*>(&buffer), MAX_SIZE) {
+            if (this != &other) {
+                this->initialise();
 
-        other.initialise();
-      }
-    }
+                typename etl::ivector<T>::iterator itr = other.begin();
+                while (itr != other.end()) {
+                    this->push_back(etl::move(*itr));
+                    ++itr;
+                }
 
-    //*************************************************************************
-    /// Move assignment operator.
-    //*************************************************************************
-    vector_ext& operator=(vector_ext&& rhs) ETL_NOEXCEPT_IF((etl::is_nothrow_move_constructible<T>::value && ETL_NOT_USING_EXCEPTIONS))
-    {
-      if (&rhs != this)
-      {
-        this->assign(etl::make_move_iterator(rhs.begin()), etl::make_move_iterator(rhs.end()));
+                other.initialise();
+            }
+        }
 
-        rhs.initialise();
-      }
+        //*************************************************************************
+        /// Move assignment operator.
+        //*************************************************************************
+        vector& operator=(vector&& rhs) ETL_NOEXCEPT_IF((etl::is_nothrow_move_constructible<T>::value)) {
+            if (&rhs != this) {
+                this->clear();
+                typename etl::ivector<T>::iterator itr = rhs.begin();
+                while (itr != rhs.end()) {
+                    this->push_back(etl::move(*itr));
+                    ++itr;
+                }
 
-      return *this;
-    }
+                rhs.initialise();
+            }
+
+            return *this;
+        }
 #endif
 
-    //*************************************************************************
-    /// Destructor.
-    //*************************************************************************
-    ~vector_ext() ETL_NOEXCEPT
-    {
-      this->clear();
-    }
-
-    //*************************************************************************
-    /// Fix the internal pointers after a low level memory copy.
-    //*************************************************************************
+        //*************************************************************************
+        /// Destructor.
+        //*************************************************************************
 #ifdef ETL_IVECTOR_REPAIR_ENABLE
-    virtual void repair() ETL_OVERRIDE
-#else
-    void repair()
+        virtual
 #endif
-    {
+            ~vector() ETL_NOEXCEPT {
+            this->clear();
+        }
+
+        //*************************************************************************
+        /// Fix the internal pointers after a low level memory copy.
+        //*************************************************************************
+#ifdef ETL_IVECTOR_REPAIR_ENABLE
+        virtual void repair() ETL_OVERRIDE
+#else
+        void repair()
+#endif
+        {
+            ETL_ASSERT_OR_RETURN(etl::is_trivially_copyable<T>::value, ETL_ERROR(etl::vector_incompatible_type));
+
+            etl::ivector<T>::repair_buffer(buffer);
+        }
+
+    private:
+        typename etl::aligned_storage<sizeof(T) * MAX_SIZE, etl::alignment_of<T>::value>::type buffer;
+    };
+
+    //*************************************************************************
+    /// Template deduction guides.
+    //*************************************************************************
+#if ETL_USING_CPP17 && ETL_HAS_INITIALIZER_LIST
+    template<typename... T>
+    vector(T...) -> vector<typename etl::common_type_t<T...>, sizeof...(T)>;
+#endif
+
+    //*************************************************************************
+    /// Make
+    //*************************************************************************
+#if ETL_USING_CPP11 && ETL_HAS_INITIALIZER_LIST
+    template<typename T = void, typename... TValues>
+    constexpr auto make_vector(TValues&&... values)
+        -> etl::vector<etl::private_make::element_type_t<T, TValues...>, sizeof...(TValues)> {
+        // Library Fundamentals TS make_array design: the element type is T when
+        // supplied explicitly, otherwise the decayed common type of the arguments.
+        // convert forwards same-type arguments and static_casts the rest.
+        using TElement = etl::private_make::element_type_t<T, TValues...>;
+        return {etl::private_make::convert<TElement>(etl::forward<TValues>(values))...};
     }
-  };
+#endif
 
-  //***************************************************************************
-  /// erase
-  //***************************************************************************
-  template <typename T, typename U>
-  typename etl::ivector<T>::difference_type erase(etl::ivector<T>& v, const U& value)
-  {
-    typename etl::ivector<T>::iterator        itr = etl::remove(v.begin(), v.end(), value);
-    typename etl::ivector<T>::difference_type d   = etl::distance(itr, v.end());
-    v.erase(itr, v.end());
+    //***************************************************************************
+    /// A vector implementation that uses a fixed size external buffer.
+    /// The buffer is supplied on construction.
+    ///\tparam T The element type.
+    ///\ingroup vector
+    //***************************************************************************
+    template<typename T>
+    class vector_ext : public etl::ivector<T> {
+    public:
+        //*************************************************************************
+        /// Constructor.
+        //*************************************************************************
+        vector_ext(void* buffer, size_t max_size) ETL_NOEXCEPT
+            : etl::ivector<T>(reinterpret_cast<T*>(buffer), max_size) {
+            this->initialise();
+        }
 
-    return d;
-  }
+        //*************************************************************************
+        /// Constructor, with size.
+        ///\param initial_size The initial size of the vector_ext.
+        //*************************************************************************
+        explicit vector_ext(size_t initial_size, void* buffer, size_t max_size)
+            : etl::ivector<T>(reinterpret_cast<T*>(buffer), max_size) {
+            this->initialise();
+            this->resize(initial_size);
+        }
 
-  //***************************************************************************
-  /// erase_if
-  //***************************************************************************
-  template <typename T, typename TPredicate>
-  typename etl::ivector<T>::difference_type erase_if(etl::ivector<T>& v, TPredicate predicate)
-  {
-    typename etl::ivector<T>::iterator        itr = etl::remove_if(v.begin(), v.end(), predicate);
-    typename etl::ivector<T>::difference_type d   = etl::distance(itr, v.end());
-    v.erase(itr, v.end());
+        //*************************************************************************
+        /// Constructor, from initial size and value.
+        ///\param initial_size  The initial size of the vector_ext.
+        ///\param value        The value to fill the vector_ext with.
+        //*************************************************************************
+        vector_ext(size_t initial_size, typename etl::ivector<T>::const_reference value, void* buffer, size_t max_size)
+            : etl::ivector<T>(reinterpret_cast<T*>(buffer), max_size) {
+            this->initialise();
+            this->resize(initial_size, value);
+        }
 
-    return d;
-  }
+        //*************************************************************************
+        /// Constructor, from an iterator range.
+        ///\tparam TIterator The iterator type.
+        ///\param first The iterator to the first element.
+        ///\param last  The iterator to the last element + 1.
+        //*************************************************************************
+        template<typename TIterator>
+        vector_ext(TIterator first,
+                   TIterator last,
+                   void*     buffer,
+                   size_t    max_size,
+                   typename etl::enable_if<!etl::is_integral<TIterator>::value, int>::type = 0)
+            : etl::ivector<T>(reinterpret_cast<T*>(buffer), max_size) {
+            this->assign(first, last);
+        }
 
-  //*********************************************************************
-  /// Overloaded swap for etl::ivector<T>
-  ///\param lhs The first vector to swap with.
-  ///\param rhs The second vector to swap with.
-  //*********************************************************************
-  template <typename T>
-  void swap(ivector<T>& lhs, ivector<T>& rhs)
-  {
-    lhs.swap(rhs);
-  }
+#if ETL_HAS_INITIALIZER_LIST
+        //*************************************************************************
+        /// Constructor, from an initializer_list.
+        //*************************************************************************
+        vector_ext(std::initializer_list<T> init, void* buffer, size_t max_size)
+            : etl::ivector<T>(reinterpret_cast<T*>(buffer), max_size) {
+            this->assign(init.begin(), init.end());
+        }
+#endif
+
+        //*************************************************************************
+        /// Copy constructor.
+        //*************************************************************************
+        vector_ext(const vector_ext& other, void* buffer, size_t max_size)
+            ETL_NOEXCEPT_IF((etl::is_nothrow_copy_constructible<T>::value && ETL_NOT_USING_EXCEPTIONS))
+            : etl::ivector<T>(reinterpret_cast<T*>(buffer), max_size) {
+            if (&other != this) {
+                this->assign(other.begin(), other.end());
+            }
+        }
+
+        //*************************************************************************
+        /// Assignment operator.
+        //*************************************************************************
+        vector_ext& operator=(const vector_ext& rhs)
+            ETL_NOEXCEPT_IF((etl::is_nothrow_copy_constructible<T>::value && ETL_NOT_USING_EXCEPTIONS)) {
+            if (&rhs != this) {
+                this->assign(rhs.cbegin(), rhs.cend());
+            }
+
+            return *this;
+        }
+
+#if ETL_USING_CPP11
+        //*************************************************************************
+        /// Move constructor.
+        //*************************************************************************
+        vector_ext(vector_ext&& other, void* buffer, size_t max_size)
+            ETL_NOEXCEPT_IF((etl::is_nothrow_move_constructible<T>::value && ETL_NOT_USING_EXCEPTIONS))
+            : etl::ivector<T>(reinterpret_cast<T*>(buffer), max_size) {
+            if (&other != this) {
+                this->assign(etl::make_move_iterator(other.begin()), etl::make_move_iterator(other.end()));
+
+                other.initialise();
+            }
+        }
+
+        //*************************************************************************
+        /// Move assignment operator.
+        //*************************************************************************
+        vector_ext& operator=(vector_ext&& rhs)
+            ETL_NOEXCEPT_IF((etl::is_nothrow_move_constructible<T>::value && ETL_NOT_USING_EXCEPTIONS)) {
+            if (&rhs != this) {
+                this->assign(etl::make_move_iterator(rhs.begin()), etl::make_move_iterator(rhs.end()));
+
+                rhs.initialise();
+            }
+
+            return *this;
+        }
+#endif
+
+        //*************************************************************************
+        /// Destructor.
+        //*************************************************************************
+        ~vector_ext() ETL_NOEXCEPT {
+            this->clear();
+        }
+
+        //*************************************************************************
+        /// Fix the internal pointers after a low level memory copy.
+        //*************************************************************************
+#ifdef ETL_IVECTOR_REPAIR_ENABLE
+        virtual void repair() ETL_OVERRIDE
+#else
+        void repair()
+#endif
+        {
+        }
+    };
+
+    //***************************************************************************
+    /// erase
+    //***************************************************************************
+    template<typename T, typename U>
+    typename etl::ivector<T>::difference_type erase(etl::ivector<T>& v, const U& value) {
+        typename etl::ivector<T>::iterator        itr = etl::remove(v.begin(), v.end(), value);
+        typename etl::ivector<T>::difference_type d   = etl::distance(itr, v.end());
+        v.erase(itr, v.end());
+
+        return d;
+    }
+
+    //***************************************************************************
+    /// erase_if
+    //***************************************************************************
+    template<typename T, typename TPredicate>
+    typename etl::ivector<T>::difference_type erase_if(etl::ivector<T>& v, TPredicate predicate) {
+        typename etl::ivector<T>::iterator        itr = etl::remove_if(v.begin(), v.end(), predicate);
+        typename etl::ivector<T>::difference_type d   = etl::distance(itr, v.end());
+        v.erase(itr, v.end());
+
+        return d;
+    }
+
+    //*********************************************************************
+    /// Overloaded swap for etl::ivector<T>
+    ///\param lhs The first vector to swap with.
+    ///\param rhs The second vector to swap with.
+    //*********************************************************************
+    template<typename T>
+    void swap(ivector<T>& lhs, ivector<T>& rhs) {
+        lhs.swap(rhs);
+    }
 } // namespace etl
 
 #endif

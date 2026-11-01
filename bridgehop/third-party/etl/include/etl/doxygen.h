@@ -50,6 +50,4 @@ SOFTWARE.
 ///\ingroup maths
 
 ///\ingroup etl
-namespace etl
-{
-}
+namespace etl {}

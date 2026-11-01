@@ -33,50 +33,41 @@ SOFTWARE.
 
 #include "tx_api.h"
 
-namespace etl
-{
-  //***************************************************************************
-  ///\ingroup mutex
-  ///\brief This mutex class is implemented using ThreadX's mutexes
-  //***************************************************************************
-  class mutex
-  {
-  public:
+namespace etl {
+    //***************************************************************************
+    ///\ingroup mutex
+    ///\brief This mutex class is implemented using ThreadX's mutexes
+    //***************************************************************************
+    class mutex {
+    public:
+        mutex() {
+            tx_mutex_create(&mutex_handle, "etl mutex", TX_INHERIT);
+        }
 
-    mutex()
-    {
-      tx_mutex_create(&mutex_handle, "etl mutex", TX_INHERIT);
-    }
+        ~mutex() {
+            tx_mutex_delete(&mutex_handle);
+        }
 
-    ~mutex()
-    {
-      tx_mutex_delete(&mutex_handle);
-    }
+        void lock() {
+            tx_mutex_get(&mutex_handle, TX_WAIT_FOREVER);
+        }
 
-    void lock()
-    {
-      tx_mutex_get(&mutex_handle, TX_WAIT_FOREVER);
-    }
+        bool try_lock() {
+            return tx_mutex_get(&mutex_handle, TX_NO_WAIT) == TX_SUCCESS;
+        }
 
-    bool try_lock()
-    {
-      return tx_mutex_get(&mutex_handle, TX_NO_WAIT) == TX_SUCCESS;
-    }
+        void unlock() {
+            tx_mutex_put(&mutex_handle);
+        }
 
-    void unlock()
-    {
-      tx_mutex_put(&mutex_handle);
-    }
+    private:
+        // Non-copyable
+        mutex(const mutex&) ETL_DELETE;
+        mutex& operator=(const mutex&) ETL_DELETE;
 
-  private:
-
-    // Non-copyable
-    mutex(const mutex&) ETL_DELETE;
-    mutex& operator=(const mutex&) ETL_DELETE;
-
-    // mutex handle
-    TX_MUTEX mutex_handle;
-  };
+        // mutex handle
+        TX_MUTEX mutex_handle;
+    };
 } // namespace etl
 
 #endif

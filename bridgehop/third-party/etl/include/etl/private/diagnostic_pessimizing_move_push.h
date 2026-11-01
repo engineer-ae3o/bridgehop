@@ -33,12 +33,13 @@ SOFTWARE.
  * This file is intended to evaluated multiple times by design.
  */
 
-#if defined(__GNUC__) && !defined(__clang__) && !defined(__llvm__) && (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wpessimizing-move"
+#if defined(__GNUC__) && !defined(__clang__) && !defined(__llvm__) &&                                                  \
+    (__GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6))
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpessimizing-move"
 #endif
 
 #if defined(__clang__) || defined(__llvm__)
-  #pragma clang diagnostic push
-  #pragma clang diagnostic ignored "-Wpessimizing-move"
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wpessimizing-move"
 #endif

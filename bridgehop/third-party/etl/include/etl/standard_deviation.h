@@ -38,225 +38,195 @@ SOFTWARE.
 #include <math.h>
 #include <stdint.h>
 
-namespace etl
-{
-  namespace private_standard_deviation
-  {
-    //***************************************************************************
-    /// Types for generic standard_deviation.
-    //***************************************************************************
-    template <typename TInput, typename TCalc>
-    struct standard_deviation_traits
-    {
-      typedef TCalc calc_t;
-    };
+namespace etl {
+    namespace private_standard_deviation {
+        //***************************************************************************
+        /// Types for generic standard_deviation.
+        //***************************************************************************
+        template<typename TInput, typename TCalc>
+        struct standard_deviation_traits {
+            typedef TCalc calc_t;
+        };
+
+        //***************************************************************************
+        /// Types for float standard_deviation.
+        //***************************************************************************
+        template<typename TCalc>
+        struct standard_deviation_traits<float, TCalc> {
+            typedef float calc_t;
+        };
+
+        //***************************************************************************
+        /// Types for double standard_deviation.
+        //***************************************************************************
+        template<typename TCalc>
+        struct standard_deviation_traits<double, TCalc> {
+            typedef double calc_t;
+        };
+    } // namespace private_standard_deviation
 
     //***************************************************************************
-    /// Types for float standard_deviation.
+    /// Standard Deviation Type.
     //***************************************************************************
-    template <typename TCalc>
-    struct standard_deviation_traits<float, TCalc>
-    {
-      typedef float calc_t;
-    };
+    namespace private_standard_deviation {
+        template<typename T = void>
+        struct standard_deviation_type_helper {
+            static ETL_CONSTANT bool Sample     = false;
+            static ETL_CONSTANT bool Population = true;
+        };
+
+        template<typename T>
+        ETL_CONSTANT bool standard_deviation_type_helper<T>::Sample;
+
+        template<typename T>
+        ETL_CONSTANT bool standard_deviation_type_helper<T>::Population;
+    } // namespace private_standard_deviation
+
+    struct standard_deviation_type : public private_standard_deviation::standard_deviation_type_helper<> {};
 
     //***************************************************************************
-    /// Types for double standard_deviation.
+    /// Standard Deviation.
     //***************************************************************************
-    template <typename TCalc>
-    struct standard_deviation_traits<double, TCalc>
-    {
-      typedef double calc_t;
-    };
-  } // namespace private_standard_deviation
+    template<bool Standard_Deviation_Type, typename TInput, typename TCalc = TInput>
+    class standard_deviation : public private_standard_deviation::standard_deviation_traits<TInput, TCalc>,
+                               public etl::binary_function<TInput, TInput, void> {
+    private:
+        static ETL_CONSTANT int Adjustment = (Standard_Deviation_Type == standard_deviation_type::Population) ? 0 : 1;
 
-  //***************************************************************************
-  /// Standard Deviation Type.
-  //***************************************************************************
-  namespace private_standard_deviation
-  {
-    template <typename T = void>
-    struct standard_deviation_type_helper
-    {
-      static ETL_CONSTANT bool Sample     = false;
-      static ETL_CONSTANT bool Population = true;
-    };
+        typedef typename private_standard_deviation::standard_deviation_traits<TInput, TCalc>::calc_t calc_t;
 
-    template <typename T>
-    ETL_CONSTANT bool standard_deviation_type_helper<T>::Sample;
-
-    template <typename T>
-    ETL_CONSTANT bool standard_deviation_type_helper<T>::Population;
-  } // namespace private_standard_deviation
-
-  struct standard_deviation_type : public private_standard_deviation::standard_deviation_type_helper<>
-  {
-  };
-
-  //***************************************************************************
-  /// Standard Deviation.
-  //***************************************************************************
-  template <bool Standard_Deviation_Type, typename TInput, typename TCalc = TInput>
-  class standard_deviation
-    : public private_standard_deviation::standard_deviation_traits<TInput, TCalc>
-    , public etl::binary_function<TInput, TInput, void>
-  {
-  private:
-
-    static ETL_CONSTANT int Adjustment = (Standard_Deviation_Type == standard_deviation_type::Population) ? 0 : 1;
-
-    typedef typename private_standard_deviation::standard_deviation_traits< TInput, TCalc>::calc_t calc_t;
-
-  public:
-
-    //*********************************
-    /// Constructor.
-    //*********************************
-    standard_deviation()
-    {
-      clear();
-    }
-
-    //*********************************
-    /// Constructor.
-    //*********************************
-    template <typename TIterator>
-    standard_deviation(TIterator first, TIterator last)
-    {
-      clear();
-      add(first, last);
-    }
-
-    //*********************************
-    /// Add a pair of values.
-    //*********************************
-    void add(TInput value)
-    {
-      sum_of_squares += TCalc(value * value);
-      sum += TCalc(value);
-      ++counter;
-      recalculate = true;
-    }
-
-    //*********************************
-    /// Add a range.
-    //*********************************
-    template <typename TIterator>
-    void add(TIterator first, TIterator last)
-    {
-      while (first != last)
-      {
-        add(*first);
-        ++first;
-      }
-    }
-
-    //*********************************
-    /// operator ()
-    /// Add a pair of values.
-    //*********************************
-    void operator()(TInput value)
-    {
-      add(value);
-    }
-
-    //*********************************
-    /// operator ()
-    /// Add a range.
-    //*********************************
-    template <typename TIterator>
-    void operator()(TIterator first, TIterator last)
-    {
-      add(first, last);
-    }
-
-    //*********************************
-    /// Get the variance.
-    //*********************************
-    double get_variance() const
-    {
-      calculate();
-
-      return variance_value;
-    }
-
-    //*********************************
-    /// Get the standard_deviation.
-    //*********************************
-    double get_standard_deviation() const
-    {
-      calculate();
-
-      return standard_deviation_value;
-    }
-
-    //*********************************
-    /// Get the standard_deviation.
-    //*********************************
-    operator double() const
-    {
-      return get_standard_deviation();
-    }
-
-    //*********************************
-    /// Get the total number added entries.
-    //*********************************
-    size_t count() const
-    {
-      return size_t(counter);
-    }
-
-    //*********************************
-    /// Clear the histogram.
-    //*********************************
-    void clear()
-    {
-      sum_of_squares           = calc_t(0);
-      sum                      = calc_t(0);
-      counter                  = 0U;
-      variance_value           = 0.0;
-      standard_deviation_value = 0.0;
-      recalculate              = true;
-    }
-
-  private:
-
-    //*********************************
-    /// Do the calculation.
-    //*********************************
-    void calculate() const
-    {
-      if (recalculate)
-      {
-        standard_deviation_value = 0.0;
-        variance_value           = 0.0;
-
-        if (counter != 0)
-        {
-          double n          = double(counter);
-          double adjustment = 1.0 / (n * (n - Adjustment));
-
-          double square_of_sum = (sum * sum);
-
-          variance_value = ((n * sum_of_squares) - square_of_sum) * adjustment;
-
-          if (variance_value > 0)
-          {
-            standard_deviation_value = sqrt(variance_value);
-          }
+    public:
+        //*********************************
+        /// Constructor.
+        //*********************************
+        standard_deviation() {
+            clear();
         }
 
-        recalculate = false;
-      }
-    }
+        //*********************************
+        /// Constructor.
+        //*********************************
+        template<typename TIterator>
+        standard_deviation(TIterator first, TIterator last) {
+            clear();
+            add(first, last);
+        }
 
-    calc_t         sum_of_squares;
-    calc_t         sum;
-    uint32_t       counter;
-    mutable double variance_value;
-    mutable double standard_deviation_value;
-    mutable bool   recalculate;
-  };
+        //*********************************
+        /// Add a pair of values.
+        //*********************************
+        void add(TInput value) {
+            sum_of_squares += TCalc(value * value);
+            sum += TCalc(value);
+            ++counter;
+            recalculate = true;
+        }
+
+        //*********************************
+        /// Add a range.
+        //*********************************
+        template<typename TIterator>
+        void add(TIterator first, TIterator last) {
+            while (first != last) {
+                add(*first);
+                ++first;
+            }
+        }
+
+        //*********************************
+        /// operator ()
+        /// Add a pair of values.
+        //*********************************
+        void operator()(TInput value) {
+            add(value);
+        }
+
+        //*********************************
+        /// operator ()
+        /// Add a range.
+        //*********************************
+        template<typename TIterator>
+        void operator()(TIterator first, TIterator last) {
+            add(first, last);
+        }
+
+        //*********************************
+        /// Get the variance.
+        //*********************************
+        double get_variance() const {
+            calculate();
+
+            return variance_value;
+        }
+
+        //*********************************
+        /// Get the standard_deviation.
+        //*********************************
+        double get_standard_deviation() const {
+            calculate();
+
+            return standard_deviation_value;
+        }
+
+        //*********************************
+        /// Get the standard_deviation.
+        //*********************************
+        operator double() const {
+            return get_standard_deviation();
+        }
+
+        //*********************************
+        /// Get the total number added entries.
+        //*********************************
+        size_t count() const {
+            return size_t(counter);
+        }
+
+        //*********************************
+        /// Clear the histogram.
+        //*********************************
+        void clear() {
+            sum_of_squares           = calc_t(0);
+            sum                      = calc_t(0);
+            counter                  = 0U;
+            variance_value           = 0.0;
+            standard_deviation_value = 0.0;
+            recalculate              = true;
+        }
+
+    private:
+        //*********************************
+        /// Do the calculation.
+        //*********************************
+        void calculate() const {
+            if (recalculate) {
+                standard_deviation_value = 0.0;
+                variance_value           = 0.0;
+
+                if (counter != 0) {
+                    double n          = double(counter);
+                    double adjustment = 1.0 / (n * (n - Adjustment));
+
+                    double square_of_sum = (sum * sum);
+
+                    variance_value = ((n * sum_of_squares) - square_of_sum) * adjustment;
+
+                    if (variance_value > 0) {
+                        standard_deviation_value = sqrt(variance_value);
+                    }
+                }
+
+                recalculate = false;
+            }
+        }
+
+        calc_t         sum_of_squares;
+        calc_t         sum;
+        uint32_t       counter;
+        mutable double variance_value;
+        mutable double standard_deviation_value;
+        mutable bool   recalculate;
+    };
 } // namespace etl
 
 #endif

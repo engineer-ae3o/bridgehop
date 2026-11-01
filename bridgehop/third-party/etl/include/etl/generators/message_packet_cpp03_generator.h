@@ -397,7 +397,7 @@ SOFTWARE.
     cog.outl("};")
 
     ####################################
-    # All of the other specialisations.
+#All of the other specialisations.
     ####################################
     for n in range(int(Handlers) - 1, 0, -1):
         cog.outl("")
@@ -721,50 +721,38 @@ SOFTWARE.
                        void, void, void, void, void, void, void, void>
   {
   public:
-
 #if ETL_USING_CPP11
-    using message_types = etl::type_list<>;
+      using message_types = etl::type_list<>;
 #endif
 
-    ETL_CONSTEXPR message_packet() ETL_NOEXCEPT
-      : valid(false)
-    {
-    }
+      ETL_CONSTEXPR message_packet() ETL_NOEXCEPT : valid(false) {
+      }
 
-    static ETL_CONSTEXPR bool accepts(etl::message_id_t)
-    {
-      return false;
-    }
+      static ETL_CONSTEXPR bool accepts(etl::message_id_t) {
+          return false;
+      }
 
-    static ETL_CONSTEXPR bool accepts(const etl::imessage&)
-    {
-      return false;
-    }
+      static ETL_CONSTEXPR bool accepts(const etl::imessage&) {
+          return false;
+      }
 
-    template <etl::message_id_t Id>
-    static ETL_CONSTEXPR bool accepts()
-    {
-      return false;
-    }
+      template<etl::message_id_t Id>
+      static ETL_CONSTEXPR bool accepts() {
+          return false;
+      }
 
-    template <typename TMessage>
-    static ETL_CONSTEXPR typename etl::enable_if<etl::is_base_of<etl::imessage, TMessage>::value, bool>::type accepts()
-    {
-      return false;
-    }
+      template<typename TMessage>
+      static ETL_CONSTEXPR typename etl::enable_if<etl::is_base_of<etl::imessage, TMessage>::value, bool>::type
+      accepts() {
+          return false;
+      }
 
-    bool is_valid() const
-    {
-      return valid;
-    }
+      bool is_valid() const {
+          return valid;
+      }
 
-    enum
-    {
-      SIZE      = 0U,
-      ALIGNMENT = 1U
-    };
+      enum { SIZE = 0U, ALIGNMENT = 1U };
 
   private:
-
-    bool valid;
+      bool valid;
   };
