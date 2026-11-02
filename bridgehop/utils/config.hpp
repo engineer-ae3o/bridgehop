@@ -16,7 +16,7 @@ namespace bhop::config {
 
     // Maximum number of contacts that can be saved.
     // Note that deletion of contacts is not supported
-    constexpr inline uint32_t MAX_CONTACTS = 1000;
+    constexpr inline uint32_t MAX_CONTACTS = 500;
 
 
 } // namespace bhop::config

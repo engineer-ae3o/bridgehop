@@ -46,10 +46,11 @@ namespace bhop::bhop {
     constexpr inline uint32_t NODE_ID_LEN_BYTES   = 16;
 
 
-    // Sizes of the AES parameters (AES-128-CCM)
+    // Sizes of the AES parameters (AES-128-CCM) and the size of the output from the HKDF
     constexpr inline uint32_t AES_KEY_LEN_BYTES      = 128 / 8;
     constexpr inline uint32_t AES_NONCE_LEN_BYTES    = 12;
     constexpr inline uint32_t AES_AUTH_TAG_LEN_BYTES = 16;
+    constexpr inline uint32_t HKDF_OUTPUT_LEN_BYTES  = (AES_KEY_LEN_BYTES * 2) + (AES_NONCE_LEN_BYTES * 2);
 
 
     // Assymetric crypto keys and signature sizes. Covers the public and private keys

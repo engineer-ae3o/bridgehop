@@ -148,6 +148,7 @@ Reason codes:
 - 1 = idle timeout
 - 2 = evicted for space
 - 3 = confirmation timeout
+- 4 = other/unknown
 
 ### 5.6 Authenticated fields
 
