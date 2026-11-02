@@ -1,8 +1,8 @@
 #pragma once
 
 
-#include "../utils/types.hpp"
-#include "../utils/bhop_constants.hpp"
+#include "utils/types.hpp"
+#include "utils/bhop_constants.hpp"
 
 #include <span>
 #include <optional>

@@ -11,6 +11,8 @@ namespace bhop::types {
         ERR_OK = 0,
         ERR_INVALID_ARG,
         ERR_INVALID_STATE,
+        ERR_SESSION_ALREADY_OPEN,
+        ERR_SESSION_FAILED_TO_OPEN,
     };
 
     struct config_t {};

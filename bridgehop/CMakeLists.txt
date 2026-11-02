@@ -9,7 +9,7 @@ project(${CMAKE_PROJECT_NAME})
 enable_language(C CXX)
 
 add_library(${LIB_ELF_NAME} STATIC active/src/node.cpp)
-target_include_directories(${LIB_ELF_NAME} PUBLIC active/ passive/ utils/ third-party/etl/include/)
+target_include_directories(${LIB_ELF_NAME} PUBLIC . third-party/etl/include/)
 
 target_compile_options(${LIB_ELF_NAME} PRIVATE
    "-Wall -Wstrict-aliasing=2 -Wduplicated-branches -Wduplicated-cond -Werror \
