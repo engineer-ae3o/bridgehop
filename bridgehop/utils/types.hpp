@@ -1,8 +1,6 @@
 #pragma once
 
 
-#include <array>
-#include <utility>
 #include <cstdint>
 
 
@@ -16,11 +14,18 @@ namespace bhop::types {
         CONFIGMATION_TIMEOUT = 3,
     };
 
+    // Represents the type of a packet and how to interpret it
     enum class packet_t : uint8_t {
         DATA        = 0b00,
         HANDSHAKE   = 0b01,
         MESSAGE_ACK = 0b10,
         END_SESSION = 0b11,
+    };
+
+    // The files being used by the protocol
+    enum class file_t : uint8_t {
+        CONFIG,
+        CONTACTS,
     };
 
 } // namespace bhop::types

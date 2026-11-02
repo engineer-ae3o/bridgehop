@@ -5,7 +5,7 @@
 #include <string_view>
 
 
-namespace bhop::constants {
+namespace bhop::bhop {
 
 
     // This file contains constants from the protocl specification.
@@ -47,9 +47,9 @@ namespace bhop::constants {
 
 
     // Sizes of the AES parameters (AES-128-CCM)
-    constexpr inline uint32_t AES_CCM_KEY_LEN_BYTES      = 128 / 8;
-    constexpr inline uint32_t AES_CCM_NONCE_LEN_BYTES    = 12;
-    constexpr inline uint32_t AES_CCM_AUTH_TAG_LEN_BYTES = 16;
+    constexpr inline uint32_t AES_KEY_LEN_BYTES      = 128 / 8;
+    constexpr inline uint32_t AES_NONCE_LEN_BYTES    = 12;
+    constexpr inline uint32_t AES_AUTH_TAG_LEN_BYTES = 16;
 
 
     // Assymetric crypto keys and signature sizes. Covers the public and private keys
@@ -57,4 +57,19 @@ namespace bhop::constants {
     constexpr inline uint32_t Ed25519_KEY_LEN_BYTES               = 32;
     constexpr inline uint32_t Ed25519_SIGNATURE_ELEMENT_LEN_BYTES = 32;
 
-} // namespace bhop::constants
+
+    // Useful aliases
+    using node_id_t       = std::array<uint8_t, NODE_ID_LEN_BYTES>;
+    using packet_id_t     = std::array<uint8_t, PACKET_ID_LEN_BYTES>;
+    using sha256_digest_t = std::array<uint8_t, 256 / 8>;
+
+    using aes_key_t      = std::array<uint8_t, AES_KEY_LEN_BYTES>;
+    using aes_nonce_t    = std::array<uint8_t, AES_NONCE_LEN_BYTES>;
+    using aes_auth_tag_t = std::array<uint8_t, AES_AUTH_TAG_LEN_BYTES>;
+
+    using x25519_key_t        = std::array<uint8_t, X25519_KEY_LEN_BYTES>;
+    using ed25519_key_t       = std::array<uint8_t, Ed25519_KEY_LEN_BYTES>;
+    using ed25519_signature_t = std::array<uint8_t, Ed25519_SIGNATURE_ELEMENT_LEN_BYTES>;
+
+
+} // namespace bhop::bhop

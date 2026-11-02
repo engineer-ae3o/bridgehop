@@ -58,4 +58,5 @@
         "editor.formatOnSave": true
     },
     "cmake.configureOnEdit": false,
+    "cmake.sourceDirectory": "/home/engineer-ae3o/Projects/bridgehop/bridgehop",
 }
