@@ -46,7 +46,7 @@ namespace bhop::bhop {
     constexpr inline uint32_t NODE_ID_LEN_BYTES   = 16;
 
 
-    // Sizes of the AES parameters (AES-128-CCM) and the size of the output from the HKDF
+    // Sizes of the AES parameters (AES-128-CCM) and the output from the HKDF
     constexpr inline uint32_t AES_KEY_LEN_BYTES      = 128 / 8;
     constexpr inline uint32_t AES_NONCE_LEN_BYTES    = 12;
     constexpr inline uint32_t AES_AUTH_TAG_LEN_BYTES = 16;
@@ -54,9 +54,9 @@ namespace bhop::bhop {
 
 
     // Assymetric crypto keys and signature sizes. Covers the public and private keys
-    constexpr inline uint32_t X25519_KEY_LEN_BYTES                = 32;
-    constexpr inline uint32_t Ed25519_KEY_LEN_BYTES               = 32;
-    constexpr inline uint32_t Ed25519_SIGNATURE_ELEMENT_LEN_BYTES = 32;
+    constexpr inline uint32_t X25519_KEY_LEN_BYTES        = 32;
+    constexpr inline uint32_t Ed25519_KEY_LEN_BYTES       = 32;
+    constexpr inline uint32_t Ed25519_SIGNATURE_LEN_BYTES = 32;
 
 
     // Useful aliases
@@ -70,7 +70,7 @@ namespace bhop::bhop {
 
     using x25519_key_t        = std::array<uint8_t, X25519_KEY_LEN_BYTES>;
     using ed25519_key_t       = std::array<uint8_t, Ed25519_KEY_LEN_BYTES>;
-    using ed25519_signature_t = std::array<uint8_t, Ed25519_SIGNATURE_ELEMENT_LEN_BYTES>;
+    using ed25519_signature_t = std::array<uint8_t, Ed25519_SIGNATURE_LEN_BYTES>;
 
 
 } // namespace bhop::bhop

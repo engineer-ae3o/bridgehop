@@ -6,6 +6,15 @@
 
 namespace bhop::types {
 
+    // All error codes used by this library
+    enum class [[nodiscard]] error_t : uint8_t {
+        ERR_OK = 0,
+        ERR_INVALID_ARG,
+        ERR_INVALID_STATE,
+    };
+
+    struct config_t {};
+
     // Reasons for ending a session
     enum class close_reason_t : uint8_t {
         CLOSED_BY_USER       = 0, // The session was closed by the application
@@ -27,6 +36,7 @@ namespace bhop::types {
     enum class file_t : uint8_t {
         CONFIG,   // Stores configuration data
         CONTACTS, // Stores all registered contacts and their handshake counter
+        TEMP,     // Used to store data temporarily when the application needs memory
     };
 
 } // namespace bhop::types

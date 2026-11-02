@@ -3,7 +3,6 @@
 
 #include "utils/bhop_constants.hpp"
 #include "utils/types.hpp"
-#include "utils/platform.hpp"
 
 #include <array>
 #include <cstdint>

@@ -6,7 +6,6 @@
 
 #include <span>
 #include <cstdint>
-#include <etl/delegate.h>
 
 
 // This file contains the platform specific functions to be provided
@@ -14,7 +13,7 @@
 
 // These include the transport layer (LoRa, sockets etc), AES-128-CCM, SHA256
 // X25519 (ECDHE with Curve25519), Ed25519 (EdDSA) and filesystem ops.
-// NOTE: The library is guaranteed to pass in valid arguments.
+// NOTE: The library is guaranteed to use these functions properly.
 
 
 namespace bhop::platform {
@@ -27,25 +26,26 @@ namespace bhop::platform {
                              std::span<uint8_t>                                  ciphertext);
 
     // Returns true if the data is decrypted and authenticated successfully, false otherwise
-    bool aes_128_ccm_decrypt(std::span<const uint8_t, bhop::AES_KEY_LEN_BYTES>      key,
-                             std::span<const uint8_t, bhop::AES_NONCE_LEN_BYTES>    nonce,
-                             std::span<const uint8_t, bhop::AES_AUTH_TAG_LEN_BYTES> auth_tag,
-                             std::span<uint8_t>                                     plaintext,
-                             std::span<const uint8_t>                               ciphertext);
+    [[nodiscard]] bool aes_128_ccm_decrypt(std::span<const uint8_t, bhop::AES_KEY_LEN_BYTES>      key,
+                                           std::span<const uint8_t, bhop::AES_NONCE_LEN_BYTES>    nonce,
+                                           std::span<const uint8_t, bhop::AES_AUTH_TAG_LEN_BYTES> auth_tag,
+                                           std::span<uint8_t>                                     plaintext,
+                                           std::span<const uint8_t>                               ciphertext);
 
     // Generate the (R, S) EdDSA signature
-    void ed25519_generate_signature(std::span<const uint8_t, bhop::Ed25519_KEY_LEN_BYTES>         public_key,
-                                    std::span<const uint8_t, bhop::Ed25519_KEY_LEN_BYTES>         private_key,
-                                    std::span<const uint8_t>                                      data,
-                                    std::span<uint8_t, bhop::Ed25519_SIGNATURE_ELEMENT_LEN_BYTES> r_signature,
-                                    std::span<uint8_t, bhop::Ed25519_SIGNATURE_ELEMENT_LEN_BYTES> s_signature);
+    void ed25519_generate_signature(std::span<const uint8_t, bhop::Ed25519_KEY_LEN_BYTES> public_key,
+                                    std::span<const uint8_t, bhop::Ed25519_KEY_LEN_BYTES> private_key,
+                                    std::span<const uint8_t>                              data,
+                                    std::span<uint8_t, bhop::Ed25519_SIGNATURE_LEN_BYTES> r_signature,
+                                    std::span<uint8_t, bhop::Ed25519_SIGNATURE_LEN_BYTES> s_signature);
 
     // Returns true if the data and signature are verified successfully, false otherwise
-    bool ed25519_verify_signature(std::span<const uint8_t, bhop::Ed25519_KEY_LEN_BYTES>               public_key,
-                                  std::span<const uint8_t, bhop::Ed25519_KEY_LEN_BYTES>               private_key,
-                                  std::span<const uint8_t>                                            data,
-                                  std::span<const uint8_t, bhop::Ed25519_SIGNATURE_ELEMENT_LEN_BYTES> r_signature,
-                                  std::span<const uint8_t, bhop::Ed25519_SIGNATURE_ELEMENT_LEN_BYTES> s_signature);
+    [[nodiscard]] bool
+    ed25519_verify_signature(std::span<const uint8_t, bhop::Ed25519_KEY_LEN_BYTES>       public_key,
+                             std::span<const uint8_t, bhop::Ed25519_KEY_LEN_BYTES>       private_key,
+                             std::span<const uint8_t>                                    data,
+                             std::span<const uint8_t, bhop::Ed25519_SIGNATURE_LEN_BYTES> r_signature,
+                             std::span<const uint8_t, bhop::Ed25519_SIGNATURE_LEN_BYTES> s_signature);
 
     // Generate a session's ECDHE keys
     void x25519_generate_keys(std::span<uint8_t, bhop::X25519_KEY_LEN_BYTES> public_key,
@@ -66,14 +66,15 @@ namespace bhop::platform {
     // Generate random bytes
     void rng_get(std::span<uint8_t> bytes);
 
-    // Transfer data over the physical layer
-    void transmit(std::span<const uint8_t> packet);
+    // Transfer data over the physical layer. Returns true if packet sent successfully, false otherwise
+    [[nodiscard]] bool transmit(std::span<const uint8_t> packet);
 
     // Because receiving is an inherently asynchronous event, we don't have a plain receive function
     // as we would have to poll or sleep the main thread, both of which are blocking and not what we
     // want. Instead, we register a callback which gets called when a packet is received and the main
     // application passes in a span to the received data. It is only called once by this library.
-    void register_receive_callback(const etl::delegate<void(std::span<uint8_t> packet)>& callback);
+    using recv_cb_t = void (*)(void*, std::span<uint8_t>);
+    void register_receive_callback(recv_cb_t& callback);
 
     // Read and write into files used by this library. By the time the application calls into this library,
     // these files should have already been opened. Errors on file ops should be handled by the caller
@@ -81,5 +82,13 @@ namespace bhop::platform {
     void   file_read(types::file_t file, std::span<uint8_t> data, uint32_t offset);
     void   file_write(types::file_t file, std::span<const uint8_t> data, uint32_t offset);
     size_t get_file_size(types::file_t file);
+
+    // Register a callback to be called after a timeout. Returns the ID of the created timer.
+    // The timer for the callback should started immediately.
+    using timer_cb_t = void (*)(void*);
+    int register_callback(timer_cb_t callback, uint32_t timeout_ms);
+
+    // Cancels an already created callback with its ID
+    void cancel_pending_callback(int id);
 
 } // namespace bhop::platform
