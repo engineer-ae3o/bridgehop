@@ -2,6 +2,7 @@
 
 
 #include <cstdint>
+#include <utility>
 #include <string_view>
 
 
@@ -69,22 +70,28 @@ namespace bhop::bhop {
     // Assymetric crypto keys and signature sizes. Covers the public and private keys
     // Must not be modified
     constexpr inline uint32_t X25519_KEY_LEN_BYTES        = 32;
+    constexpr inline uint32_t Ed25519_SEED_LEN_BYTES      = 32;
     constexpr inline uint32_t Ed25519_KEY_LEN_BYTES       = 32;
     constexpr inline uint32_t Ed25519_SIGNATURE_LEN_BYTES = 32;
 
 
     // Useful aliases
-    using node_id_t       = std::array<uint8_t, NODE_ID_LEN_BYTES>;
-    using packet_id_t     = std::array<uint8_t, PACKET_ID_LEN_BYTES>;
+    using node_id_t   = std::array<uint8_t, NODE_ID_LEN_BYTES>;
+    using packet_id_t = std::array<uint8_t, PACKET_ID_LEN_BYTES>;
+
     using sha256_digest_t = std::array<uint8_t, 256 / 8>;
+    using sha256_hkdf_t   = std::array<uint8_t, bhop::HKDF_OUTPUT_LEN_BYTES>;
 
     using aes_key_t      = std::array<uint8_t, AES_KEY_LEN_BYTES>;
     using aes_nonce_t    = std::array<uint8_t, AES_NONCE_LEN_BYTES>;
     using aes_auth_tag_t = std::array<uint8_t, AES_AUTH_TAG_LEN_BYTES>;
 
-    using x25519_key_t        = std::array<uint8_t, X25519_KEY_LEN_BYTES>;
-    using ed25519_key_t       = std::array<uint8_t, Ed25519_KEY_LEN_BYTES>;
-    using ed25519_signature_t = std::array<uint8_t, Ed25519_SIGNATURE_LEN_BYTES>;
+    using x25519_key_t   = std::array<uint8_t, X25519_KEY_LEN_BYTES>;
+    using ed25519_key_t  = std::array<uint8_t, Ed25519_KEY_LEN_BYTES>;
+    using ed25519_seed_t = std::array<uint8_t, Ed25519_SEED_LEN_BYTES>;
+    // The (R, S) signature
+    using ed25519_signature_t =
+        std::pair<std::array<uint8_t, Ed25519_SIGNATURE_LEN_BYTES>, std::array<uint8_t, Ed25519_SIGNATURE_LEN_BYTES>>;
 
 
 } // namespace bhop::bhop
