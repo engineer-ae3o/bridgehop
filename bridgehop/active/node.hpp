@@ -2,6 +2,7 @@
 
 
 #include "utils/types.hpp"
+#include "utils/platform.hpp"
 #include "utils/bhop_constants.hpp"
 
 #include <span>
@@ -13,50 +14,89 @@ namespace bhop::active {
 
     struct config_t {};
 
+    template<platform::transport_t    transport,
+             platform::aes_128_ccm_t  aes_128_ccm,
+             platform::ed25519_t      ed25519,
+             platform::x25519_t       x25519,
+             platform::rng_t          rng,
+             platform::sha256_t       sha256,
+             platform::system_timer_t system_timer,
+             platform::filesystem_t   filesystem>
     class node_t {
     public:
-        ~node_t();
+        ~node_t() {
+            cleanup();
+        }
 
         node_t(const node_t&)            = default;
         node_t& operator=(const node_t&) = default;
         node_t(node_t&&)                 = default;
         node_t& operator=(node_t&&)      = default;
 
-        // Create an instance of the library
-        [[nodiscard]] static std::expected<node_t, types::error_t> create(const config_t& config);
+        // Create an instance of the library as an active node
+        [[nodiscard]] static std::expected<node_t, types::error_t> create(const config_t& config) {
+            node_t node;
+            auto   ret = node.init(config);
+            if (ret != types::error_t::ERR_OK) {
+                return std::unexpected(ret);
+            }
+            return node;
+        }
 
-        // deinit tears down all active sessions when deinitializing the library.
+        // This tears down all active sessions when deinitializing the library.
         // It is also called from the destructor
-        types::error_t deinit();
+        types::error_t deinit() {
+            cleanup();
+            return types::error_t::ERR_OK;
+        }
 
         // Open and close a session.
         // NOTE: close drops all received packets up to that point.
         // A callback is registered in init(...) and is invoked when the session is closed
         // asynchronously due to whatever reason and that reason is passed to the callback.
-        types::error_t open(const bhop::node_id_t& id);
-        types::error_t close(const bhop::node_id_t& id);
+        types::error_t open(const bhop::node_id_t& node_id) {
+            return types::error_t::ERR_OK;
+        }
+
+        types::error_t close(const bhop::node_id_t& node_id) {
+            return types::error_t::ERR_OK;
+        }
 
         // This returns a span to all the IDs of all nodes with which exists a connection.
         // Returns std::nullopt if no open sessions.
-        [[nodiscard]] std::optional<std::span<bhop::node_id_t>> get_open_sessions();
+        [[nodiscard]] std::optional<std::span<bhop::node_id_t>> get_open_sessions() {
+            return std::nullopt;
+        }
 
         // Add/remove a contact with its ID
-        types::error_t add_contact(const bhop::node_id_t& id);
-        types::error_t delete_contact(const bhop::node_id_t& id);
+        types::error_t add_contact(const bhop::node_id_t& node_id) {
+            return types::error_t::ERR_OK;
+        }
+
+        types::error_t delete_contact(const bhop::node_id_t& node_id) {
+            return types::error_t::ERR_OK;
+        }
 
         // Send a message to a peer. It fails if the ID has not been
         // saved before or a session does not exist with that peer.
-        types::error_t send(const bhop::node_id_t& id, std::span<const uint8_t> msg);
+        types::error_t send(const bhop::node_id_t& node_id, std::span<const uint8_t> msg) {
+            return types::error_t::ERR_OK;
+        }
 
         // NOTE: For recption of messages, a callback is registered in init(...) and that is called when a message is
         // received. A span to the received message and the node ID of the sender node are passed to the callback.
 
-        // The application should call this whenever the transport layer receives a packet
-        void recv_packet(std::span<uint8_t> packet);
-
     private:
         node_t();
-        types::error_t init(const config_t& config);
+
+        bool m_is_initialized = false;
+
+        types::error_t init(const config_t& config) {
+            return types::error_t::ERR_OK;
+        }
+
+        void cleanup() {
+        }
     };
 
 } // namespace bhop::active

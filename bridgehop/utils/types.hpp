@@ -14,7 +14,7 @@ namespace bhop::types {
         ERR_SESSION_ALREADY_OPEN,
         ERR_SESSION_FAILED_TO_OPEN,
         ERR_CONTACT_ALREADY_EXISTS,
-        ERR_CONTACT_NOT_NON_EXISTENT,
+        ERR_CONTACT_NOT_FOUND,
     };
 
     // Reasons for ending a session

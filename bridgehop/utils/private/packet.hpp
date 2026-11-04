@@ -23,7 +23,7 @@ namespace bhop::packet {
     struct [[__gnu__::__packed__]] handshake_t {
         uint64_t                  counter{};
         bhop::x25519_key_t        x25519_pub_key{};
-        bhop::ed25519_signature_t signature;
+        bhop::ed25519_signature_t signature{}; // NOLINT(readability-redundant-member-init)
         bhop::ed25519_key_t       ed25519_pub_key{};
     };
 
