@@ -14,18 +14,18 @@ namespace bhop::active {
 
     struct config_t {};
 
-    template<platform::transport_t    transport,
-             platform::aes_128_ccm_t  aes_128_ccm,
-             platform::ed25519_t      ed25519,
-             platform::x25519_t       x25519,
-             platform::rng_t          rng,
-             platform::sha256_t       sha256,
-             platform::system_timer_t system_timer,
-             platform::filesystem_t   filesystem>
+    template<platform::transport_t   transport,
+             platform::aes_128_ccm_t aes_128_ccm,
+             platform::ed25519_t     ed25519,
+             platform::x25519_t      x25519,
+             platform::rng_t         rng,
+             platform::sha256_t      sha256,
+             platform::system_t      system,
+             platform::filesystem_t  filesystem>
     class node_t {
     public:
         ~node_t() {
-            cleanup();
+            (void)cleanup();
         }
 
         node_t(const node_t&)            = default;
@@ -65,14 +65,15 @@ namespace bhop::active {
         // This returns a span to all the IDs of all nodes with which exists a connection.
         // Returns std::nullopt if no open sessions.
         [[nodiscard]] std::optional<std::span<bhop::node_id_t>> get_open_sessions() {
-            return std::nullopt;
+            return {};
         }
 
-        // Add/remove a contact with its ID
+        // Add a contact with its ID
         types::error_t add_contact(const bhop::node_id_t& node_id) {
             return types::error_t::ERR_OK;
         }
 
+        // Remove a contact with its ID
         types::error_t delete_contact(const bhop::node_id_t& node_id) {
             return types::error_t::ERR_OK;
         }
@@ -86,16 +87,31 @@ namespace bhop::active {
         // NOTE: For recption of messages, a callback is registered in init(...) and that is called when a message is
         // received. A span to the received message and the node ID of the sender node are passed to the callback.
 
-    private:
-        node_t();
+        // Gets the debug counter. Pretty self explanatory
+        uint32_t get_debug_counter() {
+            return m_debug_counter;
+        }
 
-        bool m_is_initialized = false;
+    private:
+        node_t() = default;
+
+        uint32_t m_debug_counter{};
 
         types::error_t init(const config_t& config) {
             return types::error_t::ERR_OK;
         }
 
-        void cleanup() {
+        types::error_t cleanup() {
+            types::error_t error = types::error_t::ERR_OK;
+            // Close all open sessions
+            auto sessions = get_open_sessions();
+            if (sessions) {
+                for (auto session : sessions.value()) {
+                    error = close(session);
+                }
+            }
+            // TODO: Erase all internal state
+            return types::error_t::ERR_OK;
         }
     };
 

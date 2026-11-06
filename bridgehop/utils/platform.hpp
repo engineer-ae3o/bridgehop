@@ -4,6 +4,7 @@
 #include "utils/bhop_constants.hpp"
 #include "utils/types.hpp"
 
+#include <bit>
 #include <span>
 #include <cstdint>
 #include <concepts>
@@ -18,6 +19,12 @@
 
 
 namespace bhop::platform {
+
+
+    // The protocol spec enforces a byte order of little endian
+    // This library only supports little endian systems, which is most microcontrollers
+    static_assert(std::endian::native == std::endian::little);
+
 
     template<class T>
     concept transport_t = requires(
@@ -35,16 +42,17 @@ namespace bhop::platform {
     concept aes_128_ccm_t = requires(T&                          type,
                                      const bhop::aes_key_t&      key,
                                      const bhop::aes_nonce_t&    nonce,
+                                     std::span<const uint8_t>    aad,
                                      const bhop::aes_auth_tag_t& auth_tag_input,
                                      bhop::aes_auth_tag_t&       auth_tag_output,
                                      std::span<const uint8_t>    input,
                                      std::span<uint8_t>          output) {
         // Encrypt data with AES-128-CCM and get the authentication tag
         // input is the plaintext and output is the ciphertext
-        { type.encrypt(key, nonce, auth_tag_output, input, output) };
+        { type.encrypt(key, nonce, aad, auth_tag_output, input, output) };
         // Returns true if the data is decrypted and authenticated successfully, false otherwise
         // input is the ciphertext and output is the plaintext
-        { type.decrypt(key, nonce, auth_tag_input, output, input) } -> std::same_as<bool>;
+        { type.decrypt(key, nonce, aad, auth_tag_input, output, input) } -> std::same_as<bool>;
     };
 
     template<class T>
@@ -85,12 +93,14 @@ namespace bhop::platform {
     concept sha256_t = requires(T&                        type,
                                 std::span<const uint8_t>  data,
                                 bhop::sha256_digest_t&    digest,
+                                std::span<const uint8_t>  salt,
+                                std::span<const uint8_t>  info_str,
                                 const bhop::x25519_key_t& shared_secret,
                                 bhop::sha256_hkdf_t&      hkdf_output) {
         // Hash data with SHA256
         { type.hash(data, digest) };
         // Expand the X25519 shared secret into the data to serve as the session keys
-        { type.hkdf_expand(shared_secret, hkdf_output) };
+        { type.hkdf(salt, info_str, shared_secret, hkdf_output) };
     };
 
     // Used so systems with 32 bit system ticks don't promote to uint64_t
@@ -98,11 +108,12 @@ namespace bhop::platform {
     concept tick_t = std::same_as<T, uint32_t> || std::same_as<T, uint64_t>;
 
     template<class T>
-    concept system_timer_t = requires(T&                         type,
-                                      typename T::timer_handle_t timer,
-                                      void (*callback)(void*, T::timer_handle_t),
-                                      void*    ctx,
-                                      uint32_t timeout_ms) {
+    concept system_t = requires(T&                         type,
+                                typename T::timer_handle_t timer,
+                                void (*callback)(void*, T::timer_handle_t),
+                                void*              ctx,
+                                uint32_t           timeout_ms,
+                                std::span<uint8_t> src) {
         // Get the value of the system tick in milliseconds
         { type.now_ms() } -> tick_t;
         // Register a callback to be called after a timeout. Returns the ID of the created timer.
@@ -110,6 +121,10 @@ namespace bhop::platform {
         { type.register_callback(callback, ctx, timeout_ms) } -> std::same_as<typename T::timer_handle_t>;
         // Cancels an already created callback with its ID
         { type.cancel_callback(timer) };
+        // Put the calling thread to sleep indefinitely till a callback wakes it up
+        { type.sleep() };
+        // Wipe a memory region to 0s securely. NOTE: Do NOT use memset from the stdlib
+        { type.secure_memset(src) };
     };
 
     template<class T>

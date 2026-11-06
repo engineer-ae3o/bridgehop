@@ -4,7 +4,6 @@
 #include <array>
 #include <limits>
 #include <cstdint>
-#include <utility>
 #include <string_view>
 
 
@@ -23,17 +22,17 @@ namespace bhop::bhop {
 
     // Bit positions of the various fields in the frame field of the packet header
     // Must not be modified
-    constexpr inline uint32_t HOP_COUNT_BIT_POS = 0;
-    constexpr inline uint32_t HOP_COUNT_BIT_LEN = 0b1111;
+    constexpr inline uint32_t HOP_COUNT_BIT_POS  = 0;
+    constexpr inline uint32_t HOP_COUNT_BIT_MASK = 0b1111;
 
-    constexpr inline uint32_t VERSION_BIT_POS = 4;
-    constexpr inline uint32_t VERSION_BIT_LEN = 0b11;
+    constexpr inline uint32_t VERSION_BIT_POS  = 4;
+    constexpr inline uint32_t VERSION_BIT_MASK = 0b11;
 
-    constexpr inline uint32_t PACKET_TYPE_BIT_POS = 6;
-    constexpr inline uint32_t PACKET_TYPE_BIT_LEN = 0b11;
+    constexpr inline uint32_t PACKET_TYPE_BIT_POS  = 6;
+    constexpr inline uint32_t PACKET_TYPE_BIT_MASK = 0b11;
 
-    static_assert(((HOP_COUNT_BIT_LEN << HOP_COUNT_BIT_POS) | (VERSION_BIT_LEN << VERSION_BIT_POS) |
-                   (PACKET_TYPE_BIT_LEN << PACKET_TYPE_BIT_POS)) == std::numeric_limits<uint8_t>::max());
+    static_assert(((HOP_COUNT_BIT_MASK << HOP_COUNT_BIT_POS) | (VERSION_BIT_MASK << VERSION_BIT_POS) |
+                   (PACKET_TYPE_BIT_MASK << PACKET_TYPE_BIT_POS)) == std::numeric_limits<uint8_t>::max());
 
 
     // Maximum hops per packet and dedupe cache parameters
@@ -79,10 +78,10 @@ namespace bhop::bhop {
 
     // Assymetric crypto keys and signature sizes. Covers the public and private keys
     // Must not be modified
-    constexpr inline uint32_t X25519_KEY_LEN_BYTES        = 32;
-    constexpr inline uint32_t Ed25519_SEED_LEN_BYTES      = 32;
-    constexpr inline uint32_t Ed25519_KEY_LEN_BYTES       = 32;
-    constexpr inline uint32_t Ed25519_SIGNATURE_LEN_BYTES = 32;
+    constexpr inline uint32_t X25519_KEY_LEN_BYTES             = 32;
+    constexpr inline uint32_t Ed25519_SEED_LEN_BYTES           = 32;
+    constexpr inline uint32_t Ed25519_KEY_LEN_BYTES            = 32;
+    constexpr inline uint32_t Ed25519_SIGNATURE_HALF_LEN_BYTES = 32;
 
 
     // Useful aliases
@@ -101,12 +100,11 @@ namespace bhop::bhop {
     using ed25519_key_t  = std::array<uint8_t, Ed25519_KEY_LEN_BYTES>;
     using ed25519_seed_t = std::array<uint8_t, Ed25519_SEED_LEN_BYTES>;
 
-    // The (R, S) signature
-    using ed25519_signature_t =
-        std::pair<std::array<uint8_t, Ed25519_SIGNATURE_LEN_BYTES>, std::array<uint8_t, Ed25519_SIGNATURE_LEN_BYTES>>;
-
-    // Making sure the R and S arrays are contiguous within the pair so implementing APIs can treat it as such
-    static_assert(sizeof(ed25519_signature_t) == (2 * sizeof(std::array<uint8_t, Ed25519_SIGNATURE_LEN_BYTES>)));
+    // The EdDSA (R, S) signature
+    struct [[__gnu__::__packed__]] ed25519_signature_t {
+        std::array<uint8_t, Ed25519_SIGNATURE_HALF_LEN_BYTES> R{};
+        std::array<uint8_t, Ed25519_SIGNATURE_HALF_LEN_BYTES> S{};
+    };
 
 
 } // namespace bhop::bhop

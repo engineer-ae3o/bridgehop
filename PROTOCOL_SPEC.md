@@ -1,6 +1,6 @@
-# Bridgehop Protocol Specification (v1 draft)
+# BridgeHop Protocol Specification (v1 draft)
 
-This document describes the Bridgehop protocol library. It does not depend on any particular hardware or radio. The Device Specification covers the firmware, the radio, Bluetooth and storage.
+This document describes the BridgeHop protocol library. It does not depend on any particular hardware or radio. The Device Specification covers the firmware, the radio, Bluetooth and storage.
 
 MUST means required. SHOULD means strongly recommended. MAY means optional.
 
@@ -17,7 +17,7 @@ This document covers:
 
 This document does not cover Bluetooth, flash storage, radio settings, duty-cycle enforcement or anything shown on screen.
 
-Bridgehop is a multi-hop mesh messaging protocol with end-to-end encryption, forward secrecy and sender authentication. Every packet is flooded: each node that hears a packet sends it on, within a hop limit.
+BridgeHop is a multi-hop mesh messaging protocol with end-to-end encryption, forward secrecy and sender authentication. Every packet is flooded: each node that hears a packet sends it on, within a hop limit.
 
 Delivery is best-effort. The protocol never retransmits a message on its own and does not guarantee order. When the target node receives, reassembles and verifies a whole message, it sends a confirmation back. If no confirmation arrives within the wait time, the sender reports the message as unconfirmed, and the application decides whether to send it again.
 
@@ -35,9 +35,9 @@ There is no routing table.
 |---|---|
 | Signatures | Ed25519. Seed 32 bytes, public key 32 bytes, signature 64 bytes (R 32, S 32) |
 | Key agreement | X25519, new key pair for every handshake |
-| Key derivation | HKDF with SHA-256 |
+| Key derivation | HKDF with SHA256 |
 | Encryption and authentication | AES-128-CCM, 12 byte nonce, 16 byte tag |
-| Hashing | SHA-256 |
+| Hashing | SHA256 |
 
 Numbers longer than one byte are stored little-endian. This applies to the message counter, the handshake counter and any other integer field, including when they are part of signed or authenticated data. Keys, signatures, IDs, tags and hashes are byte strings and are sent in the order the algorithm produces them.
 
@@ -45,7 +45,7 @@ Numbers longer than one byte are stored little-endian. This applies to the messa
 
 - On first boot an active node creates a random 32 byte seed. The seed is the only secret that is saved.
 - The Ed25519 private scalar and public key are derived from the seed. The public key is worked out at boot and kept in memory.
-- The node ID is the first 16 bytes of SHA-256(public key), in the order the hash produces them. Users give each other this ID.
+- The node ID is the first 16 bytes of SHA256(public key), in the order the hash produces them. Users give each other this ID.
 - A node MAY save its ID. If it does, it SHOULD recompute the ID at boot and compare.
 - The full public key arrives in the first handshake and is checked against the ID by hashing.
 - Contacts are mutual. An active node MUST ignore a handshake from any ID that is not in its contact list. The device sets the number of contacts (default 500).
@@ -79,7 +79,7 @@ Rules:
 - The hop count is 0 to 10. The starting value is configurable (default 10). A received value above 10 is dropped as corrupted.
 - A relay changes only the hop count bits.
 - A packet with an unknown or unsupported version is dropped and not relayed.
-- The packet ID is the first 8 bytes of SHA-256(byte-appended sender ID, target ID, payload).
+- The packet ID is the first 8 bytes of SHA256(byte-appended sender ID, target ID, payload).
 - Every node recomputes the packet ID and drops the packet if it does not match.
 - The packet length is not in the header. The transport reports it.
 
@@ -97,14 +97,10 @@ The handshake counter is a number saved in flash on each device. It only increas
 
 The signature covers, in order:
 
-1. the text `BH1-HS`
-2. sender ID
-3. target ID
-4. ephemeral public key
-5. the sender's own handshake counter
-6. the other side's handshake counter
-
-In an initiation, item 6 is 8 zero bytes. In a response, item 6 is the handshake counter from the initiation.
+1. sender ID
+2. target ID
+3. ephemeral public key
+4. the sender's own handshake counter
 
 ### 5.3 Data payload (22 bytes plus ciphertext)
 
@@ -130,7 +126,7 @@ The tag, message counter and total are the same in every chunk of one message.
 | 4 | message counter (the sender's own next counter) |
 | 4 | acked counter (the message counter of the message being confirmed) |
 
-There is no ciphertext. The tag is made by AES-CCM over an empty message.
+There is no ciphertext. The tag is made by AES-CCM over the counters as AAD.
 
 ### 5.5 Close payload (21 bytes, 62 bytes in total)
 
@@ -140,7 +136,7 @@ There is no ciphertext. The tag is made by AES-CCM over an empty message.
 | 4 | message counter (the sender's own next counter) |
 | 1 | reason |
 
-There is no ciphertext. The tag is made by AES-CCM over an empty message.
+There is no ciphertext. The tag is made by AES-CCM over the counter and reason as AAD.
 
 Reason codes:
 
@@ -213,7 +209,7 @@ Checks on a received handshake, in order:
 
 1. The sender is in the contact list and the target ID is mine.
 2. The handshake counter is higher than the last one saved for that sender.
-3. SHA-256(public key) starts with the sender ID.
+3. SHA256(public key) starts with the sender ID.
 4. The signature is valid.
 
 The new handshake counter is saved to the contact's record only after all four checks pass. Failed checks drop the packet silently.
@@ -231,7 +227,7 @@ Nonce: the 12 byte IV XOR the message counter (4 bytes, little-endian) placed in
 
 Message counters:
 
-- Each direction has its own message counter, starting at 0.
+- Each direction has its own message counter, starting at 0, and this counts the number of complete successful messages it has sent.
 - A data message uses one message counter, however many chunks it has.
 - Confirmation and close packets also use one message counter each, taken from the same send counter.
 - A node MUST start a new handshake before its send counter reaches 4,294,967,295.
@@ -326,33 +322,31 @@ A confirmation tells the sender that the target node received every chunk, put t
 2. Track each message waiting for confirmation by (peer, message counter).
 3. When a valid confirmation arrives with a matching acked counter, report the message as confirmed. A valid confirmation also refreshes the session timer.
 4. Later copies of the same confirmation are ignored.
-5. When the timer ends, report the message as unconfirmed, send a close packet with reason 3 and erase the session. Other messages waiting on that session are reported as failed. The application decides whether to send the message again.
+5. When the timer ends, send a close packet with the reason and erase the session, report the message as unconfirmed to the application. The application decides whether to send the message again. The session is erased because an unconfirmed message could cause drift between the counters of the two peers, leading in a total lockdown of that session until it is ultimately closed by the idle timeout and a new session opened between them.
 
 The number of messages waiting for confirmation at once is limited.
 
 ## 10. Platform requirements
 
-The library is written in C++23 and takes these as concepts or function-pointer tables.
-
 | Piece | What it does |
 |---|---|
 | Transport | Sends a packet and returns true or false. Reports the largest packet size. Received packets are passed to the library with optional signal information. |
 | Clock | Returns a steadily increasing time in milliseconds |
-| Scheduler | Runs a callback after a delay and cancels it, or provides a regular tick |
+| Scheduler | Runs a callback after a delay with the option to cancel a callback. Also sleep the calling thread |
 | Random numbers | Fills a buffer with secure random bytes |
-| Crypto | SHA-256, HKDF-SHA256, Ed25519 (public key from seed, sign, verify), X25519 (make key, agree), AES-128-CCM (seal, open), memory wipe |
+| Crypto | SHA256, HKDF-SHA256, Ed25519 (public key from seed, sign, verify), X25519 (make key, agree), AES-128-CCM (seal, open), memory wipe |
 | Identity and contacts | Loads and saves the seed. Looks up a contact by ID. Reads and writes the last handshake counter seen from a contact. Reads and writes this device's handshake counter. |
 | Event sink | Receives: message received, message incomplete, session opened, session closed (with reason), send result (confirmed, unconfirmed, failed) |
 
 Settings chosen at build or start: node role, starting hop count, cache size, relay delay, confirmation copies and gap, all timeouts, maximum sessions, maximum chunks, maximum messages waiting for confirmation.
 
-A passive-only build needs the transport, clock, scheduler, random numbers and SHA-256.
+A passive-only build needs the transport, clock, scheduler, random numbers and SHA256.
 
-The library is single-threaded. The platform serialises calls into it. It SHOULD NOT allocate memory after startup.
+The library is single-threaded. The platform serialises calls into it. It MUST NOT allocate memory after startup.
 
 ## 11. Errors and drops
 
-Dropped silently, with no reply: unknown version, hop count above 10, wrong packet ID, unknown contact, bad signature, bad tag, replayed counter. Each increments a debug counter.
+Dropped silently, with no reply: unknown version, hop count above the maximum, wrong packet ID, unknown contact, bad signature, bad tag, replayed counter. Each increments an optional debug counter.
 
 Reported to the application: no session could be set up, message incomplete, message unconfirmed, session closed, message too large.
 
