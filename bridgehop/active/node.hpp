@@ -6,8 +6,6 @@
 #include "utils/bhop_constants.hpp"
 
 #include <span>
-#include <optional>
-#include <expected>
 
 
 namespace bhop::active {
@@ -24,29 +22,35 @@ namespace bhop::active {
              platform::filesystem_t  filesystem>
     class node_t {
     public:
+        node_t() = default;
+
         ~node_t() {
             (void)cleanup();
         }
 
-        node_t(const node_t&)            = default;
-        node_t& operator=(const node_t&) = default;
-        node_t(node_t&&)                 = default;
-        node_t& operator=(node_t&&)      = default;
+        node_t(const node_t&)            = delete;
+        node_t& operator=(const node_t&) = delete;
+        node_t(node_t&&)                 = delete;
+        node_t& operator=(node_t&&)      = delete;
 
-        // Create an instance of the library as an active node
-        [[nodiscard]] static std::expected<node_t, types::error_t> create(const config_t& config) {
-            node_t node;
-            auto   ret = node.init(config);
-            if (ret != types::error_t::ERR_OK) {
-                return std::unexpected(ret);
+        // Initialize the library as an active node
+        types::error_t init(const config_t& config) {
+            if (m_is_initialized) {
+                return types::error_t::ERR_INVALID_STATE;
             }
-            return node;
+
+            m_is_initialized = true;
+            return types::error_t::ERR_OK;
         }
 
         // This tears down all active sessions when deinitializing the library.
         // It is also called from the destructor
         types::error_t deinit() {
+            if (!m_is_initialized) {
+                return types::error_t::ERR_INVALID_STATE;
+            }
             cleanup();
+            m_is_initialized = false;
             return types::error_t::ERR_OK;
         }
 
@@ -63,8 +67,7 @@ namespace bhop::active {
         }
 
         // This returns a span to all the IDs of all nodes with which exists a connection.
-        // Returns std::nullopt if no open sessions.
-        [[nodiscard]] std::optional<std::span<bhop::node_id_t>> get_open_sessions() {
+        [[nodiscard]] std::span<bhop::node_id_t> get_open_sessions() {
             return {};
         }
 
@@ -93,16 +96,13 @@ namespace bhop::active {
         }
 
     private:
-        node_t() = default;
-
+        bool     m_is_initialized{};
+        config_t m_config{};
         uint32_t m_debug_counter{};
-
-        types::error_t init(const config_t& config) {
-            return types::error_t::ERR_OK;
-        }
 
         types::error_t cleanup() {
             types::error_t error = types::error_t::ERR_OK;
+
             // Close all open sessions
             auto sessions = get_open_sessions();
             if (sessions) {
@@ -110,7 +110,11 @@ namespace bhop::active {
                     error = close(session);
                 }
             }
+
             // TODO: Erase all internal state
+            m_config        = {};
+            m_debug_counter = 0;
+
             return types::error_t::ERR_OK;
         }
     };

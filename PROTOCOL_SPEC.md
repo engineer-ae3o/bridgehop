@@ -15,8 +15,6 @@ This document covers:
 - delivery confirmation
 - what the library needs from the platform
 
-This document does not cover Bluetooth, flash storage, radio settings, duty-cycle enforcement or anything shown on screen.
-
 BridgeHop is a multi-hop mesh messaging protocol with end-to-end encryption, forward secrecy and sender authentication. Every packet is flooded: each node that hears a packet sends it on, within a hop limit.
 
 Delivery is best-effort. The protocol never retransmits a message on its own and does not guarantee order. When the target node receives, reassembles and verifies a whole message, it sends a confirmation back. If no confirmation arrives within the wait time, the sender reports the message as unconfirmed, and the application decides whether to send it again.
@@ -93,14 +91,16 @@ Rules:
 | 32 | signature S |
 | 32 | sender's Ed25519 public key |
 
-The handshake counter is a number saved in flash on each device. It only increases. Each node saves the highest handshake counter seen from each contact.
+The handshake counter is a number saved in flash on each device. It only increases. Each node saves the highest handshake counter seen from each contact. If the handshake fails, the application decides whether to retry.
 
-The signature covers, in order:
+The Ed25519 signature covers, in order:
 
 1. sender ID
 2. target ID
-3. ephemeral public key
-4. the sender's own handshake counter
+3. ephemeral X25519 public key
+4. the sender's handshake counter
+
+There is no ciphertext.
 
 ### 5.3 Data payload (22 bytes plus ciphertext)
 
@@ -126,7 +126,7 @@ The tag, message counter and total are the same in every chunk of one message.
 | 4 | message counter (the sender's own next counter) |
 | 4 | acked counter (the message counter of the message being confirmed) |
 
-There is no ciphertext. The tag is made by AES-CCM over the counters as AAD.
+The message and ack counters are byte-appended and encrypted.
 
 ### 5.5 Close payload (21 bytes, 62 bytes in total)
 
@@ -136,7 +136,7 @@ There is no ciphertext. The tag is made by AES-CCM over the counters as AAD.
 | 4 | message counter (the sender's own next counter) |
 | 1 | reason |
 
-There is no ciphertext. The tag is made by AES-CCM over the counter and reason as AAD.
+The message counter and reason are byte-appended and encrypted.
 
 Reason codes:
 
@@ -148,12 +148,12 @@ Reason codes:
 
 ### 5.6 Authenticated fields
 
-The authentication fields are, in this order:
+The authentication fields as associated data are, in this order (byte-appended):
 
-- data: type value (one byte), sender ID, target ID, message counter, total chunks
-- confirmation: type value, sender ID, target ID, message counter, acked counter
-- close: type value, sender ID, target ID, message counter, reason
-- handshake: covered by the signature (see 5.2)
+- data: sender ID, target ID, message counter, total chunks
+- confirmation: sender ID and target ID
+- close: sender ID and target ID
+- handshake: not applicable here (see 5.2)
 
 The chunk index is not part of a data packet's authentication fields. A message is encrypted once and has one tag. A wrong index puts the chunks in the wrong order, and the tag check fails.
 
@@ -216,9 +216,9 @@ The new handshake counter is saved to the contact's record only after all four c
 
 ### 7.3 Key derivation
 
-1. Shared secret = X25519(my ephemeral private key, their ephemeral public key). An all-zero result is rejected.
-2. HKDF extract: salt is the initiator's handshake counter followed by the responder's handshake counter. Input key material is the shared secret.
-3. HKDF expand: info is `BH1-KEYS`, then the initiator ID, the responder ID, the initiator's ephemeral public key and the responder's ephemeral public key. Output length is 56 bytes.
+1. Shared secret = X25519(their ephemeral public key, my ephemeral private key).
+2. HKDF extract: salt is the initiator's handshake counter followed by the responder's handshake counter, byte appnded in order. Input key material is the shared secret.
+3. HKDF expand: info is the initiator ID, the responder ID, the initiator's ephemeral public key and the responder's ephemeral public key. Output length is 56 bytes.
 4. The 56 bytes are split into: initiator-to-responder key (16), initiator-to-responder IV (12), responder-to-initiator key (16), responder-to-initiator IV (12).
 5. Each side sends with its own direction's key and IV and receives with the other.
 6. The ephemeral private key is erased once the keys are derived.
@@ -230,7 +230,7 @@ Message counters:
 - Each direction has its own message counter, starting at 0, and this counts the number of complete successful messages it has sent.
 - A data message uses one message counter, however many chunks it has.
 - Confirmation and close packets also use one message counter each, taken from the same send counter.
-- A node MUST start a new handshake before its send counter reaches 4,294,967,295.
+- A node MUST start a new handshake before its send counter reaches 4,294,967,295 (moot for most applications).
 - A message counter MUST NEVER be used twice with the same key.
 
 ### 7.4 Replacing a session
@@ -290,7 +290,7 @@ Handshake processing is rate-limited per sender and in total.
 2. Split the ciphertext into chunks.
 3. Send each chunk as its own packet with the same tag, message counter and total, and its own index.
 
-The largest message is the number of chunks allowed times the chunk size. Default is 16 chunks. The limit is 255 chunks.
+The largest message is the number of chunks allowed times the chunk size. Default is 16 chunks.
 
 **Receiving.**
 
@@ -314,7 +314,7 @@ A confirmation tells the sender that the target node received every chunk, put t
 2. Send 3 copies by default, with a random gap of 1 to 5 seconds between copies.
 3. Each copy uses a new message counter. The acked counter is the same in every copy.
 4. No confirmation is sent for a duplicate, a replay or a message that failed a check.
-5. A confirmation is not confirmed.
+5. A confirmation (message ack) is not confirmed.
 
 **Sender.**
 
@@ -324,7 +324,7 @@ A confirmation tells the sender that the target node received every chunk, put t
 4. Later copies of the same confirmation are ignored.
 5. When the timer ends, send a close packet with the reason and erase the session, report the message as unconfirmed to the application. The application decides whether to send the message again. The session is erased because an unconfirmed message could cause drift between the counters of the two peers, leading in a total lockdown of that session until it is ultimately closed by the idle timeout and a new session opened between them.
 
-The number of messages waiting for confirmation at once is limited.
+The number of messages waiting for confirmation at once is to the maximum number of open sessions, one per open session.
 
 ## 10. Platform requirements
 
@@ -332,7 +332,7 @@ The number of messages waiting for confirmation at once is limited.
 |---|---|
 | Transport | Sends a packet and returns true or false. Reports the largest packet size. Received packets are passed to the library with optional signal information. |
 | Clock | Returns a steadily increasing time in milliseconds |
-| Scheduler | Runs a callback after a delay with the option to cancel a callback. Also sleep the calling thread |
+| Scheduler | Runs a callback after a delay with the option to cancel a callback. Also sleep the calling thread. The callbacks should be able to wake the sleeping thread |
 | Random numbers | Fills a buffer with secure random bytes |
 | Crypto | SHA256, HKDF-SHA256, Ed25519 (public key from seed, sign, verify), X25519 (make key, agree), AES-128-CCM (seal, open), memory wipe |
 | Identity and contacts | Loads and saves the seed. Looks up a contact by ID. Reads and writes the last handshake counter seen from a contact. Reads and writes this device's handshake counter. |
@@ -359,13 +359,8 @@ Reported to the application: no session could be set up, message incomplete, mes
 - Sender ID, target ID, packet size and timing are visible to anyone listening.
 - The hop count and packet ID are not authenticated, so an attacker can change the hop count of a copy of a packet.
 - Jamming, handshake flooding and battery drain are limited by rate limits only.
-- If a device's flash is wiped, its handshake counter restarts and contacts reject it until they add it again.
 - A confirmation shows the node received the message. It does not show that a person read it.
 
-## 13. Undecided
+## 13. Test Vectors
 
-1. Maximum message size and memory limits per peer.
-2. Whether relays cancel their send when they overhear the same packet.
-3. Handshake retry rules, in the library or the application.
-4. Number of confirmation copies and the gap between them, once airtime is known.
-5. Test vectors for the handshake, key derivation and AES-CCM, and a test suite against a simulated lossy mesh.
+Still undecided at the moment.

@@ -21,9 +21,9 @@ namespace bhop::packet {
     // The different payload types
     struct [[__gnu__::__packed__]] handshake_t {
         uint64_t                  counter{};         // Sender's handshake counter
-        bhop::x25519_key_t        x25519_pub_key{};  // Sender's X25519 public key
+        bhop::x25519_key_t        x25519_pub_key{};  // Sender's ephemeral ECDH public key
         bhop::ed25519_signature_t signature{};       // Sender's EdDSA (R, S) signature
-        bhop::ed25519_key_t       ed25519_pub_key{}; // Sender's ephemeral ECDH public key
+        bhop::ed25519_key_t       ed25519_pub_key{}; // Sender's long term EdDSA public key
     };
 
     struct [[__gnu__::__packed__]] data_t {
@@ -36,7 +36,7 @@ namespace bhop::packet {
     struct [[__gnu__::__packed__]] message_ack_t {
         bhop::aes_auth_tag_t auth_tag{};    // Authentication tag
         uint32_t             msg_counter{}; // Sender's message counter
-        uint32_t             ack_counter{}; // Ac
+        uint32_t             ack_counter{}; // COunter of the message sent
     };
 
     struct [[__gnu__::__packed__]] close_t {
@@ -44,5 +44,11 @@ namespace bhop::packet {
         uint32_t              msg_counter{}; // Sender's message counter
         types::close_reason_t reason{};      // Reason for closing the session
     };
+
+    static_assert(sizeof(header_t) == bhop::HEADER_PACKET_SIZE);
+    static_assert(sizeof(handshake_t) == bhop::HANDSHAKE_PACKET_SIZE);
+    static_assert(sizeof(data_t) == bhop::DATA_PACKET_SIZE);
+    static_assert(sizeof(message_ack_t) == bhop::MESSAGE_ACK_PACKET_SIZE);
+    static_assert(sizeof(close_t) == bhop::CLOSE_PACKET_SIZE);
 
 } // namespace bhop::packet

@@ -10,18 +10,16 @@
 namespace bhop::bhop {
 
 
-    // This file contains constants from the protocl specification.
-    // Most can be modified, but should be modified with care.
+    // This file contains constants from the protocol specification.
+    // They should NOT be modified under any circumstance.
+    // The configurable constants are over at utils/config.hpp
 
 
     // Protocol version
-    // Must not be modified
     constexpr inline uint32_t         BRIDGEHOP_VERSION     = 0;
     constexpr inline std::string_view BRIDGEHOP_VERSION_STR = "v0.1.0";
 
-
     // Bit positions of the various fields in the frame field of the packet header
-    // Must not be modified
     constexpr inline uint32_t HOP_COUNT_BIT_POS  = 0;
     constexpr inline uint32_t HOP_COUNT_BIT_MASK = 0b1111;
 
@@ -34,50 +32,29 @@ namespace bhop::bhop {
     static_assert(((HOP_COUNT_BIT_MASK << HOP_COUNT_BIT_POS) | (VERSION_BIT_MASK << VERSION_BIT_POS) |
                    (PACKET_TYPE_BIT_MASK << PACKET_TYPE_BIT_POS)) == std::numeric_limits<uint8_t>::max());
 
+    // Sizes of the different packet types
+    constexpr inline uint32_t HEADER_PACKET_SIZE      = 41;
+    constexpr inline uint32_t HANDSHAKE_PACKET_SIZE   = 136;
+    constexpr inline uint32_t DATA_PACKET_SIZE        = 22;
+    constexpr inline uint32_t MESSAGE_ACK_PACKET_SIZE = 24;
+    constexpr inline uint32_t CLOSE_PACKET_SIZE       = 21;
 
-    // Maximum hops per packet and dedupe cache parameters
-    // Can be modified
-    constexpr inline uint32_t MAX_HOPS_PER_PACKET          = 10;
-    constexpr inline uint32_t DEDUPE_CACHE_SIZE            = 2048;
-    constexpr inline uint32_t DEDUPE_CACHE_ENTRY_PERIOD_MS = 120 * 1000;
-
-
-    // Maximum number of contacts that can be saved.
-    // Note that deletion of contacts is not supported.
-    // Can be modified
-    constexpr inline uint32_t MAX_CONTACTS = 500;
-
-
-    // Before a packet is retransmitted, it is made to wait a random delay between this interval
-    // Can be modified
-    constexpr inline uint32_t PROPAGATION_DELAY_MIN_MS = 0;
-    constexpr inline uint32_t PROPAGATION_DELAY_MAX_MS = 250;
-
-
-    // Various timeouts for different states
-    // Can be modified
-    constexpr inline uint32_t HANDSHAKE_TIMEOUT_MS    = 60 * 1000;
-    constexpr inline uint32_t SESSION_IDLE_TIMEOUT_MS = 60 * 60 * 1000;
-    constexpr inline uint32_t REASSEMBLY_TIMEOUT_MS   = 45 * 1000;
-    constexpr inline uint32_t MESSAGE_ACK_TIMEOUT_MS  = 120 * 1000;
-
+    constexpr inline uint32_t HANDSHAKE_FULL_PACKET_SIZE   = HEADER_PACKET_SIZE + HANDSHAKE_PACKET_SIZE;
+    constexpr inline uint32_t DATA_PACKET_METADATA_SIZE    = HEADER_PACKET_SIZE + DATA_PACKET_SIZE;
+    constexpr inline uint32_t MESSAGE_ACK_FULL_PACKET_SIZE = HEADER_PACKET_SIZE + MESSAGE_ACK_PACKET_SIZE;
+    constexpr inline uint32_t CLOSE_FULL_PACKET_SIZE       = HEADER_PACKET_SIZE + CLOSE_PACKET_SIZE;
 
     // Sizes of the IDs for a node and a packet
-    // Must not be modified
     constexpr inline uint32_t PACKET_ID_LEN_BYTES = 8;
     constexpr inline uint32_t NODE_ID_LEN_BYTES   = 16;
 
-
     // Sizes of the AES parameters (AES-128-CCM) and the output from the HKDF
-    // Must not be modified
     constexpr inline uint32_t AES_KEY_LEN_BYTES      = 128 / 8;
     constexpr inline uint32_t AES_NONCE_LEN_BYTES    = 12;
     constexpr inline uint32_t AES_AUTH_TAG_LEN_BYTES = 16;
     constexpr inline uint32_t HKDF_OUTPUT_LEN_BYTES  = (AES_KEY_LEN_BYTES * 2) + (AES_NONCE_LEN_BYTES * 2);
 
-
     // Assymetric crypto keys and signature sizes. Covers the public and private keys
-    // Must not be modified
     constexpr inline uint32_t X25519_KEY_LEN_BYTES             = 32;
     constexpr inline uint32_t Ed25519_SEED_LEN_BYTES           = 32;
     constexpr inline uint32_t Ed25519_KEY_LEN_BYTES            = 32;
