@@ -2,7 +2,10 @@
 
 
 #include "utils/bhop_constants.hpp"
+#include "utils/common.hpp"
+#include "utils/config.hpp"
 
+#include <limits>
 #include <cstdint>
 
 
@@ -44,12 +47,23 @@ namespace bhop::types {
         CONTACTS, // Stores all registered contacts and their handshake counter
     };
 
+    // Event type passed to user callback
+    enum class event_t : uint8_t {};
+
+    // Data stored in the config file
+    struct config_file_t {};
+
+
+    // An efficient bitmask representing the contact slots that are in use
+    // Space efficient and stops us from having to do a linear scan of the file
+    using contacts_file_header_t =
+        std::array<uint8_t, utils::ceil_div(config::MAX_CONTACTS, std::numeric_limits<uint8_t>::digits)>;
+
     // The contacts file stores the number of contacts first, then the contacts. A contact slot stores whether
     // it is in use, the node ID of the contact and the number of valid handshakes with said contact. This allows
     // us to freely delete contact. Deletion would fragment the file storage, and you'd have to push elements up
     // and/or down if there was no way to know if a contact slot was in use, and this can be convoluted to implement.
-    struct [[__gnu__::__packed__]] contact_slot_t {
-        bool            is_in_use{};
+    struct contact_slot_t {
         bhop::node_id_t node_id{};
         uint64_t        handshake_counter{};
     };

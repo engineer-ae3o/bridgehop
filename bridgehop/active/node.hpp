@@ -57,6 +57,12 @@ namespace bhop::active {
 
             m_config = config;
 
+            // Read the contacts file header and cache it
+            m_config.filesystem.read(
+                types::file_t::CONTACTS,
+                std::span{reinterpret_cast<uint8_t*>(&m_contacts_header), sizeof(m_contacts_header)},
+                0);
+
             m_is_initialized = true;
             return types::error_t::ERR_OK;
         }
@@ -109,25 +115,25 @@ namespace bhop::active {
                 return types::error_t::ERR_INVALID_STATE;
             }
 
-            // Scan file for free slot and insert
-            for (uint32_t i = 0; i < config::MAX_CONTACTS; i++) {
-                types::contact_slot_t slot;
-                m_config.filesystem.read(types::file_t::CONTACTS,
-                                         std::span{reinterpret_cast<uint8_t*>(&slot), sizeof(slot)},
-                                         CONTACTS_OFFSET + (i * sizeof(slot)));
-                if (!slot.is_in_use) {
-                    slot.is_in_use         = true;
-                    slot.node_id           = node_id;
-                    slot.handshake_counter = 0;
-                    m_config.filesystem.write(types::file_t::CONTACTS,
-                                              std::span{reinterpret_cast<const uint8_t*>(&slot), sizeof(slot)},
-                                              CONTACTS_OFFSET + (i * sizeof(slot)));
-                    return types::error_t::ERR_OK;
-                }
+            auto index = utils::get_index_of_first_0_bit(m_contacts_header);
+            if (index == std::nullopt) {
+                // All bits are set. No free slot
+                return types::error_t::ERR_CONTACT_LIST_FULL;
             }
 
-            // All slots used up. Not enough storage space
-            return types::error_t::ERR_CONTACT_LIST_FULL;
+            const types::contact_slot_t contact = {.node_id = node_id, .handshake_counter = 0};
+            m_config.filesystem.write(types::file_t::CONTACTS,
+                                      std::span{reinterpret_cast<const uint8_t*>(&contact), sizeof(contact)},
+                                      CONTACTS_OFFSET + (index.value() * sizeof(contact)));
+
+            // Mark slot as used and write back header to the file
+            m_contacts_header[index.value() / 8] |= 1UL << (index.value() % 8);
+            m_config.filesystem.write(
+                types::file_t::CONTACTS,
+                std::span{reinterpret_cast<const uint8_t*>(&m_contacts_header), sizeof(m_contacts_header)},
+                0);
+
+            return types::error_t::ERR_OK;
         }
 
         // Remove a contact with its ID
@@ -136,39 +142,33 @@ namespace bhop::active {
                 return types::error_t::ERR_INVALID_STATE;
             }
 
-            // Scan file for contact and mark slot as unused
-            for (uint32_t i = 0; i < config::MAX_CONTACTS; i++) {
-                types::contact_slot_t slot;
+            // Read in batches
+            std::array<types::contact_slot_t, CONTACTS_FILE_READ_BATCH_SIZE> slot;
+
+            // Scan file for free slot and insert
+            for (uint32_t i = 0; i < (config::MAX_CONTACTS / slot.size()); i++) {
                 m_config.filesystem.read(types::file_t::CONTACTS,
                                          std::span{reinterpret_cast<uint8_t*>(&slot), sizeof(slot)},
                                          CONTACTS_OFFSET + (i * sizeof(slot)));
-                if (slot.is_in_use && (slot.node_id == node_id)) {
-                    slot.is_in_use = false;
-                    m_config.filesystem.write(types::file_t::CONTACTS,
-                                              std::span{reinterpret_cast<const uint8_t*>(&slot), sizeof(slot)},
-                                              CONTACTS_OFFSET + (i * sizeof(slot)));
-                    return types::error_t::ERR_OK;
-                }
             }
 
             // Contact is not on this device
             return types::error_t::ERR_CONTACT_NOT_EXIST;
         }
 
-        [[nodiscard]] bool is_contact_stored(const bhop::node_id_t& node_id) {
+        [[nodiscard]] bool is_contact_stored(const bhop::node_id_t& node_id) const {
             if (!m_is_initialized) {
                 return false;
             }
 
-            // Scan the file for the ID
-            for (uint32_t i = 0; i < config::MAX_CONTACTS; i++) {
-                types::contact_slot_t slot;
+            // Read in batches
+            std::array<types::contact_slot_t, CONTACTS_FILE_READ_BATCH_SIZE> slot;
+
+            // Scan file for free slot and insert
+            for (uint32_t i = 0; i < (config::MAX_CONTACTS / slot.size()); i++) {
                 m_config.filesystem.read(types::file_t::CONTACTS,
                                          std::span{reinterpret_cast<uint8_t*>(&slot), sizeof(slot)},
                                          CONTACTS_OFFSET + (i * sizeof(slot)));
-                if (slot.is_in_use && (slot.node_id == node_id)) {
-                    return true;
-                }
             }
 
             // Contact not in any used slot
@@ -176,14 +176,11 @@ namespace bhop::active {
         }
 
         // Return the number of stored contacts
-        [[nodiscard]] std::optional<uint32_t> get_num_contacts() {
+        [[nodiscard]] std::optional<uint32_t> get_num_contacts() const {
             if (!m_is_initialized) {
                 return std::nullopt;
             }
-            uint32_t contacts = 0;
-            m_config.filesystem.read(
-                types::file_t::CONTACTS, std::span{reinterpret_cast<uint8_t*>(&contacts), sizeof(contacts)}, 0);
-            return contacts;
+            return utils::count_set_bits(m_contacts_header);
         }
 
         // Send a message to a peer. It fails if the ID has not been
@@ -214,8 +211,11 @@ namespace bhop::active {
 
         dedupe::cache_t<system> m_cache{};
 
+        types::contacts_file_header_t m_contacts_header{};
+
         // Where the contact slots start in the contacts file
-        static constexpr uint32_t CONTACTS_OFFSET = 4;
+        static constexpr uint32_t CONTACTS_OFFSET               = sizeof(types::contacts_file_header_t);
+        static constexpr uint32_t CONTACTS_FILE_READ_BATCH_SIZE = 20;
 
         types::error_t cleanup() {
             types::error_t error = types::error_t::ERR_OK;
