@@ -19,15 +19,15 @@ namespace bhop::config {
     constexpr inline uint32_t DEDUPE_CACHE_ENTRY_TIMEOUT_MS = 120 * 1000;
 
     // Maxmimum active sessions at any given point and maxmimum chunked packets allowed for a given message
-    constexpr inline uint32_t MAX_ACTIVE_SESSIONS = 8;
-    constexpr inline uint32_t MAX_PENDING_CHUNKS  = 16;
+    constexpr inline uint32_t MAX_ACTIVE_SESSIONS    = 8;
+    constexpr inline uint32_t MAX_CHUNKS_PER_MESSAGE = 16;
 
     // To be filled by the user for the maximum size of a packet allowed by the physical layer
     constexpr inline uint32_t MAX_PACKET_SIZE = 255;
 
     // The maximum message size allowed
     constexpr inline uint32_t MAX_DATA_SIZE_PER_PACKET = MAX_PACKET_SIZE - bhop::DATA_PACKET_METADATA_SIZE;
-    constexpr inline uint32_t MAX_MESSAGE_SIZE_BYTES   = MAX_PENDING_CHUNKS * MAX_DATA_SIZE_PER_PACKET;
+    constexpr inline uint32_t MAX_MESSAGE_SIZE_BYTES   = MAX_CHUNKS_PER_MESSAGE * MAX_DATA_SIZE_PER_PACKET;
 
     // Maximum number of contacts that can be saved.
     constexpr inline uint32_t MAX_CONTACTS = 500;

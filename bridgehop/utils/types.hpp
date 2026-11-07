@@ -15,6 +15,7 @@ namespace bhop::types {
         ERR_SESSION_FAILED_TO_OPEN,
         ERR_CONTACT_ALREADY_EXISTS,
         ERR_CONTACT_NOT_FOUND,
+        ERR_BUSY,
     };
 
     // Reasons for ending a session
@@ -38,7 +39,14 @@ namespace bhop::types {
     enum class file_t : uint8_t {
         CONFIG,   // Stores configuration data
         CONTACTS, // Stores all registered contacts and their handshake counter
-        TEMP,     // Used to store data temporarily when the application needs memory
+    };
+
+    // Event type passed to user callback
+    enum class event_t : uint8_t {};
+
+    // Data stored in the config file
+    struct config_file_t {
+        bool first_boot{};
     };
 
 } // namespace bhop::types

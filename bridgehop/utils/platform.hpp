@@ -80,6 +80,7 @@ namespace bhop::platform {
         { type.generate_keys(output, output) };
         // Get the shared secret from our private key and the peer's public keys
         // The first parameter is the peer's public key, the second our private key and the third, the shared secret
+        // Return true if the secret is generated successfully, false otherwise
         { type.get_shared_secret(input, input, output) } -> std::same_as<bool>;
     };
 
@@ -111,18 +112,26 @@ namespace bhop::platform {
     concept system_t = requires(T&                         type,
                                 typename T::timer_handle_t timer,
                                 void (*callback)(void*, T::timer_handle_t),
-                                void*              ctx,
-                                uint32_t           timeout_ms,
-                                std::span<uint8_t> src) {
+                                void*                    ctx,
+                                uint32_t                 timeout_ms,
+                                types::event_t           event,
+                                std::span<const uint8_t> message,
+                                std::span<uint8_t>       src) {
+        typename T::tick_type_t;
         // Get the value of the system tick in milliseconds
-        { type.now_ms() } -> tick_t;
+        { T::now_ms() } -> std::same_as<typename T::tick_type_t>;
+        requires tick_t<typename T::tick_type_t>;
         // Register a callback to be called after a timeout. Returns the ID of the created timer.
         // The timer for the callback should started immediately.
         { type.register_callback(callback, ctx, timeout_ms) } -> std::same_as<typename T::timer_handle_t>;
         // Cancels an already created callback with its ID
         { type.cancel_callback(timer) };
         // Put the calling thread to sleep indefinitely till a callback wakes it up
+        // Only used in passive node builds
         { type.sleep() };
+        // This gets called when an event (check the spec for the event types) occurs
+        // NOTE: The message parameter only has meaning when the event is a message received event
+        { type.event_sink(event, message) };
         // Wipe a memory region to 0s securely. NOTE: Do NOT use memset from the stdlib
         { type.secure_memset(src) };
     };
@@ -133,9 +142,9 @@ namespace bhop::platform {
         // Read and write into files used by this library. By the time the application calls into this
         // library, these files should have already been opened. Errors on file ops should be handled by
         // the caller since those failure modes are invisible to the library and are implementation details.
-        { type.file_read(file, rw_data, offset) };
-        { type.file_write(file, ro_data, offset) };
-        { type.get_file_size(file) } -> std::same_as<size_t>;
+        { type.read(file, rw_data, offset) };
+        { type.write(file, ro_data, offset) };
+        { type.get_size(file) } -> std::same_as<size_t>;
     };
 
 } // namespace bhop::platform

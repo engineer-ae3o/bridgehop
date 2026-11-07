@@ -36,7 +36,7 @@ namespace bhop::packet {
     struct [[__gnu__::__packed__]] message_ack_t {
         bhop::aes_auth_tag_t auth_tag{};    // Authentication tag
         uint32_t             msg_counter{}; // Sender's message counter
-        uint32_t             ack_counter{}; // COunter of the message sent
+        uint32_t             ack_counter{}; // Counter of the message sent
     };
 
     struct [[__gnu__::__packed__]] close_t {

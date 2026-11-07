@@ -124,9 +124,9 @@ The tag, message counter and total are the same in every chunk of one message.
 |---|---|
 | 16 | tag |
 | 4 | message counter (the sender's own next counter) |
-| 4 | acked counter (the message counter of the message being confirmed) |
+| 4 | ack counter (the message counter of the message being confirmed) |
 
-The message and ack counters are byte-appended and encrypted.
+The ack counter is the only thing encrypted.
 
 ### 5.5 Close payload (21 bytes, 62 bytes in total)
 
@@ -136,7 +136,7 @@ The message and ack counters are byte-appended and encrypted.
 | 4 | message counter (the sender's own next counter) |
 | 1 | reason |
 
-The message counter and reason are byte-appended and encrypted.
+The reason is the only thing encrypted.
 
 Reason codes:
 
@@ -148,11 +148,11 @@ Reason codes:
 
 ### 5.6 Authenticated fields
 
-The authentication fields as associated data are, in this order (byte-appended):
+The authentication fields as associated data are, in this order (all byte-appended):
 
 - data: sender ID, target ID, message counter, total chunks
-- confirmation: sender ID and target ID
-- close: sender ID and target ID
+- confirmation: sender ID, target ID and message counter
+- close: sender ID, target ID and message counter
 - handshake: not applicable here (see 5.2)
 
 The chunk index is not part of a data packet's authentication fields. A message is encrypted once and has one tag. A wrong index puts the chunks in the wrong order, and the tag check fails.
@@ -164,7 +164,7 @@ Every node keeps a duplicate cache of packet IDs.
 | Setting | Default |
 |---|---|
 | Cache size | 2048 entries (configurable) |
-| Entry lifetime | 120 seconds since the packet was last heard |
+| Entry lifetime | 120 seconds since the packet was first heard |
 | When full | remove the oldest entry |
 | Delay before relaying | random, 0 to 250 ms (configurable) |
 
@@ -312,7 +312,7 @@ A confirmation tells the sender that the target node received every chunk, put t
 
 1. After step 5 of section 8 succeeds, send a confirmation to the sender.
 2. Send 3 copies by default, with a random gap of 1 to 5 seconds between copies.
-3. Each copy uses a new message counter. The acked counter is the same in every copy.
+3. Each copy uses a new message counter. The ack counter is the same in every copy.
 4. No confirmation is sent for a duplicate, a replay or a message that failed a check.
 5. A confirmation (message ack) is not confirmed.
 
@@ -320,7 +320,7 @@ A confirmation tells the sender that the target node received every chunk, put t
 
 1. After the last chunk has been transmitted, start a timer of 120 seconds (configurable).
 2. Track each message waiting for confirmation by (peer, message counter).
-3. When a valid confirmation arrives with a matching acked counter, report the message as confirmed. A valid confirmation also refreshes the session timer.
+3. When a valid confirmation arrives with a matching ack counter, report the message as confirmed. A valid confirmation also refreshes the session timer.
 4. Later copies of the same confirmation are ignored.
 5. When the timer ends, send a close packet with the reason and erase the session, report the message as unconfirmed to the application. The application decides whether to send the message again. The session is erased because an unconfirmed message could cause drift between the counters of the two peers, leading in a total lockdown of that session until it is ultimately closed by the idle timeout and a new session opened between them.
 

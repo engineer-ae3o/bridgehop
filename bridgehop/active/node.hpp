@@ -2,10 +2,14 @@
 
 
 #include "utils/types.hpp"
+#include "utils/cache.hpp"
+#include "utils/config.hpp"
+#include "utils/packet.hpp"
 #include "utils/platform.hpp"
 #include "utils/bhop_constants.hpp"
 
 #include <span>
+#include <array>
 
 
 namespace bhop::active {
@@ -49,9 +53,7 @@ namespace bhop::active {
             if (!m_is_initialized) {
                 return types::error_t::ERR_INVALID_STATE;
             }
-            cleanup();
-            m_is_initialized = false;
-            return types::error_t::ERR_OK;
+            return cleanup();
         }
 
         // Open and close a session.
@@ -59,31 +61,55 @@ namespace bhop::active {
         // A callback is registered in init(...) and is invoked when the session is closed
         // asynchronously due to whatever reason and that reason is passed to the callback.
         types::error_t open(const bhop::node_id_t& node_id) {
+            if (!m_is_initialized) {
+                return types::error_t::ERR_INVALID_STATE;
+            }
+
             return types::error_t::ERR_OK;
         }
 
         types::error_t close(const bhop::node_id_t& node_id) {
+            if (!m_is_initialized) {
+                return types::error_t::ERR_INVALID_STATE;
+            }
+
             return types::error_t::ERR_OK;
         }
 
         // This returns a span to all the IDs of all nodes with which exists a connection.
         [[nodiscard]] std::span<bhop::node_id_t> get_open_sessions() {
+            if (!m_is_initialized) {
+                return {};
+            }
+
             return {};
         }
 
         // Add a contact with its ID
         types::error_t add_contact(const bhop::node_id_t& node_id) {
+            if (!m_is_initialized) {
+                return types::error_t::ERR_INVALID_STATE;
+            }
+
             return types::error_t::ERR_OK;
         }
 
         // Remove a contact with its ID
         types::error_t delete_contact(const bhop::node_id_t& node_id) {
+            if (!m_is_initialized) {
+                return types::error_t::ERR_INVALID_STATE;
+            }
+
             return types::error_t::ERR_OK;
         }
 
         // Send a message to a peer. It fails if the ID has not been
         // saved before or a session does not exist with that peer.
         types::error_t send(const bhop::node_id_t& node_id, std::span<const uint8_t> msg) {
+            if (!m_is_initialized) {
+                return types::error_t::ERR_INVALID_STATE;
+            }
+
             return types::error_t::ERR_OK;
         }
 
@@ -91,7 +117,7 @@ namespace bhop::active {
         // received. A span to the received message and the node ID of the sender node are passed to the callback.
 
         // Gets the debug counter. Pretty self explanatory
-        uint32_t get_debug_counter() {
+        [[nodiscard]] uint32_t get_debug_counter() const {
             return m_debug_counter;
         }
 
@@ -100,22 +126,23 @@ namespace bhop::active {
         config_t m_config{};
         uint32_t m_debug_counter{};
 
+        dedupe::cache_t<system> cache{};
+
         types::error_t cleanup() {
             types::error_t error = types::error_t::ERR_OK;
 
             // Close all open sessions
             auto sessions = get_open_sessions();
-            if (sessions) {
-                for (auto session : sessions.value()) {
-                    error = close(session);
-                }
+            for (const auto& session : sessions) {
+                error = close(session);
             }
 
             // TODO: Erase all internal state
-            m_config        = {};
-            m_debug_counter = 0;
+            m_config         = {};
+            m_debug_counter  = 0;
+            m_is_initialized = false;
 
-            return types::error_t::ERR_OK;
+            return error;
         }
     };
 
