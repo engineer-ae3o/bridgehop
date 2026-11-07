@@ -39,101 +39,16 @@ namespace bhop::platform {
     };
 
     template<class T>
-    concept aes_128_ccm_t = requires(T&                          type,
-                                     const bhop::aes_key_t&      key,
-                                     const bhop::aes_nonce_t&    nonce,
-                                     std::span<const uint8_t>    aad,
-                                     const bhop::aes_auth_tag_t& auth_tag_input,
-                                     bhop::aes_auth_tag_t&       auth_tag_output,
-                                     std::span<const uint8_t>    input,
-                                     std::span<uint8_t>          output) {
-        // Encrypt data with AES-128-CCM and get the authentication tag
-        // input is the plaintext and output is the ciphertext
-        { type.encrypt(key, nonce, aad, auth_tag_output, input, output) };
-        // Returns true if the data is decrypted and authenticated successfully, false otherwise
-        // input is the ciphertext and output is the plaintext
-        { type.decrypt(key, nonce, aad, auth_tag_input, output, input) } -> std::same_as<bool>;
-    };
-
-    template<class T>
-    concept ed25519_t = requires(T&                               type,
-                                 const bhop::ed25519_seed_t&      seed,
-                                 std::span<const uint8_t>         data,
-                                 bhop::ed25519_key_t&             pub_key_output,
-                                 const bhop::ed25519_key_t&       peer_pub_key,
-                                 const bhop::ed25519_signature_t& signature_input,
-                                 bhop::ed25519_signature_t&       signature_output) {
-        // Derive the public key from the node's seed
-        { type.get_pub_key_from_seed(seed, pub_key_output) };
-        // The API takes in the seed and handles the derivation of the public
-        // and private keys from the seed and does the necessary operation(s)
-        // Generate the (R, S) EdDSA signature
-        { type.generate_signature(seed, data, signature_output) };
-        // Returns true if the data and signature are verified successfully, false otherwise
-        { type.verify_signature(peer_pub_key, data, signature_input) } -> std::same_as<bool>;
-    };
-
-    template<class T>
-    concept x25519_t = requires(T& type, bhop::x25519_key_t& output, const bhop::x25519_key_t& input) {
-        // Generate a session's ECDHE keys
-        // The first parameter is our public key, the second is our private key
-        { type.generate_keys(output, output) };
-        // Get the shared secret from our private key and the peer's public keys
-        // The first parameter is the peer's public key, the second our private key and the third, the shared secret
-        // Return true if the secret is generated successfully, false otherwise
-        { type.get_shared_secret(input, input, output) } -> std::same_as<bool>;
-    };
-
-    template<class T>
-    concept rng_t = requires(T& type, std::span<uint8_t> bytes) {
-        // Generate random bytes
-        { type.get(bytes) };
-    };
-
-    template<class T>
-    concept sha256_t = requires(T&                        type,
-                                std::span<const uint8_t>  data,
-                                bhop::sha256_digest_t&    digest,
-                                std::span<const uint8_t>  salt,
-                                std::span<const uint8_t>  info_str,
-                                const bhop::x25519_key_t& shared_secret,
-                                bhop::sha256_hkdf_t&      hkdf_output) {
-        // Hash data with SHA256
-        { type.hash(data, digest) };
-        // Expand the X25519 shared secret into the data to serve as the session keys
-        { type.hkdf(salt, info_str, shared_secret, hkdf_output) };
-    };
-
-    // Used so systems with 32 bit system ticks don't promote to uint64_t
-    template<class T>
-    concept tick_t = std::same_as<T, uint32_t> || std::same_as<T, uint64_t>;
-
-    template<class T>
-    concept system_t = requires(T&                         type,
+    concept timers_t = requires(T&                         type,
                                 typename T::timer_handle_t timer,
                                 void (*callback)(void*, T::timer_handle_t),
-                                void*                    ctx,
-                                uint32_t                 timeout_ms,
-                                types::event_t           event,
-                                std::span<const uint8_t> message,
-                                std::span<uint8_t>       src) {
-        typename T::tick_type_t;
-        // Get the value of the system tick in milliseconds
-        { T::now_ms() } -> std::same_as<typename T::tick_type_t>;
-        requires tick_t<typename T::tick_type_t>;
+                                void*    ctx,
+                                uint32_t timeout_ms) {
         // Register a callback to be called after a timeout. Returns the ID of the created timer.
         // The timer for the callback should started immediately.
         { type.register_callback(callback, ctx, timeout_ms) } -> std::same_as<typename T::timer_handle_t>;
-        // Cancels an already created callback with its ID
+        // Cancels and deletes an already created callback with its ID
         { type.cancel_callback(timer) };
-        // Put the calling thread to sleep indefinitely till a callback wakes it up
-        // Only used in passive node builds
-        { type.sleep() };
-        // This gets called when an event (check the spec for the event types) occurs
-        // NOTE: The message parameter only has meaning when the event is a message received event
-        { type.event_sink(event, message) };
-        // Wipe a memory region to 0s securely. NOTE: Do NOT use memset from the stdlib
-        { type.secure_memset(src) };
     };
 
     template<class T>
@@ -145,6 +60,86 @@ namespace bhop::platform {
         { type.read(file, rw_data, offset) };
         { type.write(file, ro_data, offset) };
         { type.get_size(file) } -> std::same_as<size_t>;
+    };
+
+    template<class T>
+    concept aes_128_ccm_t = requires(const bhop::aes_key_t&      key,
+                                     const bhop::aes_nonce_t&    nonce,
+                                     std::span<const uint8_t>    aad,
+                                     const bhop::aes_auth_tag_t& auth_tag_input,
+                                     bhop::aes_auth_tag_t&       auth_tag_output,
+                                     std::span<const uint8_t>    input,
+                                     std::span<uint8_t>          output) {
+        // Encrypt data with AES-128-CCM and get the authentication tag
+        // input is the plaintext and output is the ciphertext
+        { T::encrypt(key, nonce, aad, auth_tag_output, input, output) };
+        // Returns true if the data is decrypted and authenticated successfully, false otherwise
+        // input is the ciphertext and output is the plaintext
+        { T::decrypt(key, nonce, aad, auth_tag_input, output, input) } -> std::same_as<bool>;
+    };
+
+    template<class T>
+    concept ed25519_t = requires(const bhop::ed25519_seed_t&      seed,
+                                 std::span<const uint8_t>         data,
+                                 bhop::ed25519_key_t&             pub_key_output,
+                                 const bhop::ed25519_key_t&       peer_pub_key,
+                                 const bhop::ed25519_signature_t& signature_input,
+                                 bhop::ed25519_signature_t&       signature_output) {
+        // Derive the public key from the node's seed
+        { T::get_pub_key_from_seed(seed, pub_key_output) };
+        // The API takes in the seed and handles the derivation of the public
+        // and private keys from the seed and does the necessary operation(s)
+        // Generate the (R, S) EdDSA signature
+        { T::generate_signature(seed, data, signature_output) };
+        // Returns true if the data and signature are verified successfully, false otherwise
+        { T::verify_signature(peer_pub_key, data, signature_input) } -> std::same_as<bool>;
+    };
+
+    template<class T>
+    concept x25519_t = requires(bhop::x25519_key_t& output, const bhop::x25519_key_t& input) {
+        // Generate a session's ECDHE keys
+        // The first parameter is our public key, the second is our private key
+        { T::generate_keys(output, output) };
+        // Get the shared secret from our private key and the peer's public keys
+        // The first parameter is the peer's public key, the second our private key and the third, the shared secret
+        // Return true if the secret is generated successfully, false otherwise
+        { T::get_shared_secret(input, input, output) } -> std::same_as<bool>;
+    };
+
+    template<class T>
+    concept rng_t = requires(std::span<uint8_t> bytes) {
+        // Generate random bytes
+        { T::get(bytes) };
+    };
+
+    template<class T>
+    concept sha256_t = requires(std::span<const uint8_t>  data,
+                                bhop::sha256_digest_t&    digest,
+                                std::span<const uint8_t>  salt,
+                                std::span<const uint8_t>  info_str,
+                                const bhop::x25519_key_t& shared_secret,
+                                bhop::sha256_hkdf_t&      hkdf_output) {
+        // Hash data with SHA256
+        { T::hash(data, digest) };
+        // Expand the X25519 shared secret into the data to serve as the session keys
+        { T::hkdf(salt, info_str, shared_secret, hkdf_output) };
+    };
+
+    // Used so systems with 32 bit system ticks don't promote to uint64_t
+    template<class T>
+    concept tick_t = std::same_as<T, uint32_t> || std::same_as<T, uint64_t>;
+
+    template<class T>
+    concept system_t = requires(std::span<uint8_t> src) {
+        typename T::tick_type_t;
+        requires tick_t<typename T::tick_type_t>;
+        // Get the value of the system tick in milliseconds
+        { T::now_ms() } -> std::same_as<typename T::tick_type_t>;
+        // Put the calling thread to sleep indefinitely till a callback wakes it up
+        // Only used in passive node builds
+        { T::sleep() };
+        // Wipe a memory region to 0s securely. NOTE: Do NOT use memset from the stdlib
+        { T::secure_memset(src) };
     };
 
 } // namespace bhop::platform

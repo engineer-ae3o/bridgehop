@@ -7,7 +7,6 @@
 
 #include <array>
 #include <utility>
-#include <algorithm>
 
 
 namespace bhop::dedupe {
@@ -57,6 +56,10 @@ namespace bhop::dedupe {
             }
             // Packet not present in the used slots of the cache
             return false;
+        }
+
+        void erase() {
+            m_cache.fill(0);
         }
 
     private:

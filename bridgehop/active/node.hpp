@@ -126,7 +126,7 @@ namespace bhop::active {
         config_t m_config{};
         uint32_t m_debug_counter{};
 
-        dedupe::cache_t<system> cache{};
+        dedupe::cache_t<system> m_cache{};
 
         types::error_t cleanup() {
             types::error_t error = types::error_t::ERR_OK;
@@ -141,6 +141,7 @@ namespace bhop::active {
             m_config         = {};
             m_debug_counter  = 0;
             m_is_initialized = false;
+            m_cache.erase();
 
             return error;
         }
