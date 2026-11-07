@@ -21,17 +21,18 @@ namespace bhop::dedupe {
 
         void insert_packet(const bhop::packet_id_t& other) {
             // NOLINTNEXTLINE(readability-container-data-pointer)
-            element_t* oldest_slot = &m_cache[0];
+            element_t*        oldest_slot = &m_cache[0];
+            const tick_type_t now         = system::now();
             for (auto& slot : m_cache) {
                 auto& [packet, timestamp_ms] = slot;
                 // Free this slot up if it's passed its age of expiry
-                if (has_expired(timestamp_ms)) {
+                if (has_expired(timestamp_ms, now)) {
                     timestamp_ms = 0;
                 }
                 // Insert this packet at this slot since free
                 if (timestamp_ms == 0) {
                     packet       = other;
-                    timestamp_ms = system::now_ms();
+                    timestamp_ms = now;
                     return;
                 }
                 // Get a reference to the oldest ID slot currently seen
@@ -40,13 +41,14 @@ namespace bhop::dedupe {
                 }
             }
             // Store this packet's ID at the oldest used slot since no free slots
-            *oldest_slot = element_t{other, system::now_ms()};
+            *oldest_slot = element_t{other, now};
         }
 
         bool is_packet_present(const bhop::packet_id_t& other) {
+            const tick_type_t now = system::now();
             for (auto& [packet, timestamp_ms] : m_cache) {
                 // Free this slot up if it's passed its age of expiry
-                if (has_expired(timestamp_ms)) {
+                if (has_expired(timestamp_ms, now)) {
                     timestamp_ms = 0;
                 }
                 // Slot is in use and the ID is in the cache
@@ -59,16 +61,15 @@ namespace bhop::dedupe {
         }
 
         void erase() {
-            m_cache.fill(0);
+            m_cache.fill(element_t{});
         }
 
     private:
         // Stores the packet ID and its age (time of entry into the cache)
         std::array<element_t, config::DEDUPE_CACHE_SIZE> m_cache{};
 
-        bool has_expired(tick_type_t timestamp_ms) {
-            return ((system::now_ms() - timestamp_ms) >=
-                    static_cast<tick_type_t>(config::DEDUPE_CACHE_ENTRY_TIMEOUT_MS));
+        static bool has_expired(tick_type_t timestamp_ms, tick_type_t now) {
+            return ((now - timestamp_ms) >= static_cast<tick_type_t>(config::DEDUPE_CACHE_ENTRY_TIMEOUT_MS));
         }
     };
 

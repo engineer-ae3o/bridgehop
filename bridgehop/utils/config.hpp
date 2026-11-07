@@ -3,6 +3,7 @@
 
 #include "utils/bhop_constants.hpp"
 
+#include <limits>
 #include <cstdint>
 
 
@@ -42,6 +43,9 @@ namespace bhop::config {
     constexpr inline uint32_t REASSEMBLY_TIMEOUT_MS   = 45 * 1000;
     constexpr inline uint32_t MESSAGE_ACK_TIMEOUT_MS  = 120 * 1000;
 
+
+    static_assert(MAX_HOPS_PER_PACKET < bhop::HOP_COUNT_BIT_MASK);
+    static_assert(MAX_CHUNKS_PER_MESSAGE <= std::numeric_limits<uint8_t>::max());
 
     static_assert(MAX_PACKET_SIZE > bhop::HANDSHAKE_FULL_PACKET_SIZE);
     static_assert(MAX_PACKET_SIZE > bhop::DATA_PACKET_METADATA_SIZE);

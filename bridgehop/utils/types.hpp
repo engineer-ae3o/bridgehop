@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include "utils/bhop_constants.hpp"
+
 #include <cstdint>
 
 
@@ -14,7 +16,8 @@ namespace bhop::types {
         ERR_SESSION_ALREADY_OPEN,
         ERR_SESSION_FAILED_TO_OPEN,
         ERR_CONTACT_ALREADY_EXISTS,
-        ERR_CONTACT_NOT_FOUND,
+        ERR_CONTACT_NOT_EXIST,
+        ERR_CONTACT_LIST_FULL,
         ERR_BUSY,
     };
 
@@ -41,12 +44,14 @@ namespace bhop::types {
         CONTACTS, // Stores all registered contacts and their handshake counter
     };
 
-    // Event type passed to user callback
-    enum class event_t : uint8_t {};
-
-    // Data stored in the config file
-    struct config_file_t {
-        bool first_boot{};
+    // The contacts file stores the number of contacts first, then the contacts. A contact slot stores whether
+    // it is in use, the node ID of the contact and the number of valid handshakes with said contact. This allows
+    // us to freely delete contact. Deletion would fragment the file storage, and you'd have to push elements up
+    // and/or down if there was no way to know if a contact slot was in use, and this can be convoluted to implement.
+    struct [[__gnu__::__packed__]] contact_slot_t {
+        bool            is_in_use{};
+        bhop::node_id_t node_id{};
+        uint64_t        handshake_counter{};
     };
 
 } // namespace bhop::types
