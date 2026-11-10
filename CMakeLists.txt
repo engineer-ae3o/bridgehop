@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 4.0)
 
-project(BridgeHopSimulator)
+project(BridgeHop)
 enable_language(CXX)
 
 if(NOT CMAKE_TOOLCHAIN_FILE)
@@ -20,7 +20,7 @@ endif()
 
 # Build flags for the different build modes
 set(CMAKE_C_FLAGS_DEBUG "-O0 -g3 -ggdb -DDEBUG")
-set(CMAKE_C_FLAGS_RELEASE "-Os -flto -DNDEBUG")
+set(CMAKE_C_FLAGS_RELEASE "-O3 -flto -DNDEBUG")
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}")
 set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
@@ -33,19 +33,27 @@ set(CMAKE_C_FLAGS "-Wall -Wduplicated-branches -Wstrict-aliasing=2 -Wduplicated-
 
 set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -fno-exceptions -fno-rtti")
 
-# Process the BridgeHop library CMake component
-add_subdirectory(bridgehop/)
-
 # Build the project executable
-set(LIB_ELF_NAME bridgehop-simulator)
-add_executable(${LIB_ELF_NAME} host/main.cpp)
-target_link_libraries(${LIB_ELF_NAME} PRIVATE bridgehop)
+set(LIB_ELF_NAME bridgehop.elf)
+add_executable(${LIB_ELF_NAME} main.cpp)
 
 set_target_properties(${LIB_ELF_NAME} PROPERTIES
     CXX_STANDARD 23
     CXX_STANDARD_REQUIRED ON
     CXX_EXTENSIONS ON
 )
+
+# Process other CMake components
+add_subdirectory(bridgehop/)
+add_subdirectory(host/simulator/)
+
+if(BUILD_TESTS)
+add_subdirectory(host/test/)
+target_compile_definitions(${LIB_ELF_NAME} PUBLIC BUILD_TESTS)
+endif()
+
+# Link other components
+target_link_libraries(${LIB_ELF_NAME} PUBLIC bridgehop)
 
 # Targets for static analysis and formatting
 find_program(CPPCHECK cppcheck)

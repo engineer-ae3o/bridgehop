@@ -5,3 +5,4 @@ unusedFunction
 constParameterPointer
 useStlAlgorithm
 knownEmptyContainer
+unmatchedSuppression

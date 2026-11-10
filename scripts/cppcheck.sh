@@ -1,2 +1,5 @@
-cmake -B build -G Ninja
-cmake --build build --target cppcheck
+#!/bin/bash
+set -euo pipefail
+
+cmake --preset tests-debug
+cmake --build --preset tests-debug --target cppcheck

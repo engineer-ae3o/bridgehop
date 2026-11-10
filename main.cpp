@@ -98,9 +98,7 @@ struct other_t {
         while (true);
     }
     static void secure_memset(std::span<uint8_t> src) {
-        for (volatile size_t i = 0; i < src.size(); i += 1) {
-            src[i] = 0;
-        }
+        std::ranges::fill(src, 0);
     }
 };
 
@@ -112,13 +110,20 @@ using active_node_t =
 
 
 struct stateful {
+private:
+    // To silence the clangd warnings
+    int internal = 0;
+
+public:
     // concept transport_t
     void transmit(std::span<const uint8_t> packet) {
         (void)packet;
+        (void)internal;
     }
     void register_recv_cb(void (*callback)(void*, std::span<const uint8_t>), void* ctx) {
         (void)callback;
         (void)ctx;
+        (void)internal;
     }
 
     // concept timers_t
@@ -127,10 +132,12 @@ struct stateful {
         (void)callback;
         (void)ctx;
         (void)timeout_ms;
+        (void)internal;
         return 0;
     }
     void cancel_callback(timer_handle_t timer) {
         (void)timer;
+        (void)internal;
     }
 
     // concept filesystem_t
@@ -138,40 +145,24 @@ struct stateful {
         (void)file;
         (void)rw_data;
         (void)offset;
+        (void)internal;
     }
     void write(bhop::types::file_t file, std::span<const uint8_t> ro_data, uint32_t offset) {
         (void)file;
         (void)ro_data;
         (void)offset;
+        (void)internal;
     }
     size_t get_size(bhop::types::file_t file) {
         (void)file;
+        (void)internal;
         return 0;
     }
 };
 
 int main() {
-    std::println("Starting simulator");
-
+    // Do nothing now. Just a check to make sure everything compiles fine.
     active_node_t<stateful, stateful, stateful> node;
-    // Start the active node
-    auto ret = node.init({});
-    if (ret != bhop::types::error_t::ERR_OK) {
-        std::println("Failed to initialize the active node library");
-        return EXIT_FAILURE;
-    }
-
-    ret = node.open({});
-    if (ret != bhop::types::error_t::ERR_OK) {
-        std::println("Failed to initialize the active node library");
-        return EXIT_FAILURE;
-    }
-
-    ret = node.send({}, {});
-    if (ret != bhop::types::error_t::ERR_OK) {
-        std::println("Failed to initialize the active node library");
-        return EXIT_FAILURE;
-    }
-
+    std::println("Active node size: {} bytes", sizeof(node));
     return EXIT_SUCCESS;
 }

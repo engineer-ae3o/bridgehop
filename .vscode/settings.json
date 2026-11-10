@@ -47,7 +47,7 @@
     "clangd.arguments": [
         "--background-index",
         "--query-driver=g*",
-        "--compile-commands-dir=${workspaceFolder}/build/",
+        "--compile-commands-dir=${workspaceFolder}/build/tests-debug/",
     ],
     "[cpp]": {
         "editor.defaultFormatter": "xaver.clang-format",

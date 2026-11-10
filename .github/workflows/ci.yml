@@ -1,0 +1,113 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  format-check:
+    name: Check Formatting
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clang-format
+        run: |
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 22
+          sudo apt-get install -y clang-format-22
+
+      - name: Check formatting
+        run: |
+          FILES=$(git ls-files '*.c' '*.cc' '*.cpp' '*.h' '*.hpp')
+          if [ -z "$FILES" ]; then
+            echo "No matching files, nothing to check."
+            exit 0
+          fi
+          echo "$FILES" | xargs clang-format-22 --style=file --dry-run --Werror
+
+  static-analysis:
+    name: Static Analysis with Cppcheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Latest CMake & Ninja
+        uses: lukka/get-cmake@latest
+
+      - name: Install Toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc binutils
+
+      - name: Install Latest Cppcheck
+        run: |
+          git clone --depth 1 --branch 2.21.1 https://github.com/cppcheck-opensource/cppcheck.git /tmp/cppcheck
+          cmake -S /tmp/cppcheck -B /tmp/cppcheck/build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DUSE_MATCHCOMPILER=ON
+          cmake --build /tmp/cppcheck/build
+          sudo cmake --install /tmp/cppcheck/build
+          cppcheck --version
+
+      - name: Run Cppcheck
+        run: bash scripts/cppcheck.sh
+
+  build-all-presets:
+    name: Build project in all CMake presets
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Latest CMake & Ninja
+        uses: lukka/get-cmake@latest
+
+      - name: Install Toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc binutils
+
+      - name: Build all
+        run: bash scripts/all.sh
+
+  run-tests-debug:
+    name: Run test suite (debug build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Latest CMake & Ninja
+        uses: lukka/get-cmake@latest
+
+      - name: Install Toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc binutils
+
+      - name: Build and run
+        run: bash scripts/tests-debug.sh 
+
+  run-tests-release:
+    name: Run test suite (release build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup Latest CMake & Ninja
+        uses: lukka/get-cmake@latest
+
+      - name: Install Toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y gcc binutils
+
+      - name: Build and run
+        run: bash scripts/tests-release.sh 
