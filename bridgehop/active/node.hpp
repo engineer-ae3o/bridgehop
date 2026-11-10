@@ -34,8 +34,6 @@ namespace bhop::active {
              platform::system      system>
     class node_t {
     public:
-        using config_t = config_t<transport, filesystem, timers>;
-
         node_t() = default;
 
         ~node_t() {
@@ -48,7 +46,7 @@ namespace bhop::active {
         node_t& operator=(node_t&&)      = delete;
 
         // Initialize the library as an active node
-        types::error_t init(const config_t& config) {
+        types::error_t init(const config_t<transport, filesystem, timers>& config) {
             if (m_is_initialized) {
                 return types::error_t::ERR_INVALID_STATE;
             }
@@ -86,6 +84,7 @@ namespace bhop::active {
             }
 
             // TODO: Send handshake packet to peer
+            (void)node_id;
 
             return types::error_t::ERR_OK;
         }
@@ -96,6 +95,7 @@ namespace bhop::active {
             }
 
             // TODO: Send close packet to peer and free slot
+            (void)node_id;
 
             return types::error_t::ERR_OK;
         }
@@ -105,7 +105,6 @@ namespace bhop::active {
             if (!m_is_initialized) {
                 return {};
             }
-
             return {};
         }
 
@@ -143,6 +142,7 @@ namespace bhop::active {
 
             // Read in batches
             std::array<types::contact_slot_t, CONTACTS_FILE_READ_BATCH_SIZE> slot;
+            (void)node_id;
 
             // Scan file for free slot and insert
             for (uint32_t i = 0; i < (config::MAX_CONTACTS / slot.size()); i++) {
@@ -162,6 +162,7 @@ namespace bhop::active {
 
             // Read in batches
             std::array<types::contact_slot_t, CONTACTS_FILE_READ_BATCH_SIZE> slot;
+            (void)node_id;
 
             // Scan file for free slot and insert
             for (uint32_t i = 0; i < (config::MAX_CONTACTS / slot.size()); i++) {
@@ -189,6 +190,9 @@ namespace bhop::active {
                 return types::error_t::ERR_INVALID_STATE;
             }
 
+            (void)node_id;
+            (void)msg;
+
             return types::error_t::ERR_OK;
         }
 
@@ -205,8 +209,9 @@ namespace bhop::active {
 
     private:
         bool     m_is_initialized{};
-        config_t m_config{};
         uint32_t m_debug_counter{};
+
+        config_t<transport, filesystem, timers> m_config{};
 
         dedupe::cache_t<system> m_cache{};
 

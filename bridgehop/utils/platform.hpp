@@ -40,7 +40,7 @@ namespace bhop::platform {
     template<class T>
     concept timers = requires(T&                         type,
                               typename T::timer_handle_t timer,
-                              void (*callback)(void*, T::timer_handle_t),
+                              void (*callback)(void*, typename T::timer_handle_t),
                               void*    ctx,
                               uint32_t timeout_ms) {
         // Register a callback to be called after a timeout. Returns the ID of the created timer.
@@ -115,13 +115,13 @@ namespace bhop::platform {
     concept sha256 = requires(std::span<const uint8_t>  data,
                               bhop::sha256_digest_t&    digest,
                               std::span<const uint8_t>  salt,
-                              std::span<const uint8_t>  info_str,
-                              const bhop::x25519_key_t& shared_secret,
+                              std::span<const uint8_t>  info,
+                              const bhop::x25519_key_t& ikm,
                               bhop::sha256_hkdf_t&      hkdf_output) {
         // Hash data with SHA256
         { T::hash(data, digest) };
         // Expand the X25519 shared secret into the data to serve as the session keys
-        { T::hkdf(salt, info_str, shared_secret, hkdf_output) };
+        { T::hkdf(salt, info, ikm, hkdf_output) };
     };
 
     // Used so systems with 32 bit system ticks don't promote to uint64_t

@@ -27,9 +27,12 @@ namespace bhop::utils {
 
     template<typename T, size_t N>
     constexpr std::optional<uint32_t> get_index_of_first_0_bit(const std::array<T, N>& array) {
-        constexpr size_t size = sizeof(T) * 8;
+        constexpr size_t bits_per_element = sizeof(T) * 8;
         for (size_t i = 0; i < N; i++) {
-            return array[i] * i * static_cast<uint32_t>(std::countr_one(array[i]));
+            T inverted = static_cast<T>(~array[i]);
+            if (inverted != 0) {
+                return (bits_per_element * i) + static_cast<uint32_t>(std::countr_zero(inverted));
+            }
         }
         return std::nullopt;
     }

@@ -1,8 +1,6 @@
 cmake_minimum_required(VERSION 4.0)
 
-enable_language(C CXX)
-
-set(CMAKE_EXPORT_COMPILE_COMMANDS TRUE)
+enable_language(CXX)
 set(LIB_ELF_NAME bridgehop)
 
 add_library(${LIB_ELF_NAME} INTERFACE)

@@ -5,7 +5,6 @@
 #include "utils/common.hpp"
 #include "utils/config.hpp"
 
-#include <limits>
 #include <cstdint>
 
 
@@ -23,6 +22,32 @@ namespace bhop::types {
         ERR_CONTACT_LIST_FULL,
         ERR_BUSY,
     };
+
+    [[nodiscard]] constexpr const char* error_code_to_string(error_t error) {
+        using enum error_t;
+        switch (error) {
+            case ERR_OK:
+                return "ERR_OK";
+            case ERR_INVALID_ARG:
+                return "ERR_INVALID_ARG";
+            case ERR_INVALID_STATE:
+                return "ERR_INVALID_STATE";
+            case ERR_SESSION_ALREADY_OPEN:
+                return "ERR_SESSION_ALREADY_OPEN";
+            case ERR_SESSION_FAILED_TO_OPEN:
+                return "ERR_SESSION_FAILED_TO_OPEN";
+            case ERR_CONTACT_ALREADY_EXISTS:
+                return "ERR_CONTACT_ALREADY_EXISTS";
+            case ERR_CONTACT_NOT_EXIST:
+                return "ERR_CONTACT_NOT_EXIST";
+            case ERR_CONTACT_LIST_FULL:
+                return "ERR_CONTACT_LIST_FULL";
+            case ERR_BUSY:
+                return "ERR_BUSY";
+            default:
+                return "ERR_UNKNOWN";
+        }
+    }
 
     // Reasons for ending a session
     enum class close_reason_t : uint8_t {
@@ -56,8 +81,7 @@ namespace bhop::types {
 
     // An efficient bitmask representing the contact slots that are in use
     // Space efficient and stops us from having to do a linear scan of the file
-    using contacts_file_header_t =
-        std::array<uint8_t, utils::ceil_div(config::MAX_CONTACTS, std::numeric_limits<uint8_t>::digits)>;
+    using contacts_file_header_t = std::array<uint8_t, utils::ceil_div(config::MAX_CONTACTS, 8)>;
 
     // The contacts file stores the number of contacts first, then the contacts. A contact slot stores whether
     // it is in use, the node ID of the contact and the number of valid handshakes with said contact. This allows

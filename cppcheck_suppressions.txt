@@ -1,0 +1,7 @@
+constParameterReference
+functionStatic
+missingIncludeSystem
+unusedFunction
+constParameterPointer
+useStlAlgorithm
+knownEmptyContainer
