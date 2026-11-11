@@ -163,6 +163,12 @@ public:
 int main() {
     // Do nothing now. Just a check to make sure everything compiles fine.
     active_node_t<stateful, stateful, stateful> node;
+    (void)node.init({});
+    (void)node.open({});
+    (void)node.add_contact({});
+    (void)node.delete_contact({});
+    (void)node.close({});
+    (void)node.deinit();
     std::println("Active node size: {} bytes", sizeof(node));
     return EXIT_SUCCESS;
 }

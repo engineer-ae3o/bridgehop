@@ -44,7 +44,7 @@ namespace bhop::platform {
                               void*    ctx,
                               uint32_t timeout_ms) {
         // Register a callback to be called after a timeout. Returns the ID of the created timer.
-        // The timer for the callback should started immediately.
+        // The timer for the callback should be started immediately.
         { type.register_callback(callback, ctx, timeout_ms) } -> std::same_as<typename T::timer_handle_t>;
         // Cancels and deletes an already created callback with its ID
         { type.cancel_callback(timer) };

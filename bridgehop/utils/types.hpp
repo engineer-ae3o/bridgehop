@@ -76,7 +76,11 @@ namespace bhop::types {
     enum class event_t : uint8_t {};
 
     // Data stored in the config file
-    struct config_file_t {};
+    struct config_file_t {
+        bhop::ed25519_seed_t device_seed{};
+        bhop::node_id_t      device_node_id{};
+        bhop::ed25519_seed_t device_ed25519_pub_key{};
+    };
 
 
     // An efficient bitmask representing the contact slots that are in use

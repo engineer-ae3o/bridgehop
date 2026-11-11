@@ -5,11 +5,13 @@
 #include "utils/cache.hpp"
 #include "utils/config.hpp"
 #include "utils/packet.hpp"
+#include "utils/common.hpp"
 #include "utils/platform.hpp"
 #include "utils/bhop_constants.hpp"
 
 #include <span>
 #include <array>
+#include <cstring>
 #include <optional>
 
 
@@ -52,14 +54,19 @@ namespace bhop::active {
             }
 
             // TODO: Check config struct parameters
-
             m_config = config;
 
-            // Read the contacts file header and cache it
-            m_config.filesystem.read(
-                types::file_t::CONTACTS,
-                std::span{reinterpret_cast<uint8_t*>(&m_contacts_header), sizeof(m_contacts_header)},
-                0);
+            // Register our packet receive callback
+            m_config.transport.register_recv_cb(on_packet_reception, this);
+
+            if (m_config.is_first_boot) [[unlikely]] {
+                // Perform one time setup on first boot
+                one_time_setup();
+            } else [[likely]] {
+                // Just load the config file and contacts file header and cache them since not first boot
+                m_config.filesystem.read(types::file_t::CONFIG, utils::get_byte_span(m_device_identity), 0);
+                m_config.filesystem.read(types::file_t::CONTACTS, utils::get_byte_span(m_contacts_header), 0);
+            }
 
             m_is_initialized = true;
             return types::error_t::ERR_OK;
@@ -121,10 +128,10 @@ namespace bhop::active {
                 return types::error_t::ERR_CONTACT_LIST_FULL;
             }
 
-            // Construct the new contact and write back to the file with the index as the offset
+            // Construct the new contact and write back to the file with the index as the file offset
             const types::contact_slot_t contact = {.node_id = node_id, .handshake_counter = 0};
             m_config.filesystem.write(types::file_t::CONTACTS,
-                                      std::span{reinterpret_cast<const uint8_t*>(&contact), sizeof(contact)},
+                                      utils::get_const_byte_span(contact),
                                       CONTACTS_FILE_SLOTS_OFFSET + (index.value() * sizeof(contact)));
 
             // Mark slot as used and write back header to the file
@@ -145,9 +152,9 @@ namespace bhop::active {
             (void)node_id;
 
             // Scan file for free slot and insert
-            for (uint32_t i = 0; i < (config::MAX_CONTACTS / slot.size()); i++) {
+            for (uint32_t i = 0; i < utils::ceil_div(config::MAX_CONTACTS, slot.size()); i++) {
                 m_config.filesystem.read(types::file_t::CONTACTS,
-                                         std::span{reinterpret_cast<uint8_t*>(&slot), sizeof(slot)},
+                                         utils::get_byte_span(slot),
                                          CONTACTS_FILE_SLOTS_OFFSET + (i * sizeof(slot)));
             }
 
@@ -213,8 +220,13 @@ namespace bhop::active {
 
         config_t<transport, filesystem, timers> m_config{};
 
+        // The network dedupe cache of seen packet IDs
         dedupe::cache_t<system> m_cache{};
 
+        // The details of the config file. Read once at boot
+        types::config_file_t m_device_identity{};
+
+        // The contacts file header. Used as a file cache
         types::contacts_file_header_t m_contacts_header{};
 
         // Where the contact slots start in the contacts file
@@ -237,6 +249,31 @@ namespace bhop::active {
             m_cache.erase();
 
             return error;
+        }
+
+        void one_time_setup() {
+            // Generate the device's long term identity
+            rng::get(m_device_identity.device_seed);
+
+            // Derive the Ed25519 public key from the seed
+            ed25519::get_pub_key_from_seed(m_device_identity.device_seed, m_device_identity.device_ed25519_pub_key);
+
+            // Get the SHA256 of the Ed25519 public key
+            std::array<uint8_t, 256 / 8> digest{};
+            sha256::hash(m_device_identity.device_ed25519_pub_key, digest);
+
+            // The device's node ID is the first 16 bytes of the SHA256 of the Ed25519 public key
+            memcpy(m_device_identity.device_node_id.begin(), digest.begin(), m_device_identity.device_node_id.size());
+
+            // We now have our complete device identity. Write back to the files
+            m_config.filesystem.write(types::file_t::CONFIG, utils::get_const_byte_span(m_device_identity), 0);
+            m_config.filesystem.write(types::file_t::CONTACTS, utils::get_const_byte_span(m_contacts_header), 0);
+        }
+
+        static void on_packet_reception(void* arg, std::span<const uint8_t> packet) {
+            auto* node = static_cast<node_t*>(arg);
+            (void)node;
+            (void)packet;
         }
     };
 
