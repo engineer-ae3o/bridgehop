@@ -11,12 +11,12 @@
 
 namespace bhop::dedupe {
 
-    template<platform::system_t system>
+    template<platform::system system>
     class cache_t {
     public:
         using tick_type_t = typename system::tick_type_t;
 
-        // A slot with an age of 0 indicates an empty slot
+        // A slot with a timestamp of 0 indicates an empty slot
         using element_t = std::pair<bhop::packet_id_t, tick_type_t>;
 
         void insert_packet(const bhop::packet_id_t& other) {

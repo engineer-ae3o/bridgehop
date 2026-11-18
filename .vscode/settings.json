@@ -47,7 +47,7 @@
     "clangd.arguments": [
         "--background-index",
         "--query-driver=g*",
-        "--compile-commands-dir=${workspaceFolder}/bridgehop/build/",
+        "--compile-commands-dir=${workspaceFolder}/build/",
     ],
     "[cpp]": {
         "editor.defaultFormatter": "xaver.clang-format",
@@ -58,5 +58,5 @@
         "editor.formatOnSave": true
     },
     "cmake.configureOnEdit": false,
-    "cmake.sourceDirectory": "/home/engineer-ae3o/Projects/bridgehop/bridgehop",
+    "cmake.sourceDirectory": "${workspaceFolder}/",
 }

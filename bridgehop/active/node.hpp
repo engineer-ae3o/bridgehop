@@ -15,7 +15,7 @@
 
 namespace bhop::active {
 
-    template<platform::transport_t transport_t, platform::filesystem_t filesystem_t, platform::timers_t timers_t>
+    template<platform::transport transport_t, platform::filesystem filesystem_t, platform::timers timers_t>
     struct config_t {
         bool         is_first_boot{};
         transport_t  transport{};
@@ -23,15 +23,15 @@ namespace bhop::active {
         timers_t     timer{};
     };
 
-    template<platform::transport_t   transport,
-             platform::filesystem_t  filesystem,
-             platform::timers_t      timers,
-             platform::aes_128_ccm_t aes_128_ccm,
-             platform::ed25519_t     ed25519,
-             platform::x25519_t      x25519,
-             platform::rng_t         rng,
-             platform::sha256_t      sha256,
-             platform::system_t      system>
+    template<platform::transport   transport,
+             platform::filesystem  filesystem,
+             platform::timers      timers,
+             platform::aes_128_ccm aes_128_ccm,
+             platform::ed25519     ed25519,
+             platform::x25519      x25519,
+             platform::rng         rng,
+             platform::sha256      sha256,
+             platform::system      system>
     class node_t {
     public:
         using config_t = config_t<transport, filesystem, timers>;
@@ -53,7 +53,7 @@ namespace bhop::active {
                 return types::error_t::ERR_INVALID_STATE;
             }
 
-            // TODO: Check config struct
+            // TODO: Check config struct parameters
 
             m_config = config;
 
@@ -101,7 +101,7 @@ namespace bhop::active {
         }
 
         // This returns a span to all the IDs of all nodes with which exists a connection.
-        [[nodiscard]] std::span<bhop::node_id_t> get_open_sessions() {
+        [[nodiscard]] std::span<bhop::node_id_t> get_open_sessions() const {
             if (!m_is_initialized) {
                 return {};
             }
@@ -115,23 +115,22 @@ namespace bhop::active {
                 return types::error_t::ERR_INVALID_STATE;
             }
 
+            // Find the first free slot in the file by getting the first 0 bit in the file header bitmask
             auto index = utils::get_index_of_first_0_bit(m_contacts_header);
             if (index == std::nullopt) {
                 // All bits are set. No free slot
                 return types::error_t::ERR_CONTACT_LIST_FULL;
             }
 
+            // Construct the new contact and write back to the file with the index as the offset
             const types::contact_slot_t contact = {.node_id = node_id, .handshake_counter = 0};
             m_config.filesystem.write(types::file_t::CONTACTS,
                                       std::span{reinterpret_cast<const uint8_t*>(&contact), sizeof(contact)},
-                                      CONTACTS_OFFSET + (index.value() * sizeof(contact)));
+                                      CONTACTS_FILE_SLOTS_OFFSET + (index.value() * sizeof(contact)));
 
             // Mark slot as used and write back header to the file
             m_contacts_header[index.value() / 8] |= 1UL << (index.value() % 8);
-            m_config.filesystem.write(
-                types::file_t::CONTACTS,
-                std::span{reinterpret_cast<const uint8_t*>(&m_contacts_header), sizeof(m_contacts_header)},
-                0);
+            m_config.filesystem.write(types::file_t::CONTACTS, utils::get_const_byte_span(m_contacts_header), 0);
 
             return types::error_t::ERR_OK;
         }
@@ -149,7 +148,7 @@ namespace bhop::active {
             for (uint32_t i = 0; i < (config::MAX_CONTACTS / slot.size()); i++) {
                 m_config.filesystem.read(types::file_t::CONTACTS,
                                          std::span{reinterpret_cast<uint8_t*>(&slot), sizeof(slot)},
-                                         CONTACTS_OFFSET + (i * sizeof(slot)));
+                                         CONTACTS_FILE_SLOTS_OFFSET + (i * sizeof(slot)));
             }
 
             // Contact is not on this device
@@ -168,7 +167,7 @@ namespace bhop::active {
             for (uint32_t i = 0; i < (config::MAX_CONTACTS / slot.size()); i++) {
                 m_config.filesystem.read(types::file_t::CONTACTS,
                                          std::span{reinterpret_cast<uint8_t*>(&slot), sizeof(slot)},
-                                         CONTACTS_OFFSET + (i * sizeof(slot)));
+                                         CONTACTS_FILE_SLOTS_OFFSET + (i * sizeof(slot)));
             }
 
             // Contact not in any used slot
@@ -214,7 +213,7 @@ namespace bhop::active {
         types::contacts_file_header_t m_contacts_header{};
 
         // Where the contact slots start in the contacts file
-        static constexpr uint32_t CONTACTS_OFFSET               = sizeof(types::contacts_file_header_t);
+        static constexpr uint32_t CONTACTS_FILE_SLOTS_OFFSET    = sizeof(types::contacts_file_header_t);
         static constexpr uint32_t CONTACTS_FILE_READ_BATCH_SIZE = 20;
 
         types::error_t cleanup() {

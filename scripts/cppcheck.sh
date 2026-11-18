@@ -1,3 +1,2 @@
-cd bridgehop
 cmake -B build -G Ninja
-cmake --build build --target cppcheck; cd ..
+cmake --build build --target cppcheck

@@ -27,11 +27,10 @@ namespace bhop::platform {
 
 
     template<class T>
-    concept transport_t = requires(
+    concept transport = requires(
         T& type, std::span<const uint8_t> packet, void (*callback)(void*, std::span<const uint8_t>), void* ctx) {
         // Transfer data over the physical layer.
-        // Returns true if packet sent successfully, false otherwise
-        { type.transmit(packet) } -> std::same_as<bool>;
+        { type.transmit(packet) };
         // Since reception is an inherently asynchronous event, we register a callback that gets
         // called when a packet is received, and the app passes a span to packet to our callback
         // The library only calls this once at startup
@@ -39,11 +38,11 @@ namespace bhop::platform {
     };
 
     template<class T>
-    concept timers_t = requires(T&                         type,
-                                typename T::timer_handle_t timer,
-                                void (*callback)(void*, T::timer_handle_t),
-                                void*    ctx,
-                                uint32_t timeout_ms) {
+    concept timers = requires(T&                         type,
+                              typename T::timer_handle_t timer,
+                              void (*callback)(void*, T::timer_handle_t),
+                              void*    ctx,
+                              uint32_t timeout_ms) {
         // Register a callback to be called after a timeout. Returns the ID of the created timer.
         // The timer for the callback should started immediately.
         { type.register_callback(callback, ctx, timeout_ms) } -> std::same_as<typename T::timer_handle_t>;
@@ -52,7 +51,7 @@ namespace bhop::platform {
     };
 
     template<class T>
-    concept filesystem_t = requires(
+    concept filesystem = requires(
         T& type, types::file_t file, std::span<uint8_t> rw_data, std::span<const uint8_t> ro_data, uint32_t offset) {
         // Read and write into files used by this library. By the time the application calls into this
         // library, these files should have already been opened. Errors on file ops should be handled by
@@ -63,13 +62,13 @@ namespace bhop::platform {
     };
 
     template<class T>
-    concept aes_128_ccm_t = requires(const bhop::aes_key_t&      key,
-                                     const bhop::aes_nonce_t&    nonce,
-                                     std::span<const uint8_t>    aad,
-                                     const bhop::aes_auth_tag_t& auth_tag_input,
-                                     bhop::aes_auth_tag_t&       auth_tag_output,
-                                     std::span<const uint8_t>    input,
-                                     std::span<uint8_t>          output) {
+    concept aes_128_ccm = requires(const bhop::aes_key_t&      key,
+                                   const bhop::aes_nonce_t&    nonce,
+                                   std::span<const uint8_t>    aad,
+                                   const bhop::aes_auth_tag_t& auth_tag_input,
+                                   bhop::aes_auth_tag_t&       auth_tag_output,
+                                   std::span<const uint8_t>    input,
+                                   std::span<uint8_t>          output) {
         // Encrypt data with AES-128-CCM and get the authentication tag
         // input is the plaintext and output is the ciphertext
         { T::encrypt(key, nonce, aad, auth_tag_output, input, output) };
@@ -79,12 +78,12 @@ namespace bhop::platform {
     };
 
     template<class T>
-    concept ed25519_t = requires(const bhop::ed25519_seed_t&      seed,
-                                 std::span<const uint8_t>         data,
-                                 bhop::ed25519_key_t&             pub_key_output,
-                                 const bhop::ed25519_key_t&       peer_pub_key,
-                                 const bhop::ed25519_signature_t& signature_input,
-                                 bhop::ed25519_signature_t&       signature_output) {
+    concept ed25519 = requires(const bhop::ed25519_seed_t&      seed,
+                               std::span<const uint8_t>         data,
+                               bhop::ed25519_key_t&             pub_key_output,
+                               const bhop::ed25519_key_t&       peer_pub_key,
+                               const bhop::ed25519_signature_t& signature_input,
+                               bhop::ed25519_signature_t&       signature_output) {
         // Derive the public key from the node's seed
         { T::get_pub_key_from_seed(seed, pub_key_output) };
         // The API takes in the seed and handles the derivation of the public
@@ -96,7 +95,7 @@ namespace bhop::platform {
     };
 
     template<class T>
-    concept x25519_t = requires(bhop::x25519_key_t& output, const bhop::x25519_key_t& input) {
+    concept x25519 = requires(bhop::x25519_key_t& output, const bhop::x25519_key_t& input) {
         // Generate a session's ECDHE keys
         // The first parameter is our public key, the second is our private key
         { T::generate_keys(output, output) };
@@ -107,18 +106,18 @@ namespace bhop::platform {
     };
 
     template<class T>
-    concept rng_t = requires(std::span<uint8_t> bytes) {
+    concept rng = requires(std::span<uint8_t> bytes) {
         // Generate random bytes
         { T::get(bytes) };
     };
 
     template<class T>
-    concept sha256_t = requires(std::span<const uint8_t>  data,
-                                bhop::sha256_digest_t&    digest,
-                                std::span<const uint8_t>  salt,
-                                std::span<const uint8_t>  info_str,
-                                const bhop::x25519_key_t& shared_secret,
-                                bhop::sha256_hkdf_t&      hkdf_output) {
+    concept sha256 = requires(std::span<const uint8_t>  data,
+                              bhop::sha256_digest_t&    digest,
+                              std::span<const uint8_t>  salt,
+                              std::span<const uint8_t>  info_str,
+                              const bhop::x25519_key_t& shared_secret,
+                              bhop::sha256_hkdf_t&      hkdf_output) {
         // Hash data with SHA256
         { T::hash(data, digest) };
         // Expand the X25519 shared secret into the data to serve as the session keys
@@ -127,12 +126,12 @@ namespace bhop::platform {
 
     // Used so systems with 32 bit system ticks don't promote to uint64_t
     template<class T>
-    concept tick_t = std::same_as<T, uint32_t> || std::same_as<T, uint64_t>;
+    concept tick = std::same_as<T, uint32_t> || std::same_as<T, uint64_t>;
 
     template<class T>
-    concept system_t = requires(std::span<uint8_t> src) {
+    concept system = requires(std::span<uint8_t> src) {
         typename T::tick_type_t;
-        requires tick_t<typename T::tick_type_t>;
+        requires tick<typename T::tick_type_t>;
         // Get the value of the system tick in milliseconds
         { T::now_ms() } -> std::same_as<typename T::tick_type_t>;
         // Put the calling thread to sleep indefinitely till a callback wakes it up
